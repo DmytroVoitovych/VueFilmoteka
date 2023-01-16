@@ -1,0 +1,463 @@
+<template>
+  <header class="header header__home">
+    <router-link :to="{ name: 'Auth' }" class="custom-btn btn-A"
+      ><span>Authorization</span></router-link
+    >
+    <ContainerMain>
+      <nav class="navigation">
+        <router-link :to="{ name: 'Home' }" class="logo-link">
+          <svg
+            class="subscribe-form__icon rotate-vert-center"
+            width="24"
+            height="24"
+          >
+            <use href="../../assets/sprite.svg#icon-logo"></use>
+          </svg>
+          <span class="logo-text tracking-in-expand">Filmoteka</span>
+        </router-link>
+        <ul class="nav-list">
+          <li class="nav-item active__page">
+            <router-link
+              :to="{ name: 'Home' }"
+              rel="noopener noreferrer"
+              data-lang="home"
+              class="nav-btn home__btn"
+            >
+              home
+            </router-link>
+          </li>
+
+          <li class="nav-item" data-auth="false">
+            <router-link
+              :to="{ name: 'Biblioteka' }"
+              rel="noopener noreferrer"
+              data-lang="library"
+              class="nav-btn library__btn js-auth"
+            >
+              my library
+            </router-link>
+            <div class="auth-chek">
+              <svg width="32px" height="32px">
+                <use href="../../assets/sprite.svg#icon-yes"></use>
+              </svg>
+            </div>
+          </li>
+        </ul>
+      </nav>
+      <form action="" class="search-form js-form">
+        <CustomInput
+          v-model="text"
+          data-lang="placeholder"
+          name="searchQuery"
+          placeholder="Movie search"
+          class="input-form"
+        />
+        <button class="submit-btn" type="submit">
+          <svg class="menu__icon" width="12" height="12">
+            <use href="../../assets/sprite.svg#icon-search"></use>
+          </svg>
+        </button>
+      </form>
+    </ContainerMain>
+  </header>
+</template>;
+
+<script>
+import ContainerMain from "../shared/ContainerMain.vue";
+import CustomInput from "./InputComponent.vue";
+
+export default {
+  name: "HeaderMain",
+
+  // props: {
+  //   type: {
+  //     type: String,
+  //     default: 'button'
+  //   },
+  //   see: {
+  //     type: Boolean,
+  //     default: false
+  //   }
+  // },
+  components: {
+    ContainerMain,
+    CustomInput,
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.header {
+  padding-top: 40px;
+  padding-bottom: 92px;
+  height: 230px;
+
+  @include mq(tablet) {
+    height: 216px;
+  }
+}
+
+.header__home {
+  background-image: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.56),
+      rgba(0, 0, 0, 0.56)
+    ),
+    url(../../assets/images/desc/header-desc@1x.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  @media (min-device-pixel-ratio: 2),
+    (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi),
+    (min-resolution: 2dppx) {
+    background-image: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.56),
+        rgba(0, 0, 0, 0.56)
+      ),
+      url(../../assets/images/mob/header-mob@2x.jpg);
+  }
+
+  @include mq(tablet) {
+    padding-bottom: 81px;
+    background-image: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.56),
+        rgba(0, 0, 0, 0.56)
+      ),
+      url(../../assets/images/tab/header-tab@1x.jpg);
+
+    @media (min-device-pixel-ratio: 2),
+      (-webkit-min-device-pixel-ratio: 2),
+      (min-resolution: 192dpi),
+      (min-resolution: 2dppx) {
+      background-image: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, 0.56),
+          rgba(0, 0, 0, 0.56)
+        ),
+        url(../../assets/images/tab/header-tab@2x.jpg);
+    }
+  }
+
+  @include mq(desktop) {
+    background-image: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.56),
+        rgba(0, 0, 0, 0.56)
+      ),
+      url(../../assets/images/desc/header-desc@1x.jpg);
+
+    @media (min-device-pixel-ratio: 2),
+      (-webkit-min-device-pixel-ratio: 2),
+      (min-resolution: 192dpi),
+      (min-resolution: 2dppx) {
+      background-image: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, 0.56),
+          rgba(0, 0, 0, 0.56)
+        ),
+        url(../../assets/images/desc/header-desc@2x.jpg);
+    }
+  }
+}
+
+.header__container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 54px;
+  position: relative;
+
+  @include mq(tablet) {
+    margin-bottom: 46px;
+  }
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  @media screen and (max-width: 767px) {
+    display: none;
+  }
+
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 1.17;
+  display: flex;
+
+  margin-left: 8px;
+
+  color: #ffffff;
+
+  &:hover {
+    color: #ff001b;
+    transition: 1s ease;
+  }
+
+  color: var(--text-color-light);
+  cursor: pointer;
+}
+
+.search-form {
+  display: flex;
+  margin: 0 auto;
+  max-width: 280px;
+  height: 20px;
+  padding-bottom: 4px;
+  border-bottom: 0.5px solid #ffffff;
+
+  @include mq(tablet) {
+    max-width: 336px;
+  }
+
+  @include mq(desctop) {
+    max-width: 394px;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.input-form {
+  display: block;
+  background-color: inherit;
+  border: 0.5px;
+  outline: none;
+  width: 100%;
+  height: 20px;
+  color: var(--text-color-light);
+
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.14;
+  color: #ffffff;
+
+  .input-form::placeholder {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.17;
+    color: var(--text-color-light);
+  }
+}
+
+.submit-btn {
+  background-color: inherit;
+  border: none;
+  outline: none;
+  margin-left: auto;
+  padding: 0px;
+  cursor: pointer;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 46px;
+}
+
+.nav-list {
+  display: flex;
+  gap: 39px;
+  // width: 180px;
+  // justify-content: space-between;
+}
+
+.nav-btn {
+  text-transform: uppercase;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.17;
+  text-transform: uppercase;
+
+  color: var(--text-color-light);
+  background-color: inherit;
+  border: none;
+  outline: none;
+
+  cursor: pointer;
+}
+
+.nav-item {
+  position: relative;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.17;
+
+  &.is-hidden {
+    display: none;
+  }
+}
+
+.nav-btn {
+  position: relative;
+}
+
+.nav-btn:hover,
+.nav-btn:focus {
+  color: var(--text-color-red);
+  transition: 1s ease;
+}
+
+.nav-btn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  background: transparent;
+  height: 50%;
+  width: 100%;
+  transform: perspective(1em) rotateX(40deg) scale(1, 0.35);
+  filter: blur(8px);
+  transition: 1s ease;
+}
+.active__page {
+  border-bottom: 2.86px solid #ff001b;
+}
+
+//**animation logo */
+.rotate-vert-center {
+  -webkit-animation: rotate-vert-center 3s
+    cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s infinite both;
+  animation: rotate-vert-center 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s
+    infinite both;
+}
+
+@-webkit-keyframes rotate-vert-center {
+  0% {
+    -webkit-transform: rotateY(0);
+    transform: rotateY(0);
+  }
+
+  100% {
+    -webkit-transform: rotateY(360deg);
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes rotate-vert-center {
+  0% {
+    -webkit-transform: rotateY(0);
+    transform: rotateY(0);
+  }
+
+  100% {
+    -webkit-transform: rotateY(360deg);
+    transform: rotateY(360deg);
+  }
+}
+
+.custom-btn {
+  width: 130px;
+  height: 40px;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 25px;
+  font-family: "Lato", sans-serif;
+  font-weight: 500;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  display: inline-block;
+  box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, 0.5),
+    7px 7px 20px 0px rgba(0, 0, 0, 0.1), 4px 4px 5px 0px rgba(0, 0, 0, 0.1);
+  outline: none;
+  text-align: center;
+  right: 50%;
+  translate: 50%;
+  top: 160px;
+  font-size: 14px;
+}
+
+.btn-A {
+  background: linear-gradient(
+    0deg,
+    rgba(255, 151, 0, 1) 0%,
+    rgba(251, 75, 2, 1) 100%
+  );
+  line-height: 42px;
+  padding: 0;
+  border: none;
+}
+
+.btn-A span {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-A:before,
+.btn-A:after {
+  position: absolute;
+  content: "";
+  right: 0;
+  bottom: 0;
+  background: rgba(251, 75, 2, 1);
+  box-shadow: -7px -7px 20px 0px rgba(255, 255, 255, 0.9),
+    -4px -4px 5px 0px rgba(255, 255, 255, 0.9),
+    7px 7px 20px 0px rgba(0, 0, 0, 0.2), 4px 4px 5px 0px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-A:before {
+  height: 0%;
+  width: 2px;
+}
+
+.btn-A:after {
+  width: 0%;
+  height: 2px;
+}
+
+.btn-A:hover {
+  color: rgba(251, 75, 2, 1);
+  background: transparent;
+}
+
+.btn-A:hover:before {
+  height: 100%;
+}
+
+.btn-A:hover:after {
+  width: 100%;
+}
+
+.btn-A span:before,
+.btn-A span:after {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 0;
+  background: rgba(251, 75, 2, 1);
+  box-shadow: -7px -7px 20px 0px rgba(255, 255, 255, 0.9) A -4px -4px 5px 0px rgba(255, 255, 255, 0.9),
+    7px 7px 20px 0px rgba(0, 0, 0, 0.2), 4px 4px 5px 0px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-A span:before {
+  width: 2px;
+  height: 0%;
+}
+
+.btn-A span:after {
+  height: 2px;
+  width: 0%;
+}
+
+.btn-A span:hover:before {
+  height: 100%;
+}
+
+.btn-A span:hover:after {
+  width: 100%;
+}
+</style>
