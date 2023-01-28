@@ -22,7 +22,9 @@
               class="gallery__img"
               loading="lazy"
               :src="
-                poster_path ? getPoster(poster_path) : '/img/ded.01be9432.jpg'
+                poster_path
+                  ? getPoster(poster_path)
+                  : require('./../../assets/images/ded.jpg')
               "
               :alt="title"
             />
