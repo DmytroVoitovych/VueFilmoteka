@@ -1,4 +1,5 @@
 import http from "./axios";
+// import { Block } from "notiflix";
 
 export default class MovieAPiServer {
   constructor() {
@@ -14,8 +15,8 @@ export default class MovieAPiServer {
     this.isLoadGenres = true;
   }
   //зміни запит популярні фільми за тиждень
-  async fetchTopMovies() {
-    const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${this.pageCounter}`;
+  async fetchTopMovies(p) {
+    const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${p}`;
     try {
       const response = await http.get(URL);
       //добавив
@@ -32,11 +33,7 @@ export default class MovieAPiServer {
     const URL = `/3/genre/movie/list?api_key=${this.API_KEY}`;
     try {
       const response = await http.get(URL);
-      const genresList = response.data.genres;
-      localStorage.setItem(
-        "genresList",
-        JSON.stringify(genresList)
-      );
+      return response.data.genres;
     } catch (error) {
       return error;
     }
@@ -54,13 +51,17 @@ export default class MovieAPiServer {
     }
   }
 
-  async fetchMovieByQuery() {
+  async fetchMovieByQuery(n, q) {
     console.log("test");
-    const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${this.pageCounter}&query=${this.searchQuery}`;
+    const URL = `/3/search/movie?api_key=${
+      this.API_KEY
+    }&page=${n}&query=${q.replaceAll('"', "")}`;
 
     try {
       const response = await http.get(URL);
-      return response.data;
+      this.maxPages = response.data.total_pages;
+
+      return response.data.results;
     } catch (error) {
       return error;
     }
@@ -74,12 +75,12 @@ export default class MovieAPiServer {
   //     return (this.movieId = newMovieId);
   //   }
 
-  //   get page() {
-  //     return this.pageCounter;
-  //   }
-  //   set page(newPage) {
-  //     return (this.pageCounter = newPage);
-  //   }
+  get page() {
+    return this.pageCounter;
+  }
+  set page(newPage) {
+    this.pageCounter = newPage;
+  }
 
   get query() {
     return this.searchQuery;

@@ -5,7 +5,7 @@
         <span>&#xA9;</span>
       </li>
       <li class="footer__items">
-        <sapn>{{ year() }}</sapn>
+        <span>{{ year() }}</span>
       </li>
       <li class="footer__items"><p>All Rights Reserved</p></li>
       <li class="footer__items"><p>Developed with</p></li>

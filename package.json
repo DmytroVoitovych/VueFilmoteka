@@ -12,6 +12,7 @@
     "axios": "^1.2.2",
     "core-js": "^3.8.3",
     "modern-normalize": "^1.1.0",
+    "notiflix": "^3.2.6",
     "sass-resources-loader": "^2.2.5",
     "vue": "^3.2.36",
     "vue-router": "^4.1.6"

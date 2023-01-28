@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <button v-bind:type="type" :class='{addBtn:true, queBtn:see}'>
       <slot></slot>  
     </button>
@@ -81,4 +81,4 @@ cursor: pointer;
             border-radius: 5px;
         }
 }
-</style>
+</style> -->

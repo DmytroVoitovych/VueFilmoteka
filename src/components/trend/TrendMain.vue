@@ -1,29 +1,52 @@
 <template>
-  <Home>
+  <Home :switcher="switcher">
     <ContainerMain>
       <section class="container gallery section">
+        <div v-if="trend?.length && max > 1" class="pagination-wrap">
+          <PaginationHardVue @numPage="setPage" :proppages="max" ref="upBtn" />
+        </div>
         <ul class="gallery-js gallery__list">
           <li
-            v-for="{ id, title, release_date, poster_path } in trend"
+            v-for="{
+              id,
+              title,
+              release_date,
+              poster_path,
+              genre_ids,
+              vote_average,
+            } in trend"
             :key="id"
             class="gallery__item"
-            data-ip="${id}"
           >
             <img
               class="gallery__img"
               loading="lazy"
-              :src="getPoster(poster_path)"
+              :src="
+                poster_path ? getPoster(poster_path) : '/img/ded.01be9432.jpg'
+              "
               :alt="title"
             />
             <div class="gallery__info">
               <p class="gallery__title them">{{ title }}</p>
               <p class="gallery__text them">
-                <span>{{ year(release_date) }}</span
-                ><span class="gallery__rating them"></span>
+                <span :class="{ space: getGenre(genre_ids).length > 27 }"
+                  >{{ getGenre(genre_ids) }}&ensp;|&ensp;</span
+                >
+                {{ year(release_date)
+                }}<span class="gallery__rating them">{{
+                  vote_average.toFixed(1)
+                }}</span>
               </p>
             </div>
           </li>
         </ul>
+        <div v-if="trend?.length && max > 1" class="pagination-wrap">
+          <PaginationHardVue
+            @numPage="setPage"
+            :proppages="max"
+            ref="downBtn"
+          />
+        </div>
       </section>
     </ContainerMain>
   </Home>
@@ -33,34 +56,175 @@
 import ContainerMain from "../shared/ContainerMain.vue";
 import Home from "@/page/Home.vue";
 import MovieAPiServer from "@/helpers/req";
+import PaginationHardVue from "../shared/PaginationHard.vue";
+import { axio } from "../../helpers/axios";
+import { Report, Block } from "notiflix";
 
+const http = new MovieAPiServer();
 export default {
   name: "TrendMain",
   components: {
     ContainerMain,
     Home,
+    PaginationHardVue,
   },
+  props: {
+    proppages: {
+      type: Number,
+      default: 0,
+    },
+    switcher: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   data() {
     //стейт
     return {
       trend: [],
+      genrs: [],
+      page: 1,
+      max: 0,
+      locate: 0,
+      check: false,
+      test: false,
     };
   },
   async created() {
     // хук для запросов
-    const http = new MovieAPiServer();
-    const data = await http.fetchTopMovies();
-    this.trend = data;
-    console.log(data);
+    this.startRenderPage();
   },
   methods: {
     // функції
+    async startRenderPage() {
+      const data = this.checkFind()
+        ? await http.fetchMovieByQuery(
+            window.localStorage.getItem("numberPage") ?? 1,
+            window.localStorage.getItem("findedFilms")
+          )
+        : await http.fetchTopMovies(this.page);
+
+      data.length === 0 && this.toMainPage();
+      this.trend = this.controlStorage() || data;
+      this.max = http.maxPages;
+
+      const genr = await http.getGenresList();
+      this.genrs = genr;
+    },
     year(num) {
+      // рік
       return num ? num.slice(0, 4) : "no date";
     },
     getPoster(poster) {
+      //постери
       return `https://image.tmdb.org/t/p/w500/${poster}`;
     },
+    getGenre(idg) {
+      //розбір жанрів
+      return idg
+        ?.map((e) => this.genrs.filter(({ id, name }) => id === e && name))
+        .flat(3)
+        .map(({ name }) => name)
+        .slice(0, 2)
+        .join(", ");
+    },
+    async setPage(num) {
+      this.page = num;
+      window.localStorage.setItem("numberPage", num); // добавляю сторінку
+
+      const data = this.checkFind()
+        ? await http.fetchMovieByQuery(
+            this.page,
+            window.localStorage.getItem("findedFilms")
+          )
+        : await http.fetchTopMovies(num);
+
+      this.trend = data;
+      this.max = http.maxPages;
+      window.localStorage.setItem("filmsPage", JSON.stringify(data));
+
+      this.locate = window.scrollY; //запис положення
+      this.$nextTick().then(() => {
+        //прибиваю скролл
+        this.locate > 1000 && window.scrollBy(0, this.locate);
+      });
+    },
+
+    controlStorage() {
+      //перевіка локльного стора
+      if (
+        JSON.parse(window.localStorage.getItem("numberPage")) &&
+        JSON.parse(window.localStorage.getItem("filmsPage"))
+      ) {
+        return JSON.parse(window.localStorage.getItem("filmsPage"));
+      }
+
+      return false;
+    },
+    checkFind() {
+      //перевірка наявності пошуку
+      const check = JSON.parse(window.localStorage.getItem("findedFilms"))
+        ? true
+        : false;
+      this.check = check;
+      return check;
+    },
+    toMainPage() {
+      // добавити вспливаючу підказку (що нічого нема)
+      Report.info(
+        "Sorry",
+        "On your request we found nothing , we return you to the main.",
+        "Okay",
+        () => {
+          this.$router.go(0);
+          window.localStorage.removeItem("numberPage");
+          window.localStorage.removeItem("findedFilms");
+        }
+      );
+    },
+    checkForStupid() {
+      return this.trend.length > 0;
+    },
+    loaderBasic() {
+      // функція відповідальна за основний лоадер на сайті
+      axio.loader.interceptors.request.use((config) => {
+        //перехоплюєм запит
+        this.checkForStupid() && //перевірка на дурня
+          Block.dots(".gallery__item", {
+            //сам лофдер з конфігураціями
+            svgColor: "var(--text-color-red)",
+            svgSize: "100px",
+            backgroundColor: "var(--bg-loader-basic)",
+          });
+
+        return config;
+      });
+
+      axio.loader.interceptors.response.use((res) => {
+        // коли дані нам надійшли  вимикаєм лоадер
+        this.checkForStupid() && Block.remove(".gallery__item");
+        return res;
+      });
+    },
+  },
+  watch: {
+    page() {
+      this.$refs?.upBtn?.forcePage(this.page); //форс зверху
+      this.page = this.$refs?.upBtn?.page; //зміна
+      this.$refs?.downBtn?.forcePage(this.page); //форс знизу
+      this.page = this.$refs?.downBtn?.page; //зміна
+    },
+
+    switcher() {
+      // тригер пошуку // завязано за імпут в хедері
+      this.startRenderPage();
+      this.max = 0;
+      this.test = false;
+    },
+  },
+  mounted() {
+    this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
 };
 </script>
@@ -70,10 +234,25 @@ export default {
   background-color: #2d2a2a;
 }
 
+.active {
+  width: 40px;
+  height: 40px;
+
+  pointer-events: none;
+  background-color: var(--text-color-light-orange);
+  color: var(--text-color-light);
+  @media screen and (max-width: 390px) {
+    width: 30px;
+  }
+}
+
 .gallery {
   position: relative;
   padding-top: 60px;
   padding-bottom: 60px;
+  display: grid;
+
+  gap: 60px;
 }
 
 .overlay {
@@ -93,7 +272,7 @@ export default {
 }
 
 .gallery__list {
-  margin-bottom: 60px;
+  /* margin-bottom: 60px; */
   display: grid;
 
   @media screen and (min-width: 1280px) {
@@ -127,11 +306,7 @@ export default {
 }
 
 .gallery__img {
-  // background-image: url(../images/no_movie.jpeg);
-  // background-position: center;
-  // background-repeat:no-repeat;
-  // background-size: contain;
-
+  position: relative;
   border: none;
   width: 100%;
   height: 574px;
@@ -139,6 +314,11 @@ export default {
   border-radius: 5px;
   overflow: hidden;
   margin-bottom: 12px;
+
+  background: var(--bg-loader-basic);
+  background-size: 130px;
+  animation: load 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+
   @media screen and (min-width: 768px) and(max-width: 1279.5px) {
     height: 455px;
   }
@@ -175,6 +355,7 @@ export default {
 }
 .gallery__text {
   color: var(--text-color-light-orange);
+  display: flex;
   @media screen and (max-width: 767.5px) {
     line-height: 1.33;
   }
@@ -191,7 +372,9 @@ export default {
   color: var(--text-color-light);
   font-size: 12px;
   line-height: 1.17;
-
+  align-self: center;
+  margin-left: auto;
+  margin-right: 2px;
   @media screen and (max-width: 1279.5px) {
     width: 36px;
     height: 16px;
@@ -225,5 +408,22 @@ export default {
   height: 100vh;
   overflow: hidden;
   overflow-y: hidden;
+}
+
+//******* spec */
+.space {
+  font-size: smaller;
+}
+
+@keyframes load {
+  50% {
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        #e8e8e8 50%,
+        transparent 100%
+      )
+      top right;
+  }
 }
 </style>

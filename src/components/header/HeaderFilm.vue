@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home">
     <router-link :to="{ name: 'Auth' }" class="custom-btn btn-A"
@@ -5,7 +6,11 @@
     >
     <ContainerMain>
       <nav class="navigation">
-        <router-link :to="{ name: 'Home' }" class="logo-link">
+        <router-link
+          :to="{ name: 'Home' }"
+          v-on:click.prevent="toMainPage"
+          class="logo-link"
+        >
           <svg
             class="subscribe-form__icon rotate-vert-center"
             width="24"
@@ -13,7 +18,11 @@
           >
             <use href="../../assets/sprite.svg#icon-logo"></use>
           </svg>
-          <span class="logo-text tracking-in-expand">Filmoteka</span>
+          <span class="logo-text tracking-in-expand"
+            ><abbr title="Go to page main" role="contentinfo"
+              >Filmoteka</abbr
+            ></span
+          >
         </router-link>
         <ul class="nav-list">
           <li class="nav-item active__page">
@@ -46,13 +55,18 @@
       </nav>
       <form action="" class="search-form js-form">
         <CustomInput
-          v-model="text"
+          v-model:find.trim="nameFilms"
           data-lang="placeholder"
           name="searchQuery"
           placeholder="Movie search"
           class="input-form"
         />
-        <button class="submit-btn" type="submit">
+
+        <button
+          class="submit-btn"
+          type="submit"
+          v-on:click.prevent="searchFilms"
+        >
           <svg class="menu__icon" width="12" height="12">
             <use href="../../assets/sprite.svg#icon-search"></use>
           </svg>
@@ -65,23 +79,62 @@
 <script>
 import ContainerMain from "../shared/ContainerMain.vue";
 import CustomInput from "./InputComponent.vue";
+import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 export default {
   name: "HeaderMain",
 
-  // props: {
-  //   type: {
-  //     type: String,
-  //     default: 'button'
-  //   },
-  //   see: {
-  //     type: Boolean,
-  //     default: false
-  //   }
-  // },
   components: {
     ContainerMain,
     CustomInput,
+  },
+  emits: {
+    onChekfind: (v) => typeof v === "boolean", //передача тригера
+  },
+  data() {
+    return {
+      switcher: false, //тригер пошуку
+      nameFilms: "",
+    };
+  },
+
+  methods: {
+    searchFilms() {
+      const specifick =
+        this.nameFilms ===
+        JSON.parse(window.localStorage.getItem("findedFilms"));
+
+      if (this.nameFilms && !specifick) {
+        this.changeStorage();
+        this.switcher = !this.switcher; //або або // логіка тогл
+        this.$emit("onChekfind", this.switcher);
+      } else if (specifick) {
+        return Notify.failure(
+          `You already have movies on request: ${this.nameFilms}`
+        );
+      } else {
+        return Notify.failure("Search string must have at least one character");
+      }
+    },
+    toMainPage() {
+      window.localStorage.removeItem("numberPage");
+      window.localStorage.removeItem("findedFilms");
+      this.$router.go(0);
+    },
+    changeStorage() {
+      window.localStorage.removeItem("numberPage"); //обнуляю сторінку
+      window.localStorage.removeItem("filmsPage"); // обнуляю старі дані
+      window.localStorage.setItem(
+        "findedFilms",
+        JSON.stringify(this.nameFilms)
+      ); //передаю в основу
+      this.nameFilms = "";
+    },
+  },
+  watch: {
+    nameFilms() {
+      console.log(this.nameFilms);
+    },
   },
 };
 </script>
@@ -459,5 +512,10 @@ export default {
 
 .btn-A span:hover:after {
   width: 100%;
+}
+
+//**special */
+header abbr {
+  text-decoration: none;
 }
 </style>

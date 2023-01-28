@@ -1,24 +1,19 @@
 <template>
-    <input v-on="listeners" >
+  <input
+    type="text"
+    :value="find"
+    @input="$emit('update:find', $event.target.value)"
+  />
 </template>
-
 <script>
-
 export default {
-    name: 'CustomInput',
-    computed: {
-        listeners() {
-            console.log(this.$listeners, this.$emit);
-            return {
-                ...this.$listeners,
-                input: event => this.$emit('input', event.target.value)
-            }
-        }
-    }
+  props: ["find"],
+  emits: ["update:find"],
 };
-   
 </script>
 
 <style lang="scss" scoped>
-
+.valid {
+  color: green;
+}
 </style>
