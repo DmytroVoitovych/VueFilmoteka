@@ -15,7 +15,7 @@ export default class MovieAPiServer {
     this.isLoadGenres = true;
   }
   //зміни запит популярні фільми за тиждень
-  async fetchTopMovies(p) {
+  async fetchTopMovies(p, toBack) {
     const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${p}`;
     try {
       const response = await http.get(URL);
@@ -24,6 +24,7 @@ export default class MovieAPiServer {
       // ---
       return response.data.results;
     } catch (error) {
+      toBack();
       return console.log(error);
     }
   }
@@ -39,8 +40,8 @@ export default class MovieAPiServer {
     }
   }
   // ----
-  async fetchMovieById() {
-    const URL = `/3/movie/${this.movieId}?api_key=${this.API_KEY}`;
+  async fetchMovieById(id) {
+    const URL = `/3/movie/${id}?api_key=${this.API_KEY}`;
 
     try {
       const response = await http.get(URL);
@@ -51,7 +52,7 @@ export default class MovieAPiServer {
     }
   }
 
-  async fetchMovieByQuery(n, q) {
+  async fetchMovieByQuery(n, q, toBack) {
     console.log("test");
     const URL = `/3/search/movie?api_key=${
       this.API_KEY
@@ -63,6 +64,7 @@ export default class MovieAPiServer {
 
       return response.data.results;
     } catch (error) {
+      toBack();
       return error;
     }
   }

@@ -17,6 +17,7 @@
             } in trend"
             :key="id"
             class="gallery__item"
+            @click="getIdForModal(id)"
           >
             <img
               class="gallery__img"
@@ -63,6 +64,8 @@ import { axio } from "../../helpers/axios";
 import { Report, Block } from "notiflix";
 
 const http = new MovieAPiServer();
+let checkParam = false;
+
 export default {
   name: "TrendMain",
   components: {
@@ -80,7 +83,9 @@ export default {
       default: false,
     },
   },
-
+  emits: {
+    "get-find-id": (v) => typeof v === "number",
+  },
   data() {
     //стейт
     return {
@@ -90,7 +95,6 @@ export default {
       max: 0,
       locate: 0,
       check: false,
-      test: false,
     };
   },
   async created() {
@@ -103,9 +107,10 @@ export default {
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
             window.localStorage.getItem("numberPage") ?? 1,
-            window.localStorage.getItem("findedFilms")
+            window.localStorage.getItem("findedFilms"),
+            this.toMainPage
           )
-        : await http.fetchTopMovies(this.page);
+        : await http.fetchTopMovies(this.page, this.toMainPage);
 
       data.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
@@ -190,26 +195,39 @@ export default {
     },
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
+
       axio.loader.interceptors.request.use((config) => {
         //перехоплюєм запит
-        this.checkForStupid() && //перевірка на дурня
-          Block.dots(".gallery__item", {
-            //сам лофдер з конфігураціями
-            svgColor: "var(--text-color-red)",
-            svgSize: "100px",
-            backgroundColor: "var(--bg-loader-basic)",
-          });
+        checkParam = config.url.includes("/3/movie/");
+        if (!checkParam) {
+          //якщо потрібний запит
+          this.checkForStupid() && //перевірка на дурня
+            Block.dots(".gallery__item", {
+              //сам лофдер з конфігураціями
+              svgColor: "var(--text-color-red)",
+              svgSize: "100px",
+              backgroundColor: "var(--bg-loader-basic)",
+            });
+        }
 
         return config;
       });
 
       axio.loader.interceptors.response.use((res) => {
         // коли дані нам надійшли  вимикаєм лоадер
-        this.checkForStupid() && Block.remove(".gallery__item");
+        if (!checkParam) {
+          //якщо потрібний запит
+          this.checkForStupid() && Block.remove(".gallery__item");
+        }
         return res;
       });
     },
+    getIdForModal(id) {
+      // отримання данних для модалки
+      this.$emit("get-find-id", id);
+    },
   },
+
   watch: {
     page() {
       this.$refs?.upBtn?.forcePage(this.page); //форс зверху
@@ -222,7 +240,6 @@ export default {
       // тригер пошуку // завязано за імпут в хедері
       this.startRenderPage();
       this.max = 0;
-      this.test = false;
     },
   },
   mounted() {

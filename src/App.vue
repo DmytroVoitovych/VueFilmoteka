@@ -1,13 +1,17 @@
 <template>
-  <div id="app">
-    <HeaderFilm @onChekfind="onChekfind" />
+  <div
+    id="app"
+    :class="{ modal: modalt }"
+    :style="{ top: modalt && `${-locate}px` }"
+  >
+    <HeaderFilm @onChekfind="onChekfind" :class="{ spec: modalt }" />
     <main>
       <router-view></router-view>
-      <TrendMain :switcher="check"></TrendMain>
+      <TrendMain :switcher="check" @get-find-id="getFindId"></TrendMain>
     </main>
-    <FooterMain></FooterMain>
+    <FooterMain :class="{ spec: modalt }"></FooterMain>
     <teleport to="#modalMain">
-      <ModalMain />
+      <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
     </teleport>
     <!-- <ModalBtnVue type="button" >Add Watched</ModalBtnVue>
     <ModalBtnVue type="button" see>Add Que</ModalBtnVue> -->
@@ -42,12 +46,35 @@ export default {
   data() {
     return {
       check: false, //слідкуваня за пошуком
+      filmsid: -1,
+      locate: 0,
+      modalt: false,
     };
   },
   methods: {
     onChekfind(triger) {
-      // console.log(check);
       this.check = triger;
+    },
+    getFindId(id) {
+      console.log(id);
+      this.filmsid = id;
+      this.locate = window.scrollY;
+    },
+    modalstate(e) {
+      this.modalt = e;
+    },
+  },
+  updated() {
+    this.filmsid = -1;
+  },
+  watch: {
+    modalt() {
+      if (!this.modalt) {
+        this.$nextTick().then(() => {
+          //прибиваю скролл
+          window.scrollBy(0, this.locate);
+        });
+      }
     },
   },
 };
@@ -80,5 +107,15 @@ export default {
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
+}
+
+.modal {
+  position: fixed;
+  right: 10px;
+  left: 0;
+}
+
+.spec {
+  width: 100vw;
 }
 </style>
