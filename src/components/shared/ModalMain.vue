@@ -1,4 +1,4 @@
-/* <template   >
+ <template   >
   <div
     class="backdropV"
     :class="{ visibleV: openModal }"
@@ -80,7 +80,7 @@
       </div>
     </div>
   </div>
-</template> */
+</template>
 
 <script>
 import MovieAPiServer from "../../helpers/req";
@@ -90,6 +90,13 @@ const http = new MovieAPiServer();
 export default {
   props: {
     filmsid: {
+      //проп з id
+      type: Number,
+      require: true,
+      default: -1,
+    },
+    scrollWidth: {
+      //проп з id
       type: Number,
       require: true,
       default: -1,
@@ -97,11 +104,12 @@ export default {
   },
   data() {
     return {
-      openModal: false,
+      openModal: false, //стан модалки
       infos: [],
     };
   },
   emits: {
+    //передача стана наверх
     modalstate: (e) => typeof e === "boolean",
   },
   methods: {
@@ -111,19 +119,20 @@ export default {
       this.infos = data;
     },
     onClose() {
+      //закриття модалки
       this.openModal = false;
       this.infos = [];
       this.$emit("modalstate", false);
     },
     funcKeyDown(e) {
-      // закрытие по ескейпу
+      // закриття по ескейпу
       if (this.openModal && e.code === "Escape") {
         this.onClose();
       }
       return;
     },
     funcClickBackdrop(e) {
-      //закрытие по бекдропу
+      //закриття по бекдропу
       if (e.target === e.currentTarget) {
         this.onClose();
       }
@@ -138,12 +147,11 @@ export default {
         this.$emit("modalstate", this.openModal);
       }
     },
-  },
-  mounted() {
-    window.addEventListener("keydown", this.funcKeyDown);
-  },
-  beforeUnmount() {
-    window.removeEventListener("keydown", this.funcKeyDown);
+    openModal() {
+      window.addEventListener("keydown", this.funcKeyDown);
+      !this.openModal && //вимикаєм слухач
+        window.removeEventListener("keydown", this.funcKeyDown);
+    },
   },
 };
 </script>
@@ -151,7 +159,7 @@ export default {
 <style lang="scss" scoped>
 .modalV {
   position: absolute;
-  left: calc(50% - 5px);
+  left: calc(50% - var(--left-modal));
   top: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -422,9 +430,6 @@ export default {
 
 .visibleV {
   overflow: hidden;
-  // position: fixed;
-  // width: 100%;
-  // height: 100%;
   opacity: 1;
   visibility: visible;
   transition: all 250ms;

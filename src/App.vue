@@ -1,15 +1,22 @@
 <template>
   <div
     id="app"
-    :class="{ modal: modalt }"
-    :style="{ top: modalt && `${-locate}px` }"
+    :class="{ modal: stateModal }"
+    :style="{ top: stateModal && `${-locate}px`, right: scrollWidth + 'px' }"
   >
-    <HeaderFilm @onChekfind="onChekfind" :class="{ spec: modalt }" />
+    <HeaderFilm
+      @onChekfind="onChekfind"
+      :class="{ spec: stateModal }"
+      :style="{ paddingRight: scrollWidth + 'px' }"
+    />
     <main>
       <router-view></router-view>
       <TrendMain :switcher="check" @get-find-id="getFindId"></TrendMain>
     </main>
-    <FooterMain :class="{ spec: modalt }"></FooterMain>
+    <FooterMain
+      :class="{ spec: stateModal }"
+      :style="{ paddingRight: scrollWidth + 'px' }"
+    ></FooterMain>
     <teleport to="#modalMain">
       <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
     </teleport>
@@ -46,31 +53,50 @@ export default {
   data() {
     return {
       check: false, //слідкуваня за пошуком
-      filmsid: -1,
-      locate: 0,
-      modalt: false,
+      filmsid: -1, // id фільму
+      locate: 0, //положеня скролу
+      stateModal: false, //стан модалки
+      scrollWidth: 0, //ширина скролу
     };
   },
   methods: {
     onChekfind(triger) {
+      //тригер пошуку
       this.check = triger;
     },
     getFindId(id) {
-      console.log(id);
-      this.filmsid = id;
-      this.locate = window.scrollY;
+      this.filmsid = id; // отримання і запис id
+      this.locate = window.scrollY; // запис положення скролу
+      this.scrollCount(); //прорахунок ширини
+    },
+    scrollCount() {
+      //прорахунок ширини
+      this.scrollWidth =
+        window?.innerWidth - window?.document?.documentElement?.clientWidth;
+
+      window.document.documentElement.style.setProperty(
+        // динамічно міняю положеня модалки
+        "--left-modal",
+        this.scrollWidth / 2 + "px"
+      );
     },
     modalstate(e) {
-      this.modalt = e;
+      //запис стану модалки
+      this.stateModal = e;
     },
   },
   updated() {
+    // при оновлені встановлення дефолту
     this.filmsid = -1;
   },
   watch: {
-    modalt() {
-      if (!this.modalt) {
+    stateModal() {
+      //слідкування за станом модалки
+      if (!this.stateModal) {
+        //якщо закрита
+        this.scrollWidth = 0; //скрол по дефолту
         this.$nextTick().then(() => {
+          //чекаеєм виконня всього а вже потім
           //прибиваю скролл
           window.scrollBy(0, this.locate);
         });
@@ -80,8 +106,10 @@ export default {
 };
 </script>
 
-<style>
+<style >
 :root {
+  /* spec style */
+  --left-modal: 0;
   /* Шрифти */
   --main-fonts: "Roboto", sans-serif;
   --secondary-fonts: "Titan One", sans-serif;
@@ -107,11 +135,11 @@ export default {
   flex-direction: column;
   min-height: 100vh;
   justify-content: space-between;
+  background-color: #ffffff;
 }
 
 .modal {
   position: fixed;
-  right: 10px;
   left: 0;
 }
 

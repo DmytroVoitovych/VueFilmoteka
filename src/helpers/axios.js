@@ -1,5 +1,4 @@
 import axios from "axios";
-// import { Block } from "notiflix";
 
 const http = axios.create({
   baseURL: "https://api.themoviedb.org",

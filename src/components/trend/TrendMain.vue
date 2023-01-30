@@ -201,6 +201,7 @@ export default {
         checkParam = config.url.includes("/3/movie/");
         if (!checkParam) {
           //якщо потрібний запит
+
           this.checkForStupid() && //перевірка на дурня
             Block.dots(".gallery__item", {
               //сам лофдер з конфігураціями
