@@ -1,14 +1,14 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home">
-    <router-link :to="{ name: 'Auth' }" class="custom-btn btn-A"
+    <router-link :to="{ path: 'auth/login' }" class="custom-btn btn-A"
       ><span>Authorization</span></router-link
     >
     <ContainerMain>
       <nav class="navigation">
         <router-link
           :to="{ name: 'Home' }"
-          v-on:click.prevent="toMainPage"
+          v-on:click="toMainPage"
           class="logo-link"
         >
           <svg
@@ -119,7 +119,9 @@ export default {
     toMainPage() {
       window.localStorage.removeItem("numberPage");
       window.localStorage.removeItem("findedFilms");
-      this.$router.go(0);
+      this.$route.fullPath !== "/"
+        ? this.$router.push({ path: "/" })
+        : this.$router.go(0);
     },
     changeStorage() {
       window.localStorage.removeItem("numberPage"); //обнуляю сторінку
@@ -222,8 +224,8 @@ export default {
   margin-bottom: 54px;
   position: relative;
 
-  @include mq(tablet) {
-    margin-bottom: 46px;
+  @include mq(mobile) {
+    overflow: hidden;
   }
 }
 
@@ -381,6 +383,9 @@ export default {
     cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s infinite both;
   animation: rotate-vert-center 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s
     infinite both;
+  path {
+    color: currentColor;
+  }
 }
 
 @-webkit-keyframes rotate-vert-center {

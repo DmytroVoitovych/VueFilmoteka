@@ -1,5 +1,6 @@
 <template>
-  <Home :switcher="switcher">
+  <Home :switcher="switcher" :path="path">
+    <div class="gallery__item" style="display: none"></div>
     <ContainerMain>
       <section class="container gallery section">
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
@@ -82,6 +83,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    path: {
+      type: String,
+      default: "",
+    },
   },
   emits: {
     "get-find-id": (v) => typeof v === "number",
@@ -99,7 +104,7 @@ export default {
   },
   async created() {
     // хук для запросов
-    this.startRenderPage();
+    (!this.path || this.path === "Home") && this.startRenderPage();
   },
   methods: {
     // функції
@@ -184,6 +189,7 @@ export default {
         "On your request we found nothing , we return you to the main.",
         "Okay",
         () => {
+          console.log(this.$router);
           this.$router.go(0);
           window.localStorage.removeItem("numberPage");
           window.localStorage.removeItem("findedFilms");
@@ -203,7 +209,7 @@ export default {
           //якщо потрібний запит
 
           this.checkForStupid() && //перевірка на дурня
-            Block.dots(".gallery__item", {
+            Block?.dots(".gallery__item", {
               //сам лофдер з конфігураціями
               svgColor: "var(--text-color-red)",
               svgSize: "100px",
@@ -218,7 +224,7 @@ export default {
         // коли дані нам надійшли  вимикаєм лоадер
         if (!checkParam) {
           //якщо потрібний запит
-          this.checkForStupid() && Block.remove(".gallery__item");
+          this.checkForStupid() && Block?.remove(".gallery__item");
         }
         return res;
       });
@@ -244,6 +250,8 @@ export default {
     },
   },
   mounted() {
+    console.log(this.$route);
+    console.log(1, this.path);
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
 };

@@ -1,27 +1,40 @@
 <template>
-  <div
-    id="app"
-    :class="{ modal: stateModal }"
-    :style="{ top: stateModal && `${-locate}px`, right: scrollWidth + 'px' }"
-  >
-    <HeaderFilm
-      @onChekfind="onChekfind"
-      :class="{ spec: stateModal }"
-      :style="{ paddingRight: scrollWidth + 'px' }"
-    />
-    <main>
+  <div>
+    <div v-if="path.includes('Auth')" id="auth">
       <router-view></router-view>
-      <TrendMain :switcher="check" @get-find-id="getFindId"></TrendMain>
-    </main>
-    <FooterMain
-      :class="{ spec: stateModal }"
-      :style="{ paddingRight: scrollWidth + 'px' }"
-    ></FooterMain>
-    <teleport to="#modalMain">
-      <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
-    </teleport>
-    <!-- <ModalBtnVue type="button" >Add Watched</ModalBtnVue>
+    </div>
+    <div
+      v-else
+      id="app"
+      :class="{ modal: stateModal }"
+      :style="{ top: stateModal && `${-locate}px`, right: scrollWidth + 'px' }"
+    >
+      <HeaderFilm
+        @onChekfind="onChekfind"
+        :class="{ spec: stateModal }"
+        :style="{ paddingRight: scrollWidth + 'px' }"
+      />
+
+      <main>
+        <router-view></router-view>
+        <TrendMain
+          v-if="path === 'Home'"
+          :path="path"
+          :switcher="check"
+          @get-find-id="getFindId"
+        ></TrendMain>
+      </main>
+
+      <FooterMain
+        :class="{ spec: stateModal }"
+        :style="{ paddingRight: scrollWidth + 'px' }"
+      ></FooterMain>
+      <teleport to="#modalMain">
+        <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
+      </teleport>
+      <!-- <ModalBtnVue type="button" >Add Watched</ModalBtnVue>
     <ModalBtnVue type="button" see>Add Que</ModalBtnVue> -->
+    </div>
   </div>
 </template>
 
@@ -30,6 +43,7 @@ import HeaderFilm from "./components/header/HeaderFilm.vue";
 import FooterMain from "./components/footer/FooterMain.vue";
 import TrendMain from "./components/trend/TrendMain.vue";
 import ModalMain from "./components/shared/ModalMain.vue";
+
 // import ModalBtnVue from './components/btn/ModalBtn.vue';
 
 export default {
@@ -57,7 +71,17 @@ export default {
       locate: 0, //положеня скролу
       stateModal: false, //стан модалки
       scrollWidth: 0, //ширина скролу
+      path: "",
+      currentPage: this.$route.name,
     };
+  },
+  created() {
+    this.watchPath();
+    console.log(this.path);
+  },
+  beforeRouteEnter() {
+    console.log(this.$route.name);
+    console.log(this.path);
   },
   methods: {
     onChekfind(triger) {
@@ -83,6 +107,16 @@ export default {
     modalstate(e) {
       //запис стану модалки
       this.stateModal = e;
+    },
+    watchPath() {
+      // слідкую за змінами сторінки (роут)
+      this.$watch(
+        () => this.$route.name,
+        (fullPath) => {
+          console.log(fullPath);
+          this.path = fullPath.replace("/", "");
+        }
+      );
     },
   },
   updated() {

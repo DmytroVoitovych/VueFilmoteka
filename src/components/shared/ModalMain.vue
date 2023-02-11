@@ -166,8 +166,6 @@ export default {
   justify-content: flex-start;
   padding: 40px 12px;
   gap: 16px;
-  overflow-y: auto;
-  max-height: 555;
   background-color: var(--text-color-light);
 
   max-width: 806px;
