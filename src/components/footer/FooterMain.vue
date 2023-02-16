@@ -39,6 +39,7 @@ export default {
   align-items: center;
   height: 100px;
   background-color: #f7f7f7;
+  z-index: 0;
   // transition: opacity 350ms;
 
   @media screen and (min-width: 1200px) {

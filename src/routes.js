@@ -15,6 +15,18 @@ const routes = [
     path: "/biblioteka",
     name: "Biblioteka",
     component: BibliotekaPage,
+    children: [
+      {
+        path: "watched",
+        name: "BibliotekaWatched",
+        component: LoginForm,
+      },
+      {
+        path: "queue",
+        name: "BibliotekaQueue",
+        component: RegisterForm,
+      },
+    ],
   },
   {
     path: "/auth",

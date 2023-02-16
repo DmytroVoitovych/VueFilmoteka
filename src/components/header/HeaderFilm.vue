@@ -1,7 +1,10 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home">
-    <router-link :to="{ path: 'auth/login' }" class="custom-btn btn-A"
+    <router-link
+      v-if="!path.includes('Biblioteka')"
+      :to="{ path: 'auth/login' }"
+      class="custom-btn btn-A"
       ><span>Authorization</span></router-link
     >
     <ContainerMain>
@@ -38,7 +41,7 @@
 
           <li class="nav-item" data-auth="false">
             <router-link
-              :to="{ name: 'Biblioteka' }"
+              :to="{ name: 'BibliotekaWatched' }"
               rel="noopener noreferrer"
               data-lang="library"
               class="nav-btn library__btn js-auth"
@@ -53,7 +56,11 @@
           </li>
         </ul>
       </nav>
-      <form action="" class="search-form js-form">
+      <form
+        v-if="!path.includes('Biblioteka')"
+        action=""
+        class="search-form js-form"
+      >
         <CustomInput
           v-model:find.trim="nameFilms"
           data-lang="placeholder"
@@ -72,6 +79,10 @@
           </svg>
         </button>
       </form>
+      <ul v-else>
+        <li><ModalBtn :name="'WATCHED'" /></li>
+        <li><ModalBtn :name="'QUEUE'" /></li>
+      </ul>
     </ContainerMain>
   </header>
 </template>;
@@ -79,6 +90,7 @@
 <script>
 import ContainerMain from "../shared/ContainerMain.vue";
 import CustomInput from "./InputComponent.vue";
+import ModalBtn from "../btn/ModalBtn.vue";
 import { Notify } from "notiflix/build/notiflix-notify-aio";
 
 export default {
@@ -87,6 +99,13 @@ export default {
   components: {
     ContainerMain,
     CustomInput,
+    ModalBtn,
+  },
+  props: {
+    path: {
+      type: String,
+      required: true,
+    },
   },
   emits: {
     onChekfind: (v) => typeof v === "boolean", //передача тригера
@@ -146,7 +165,7 @@ export default {
   padding-top: 40px;
   padding-bottom: 92px;
   height: 230px;
-
+  z-index: 1;
   @include mq(tablet) {
     height: 216px;
   }

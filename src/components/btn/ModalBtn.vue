@@ -1,84 +1,81 @@
-<!-- <template>
-    <button v-bind:type="type" :class='{addBtn:true, queBtn:see}'>
-      <slot></slot>  
-    </button>
+<template>
+  <button
+    :class="{ selected: see === name }"
+    @click="toggle"
+    :textcontent="name"
+    class="library__header--btn"
+  >
+    {{ name }}
+  </button>
 </template>
 
 <script>
-    export default {
-    name: 'ModalBtn',
-    props: {
-        type: {
-            type: String,
-            default: 'button'   
-        },
-        see: {
-         type: Boolean,
-         default:false   
-        } 
+export default {
+  name: "ModalBtn",
+  props: {
+    name: {
+      type: String,
+      requried: true,
     },
-     
-    }
+  },
+  data() {
+    return {
+      see: "WATCHED",
+    };
+  },
+  created() {
+    console.log(this.see);
+  },
+
+  methods: {
+    toggle(e) {
+      this.see = e.target.textContent;
+      this.$router.push({ path: this.name.toLowerCase() });
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-.addBtn { 
-padding: 14px 10px 12px;
-color: var(--text-color-light);
-text-transform: uppercase;
-background: var(--bg-color-modal-orange);
-border-radius: 5px;
-border: none;
-border-radius: 5px;
+.library__header--btn {
+  width: 130px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 
-font-family: Roboto;
-font-weight: 500;
-font-size: 12px;
-line-height: 1.33;
-cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.33;
 
-@media screen and (max-width: 769.5px) {
-    padding: 6px 27px;
-    max-width: 161px;
-}
+  color: #ffffff;
+  background-color: transparent;
+  border-radius: 5px;
+  border: 1px solid #ffffff;
 
-&:hover {
-    color: var(--bg-color-modal-orange);
-    text-transform: uppercase;
-    background: var(--text-color-light);
-    border: 2px solid #ff6b01;
-    border-radius: 5px;
+  &:hover {
+    background-color: #ff00193b;
+    box-shadow: 8px 8px 14px -8px rgba(255, 255, 255, 1);
+  }
 
+  @include mq(tablet) {
+    width: 148px;
+  }
+
+  &:first-child {
+    margin-right: 16px;
+
+    @include mq(tablet) {
+      margin-right: 32px;
+    }
+
+    @include mq(desktop) {
+      margin-right: 16px;
+    }
+  }
+
+  &.selected {
+    background-color: #ff6b01;
+    border-color: #ff6b01;
+  }
 }
-}
-.queBtn{
-    padding: 14px 10px 12px;
-        color: var(--text-color-black);
-        text-transform: uppercase;
-        background: var(--text-color-light);
-        border: none;
-        border-radius: 5px;
-        outline: 1px solid var(--text-color-black);
-        cursor: pointer;
-        border-radius: 5px;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 1.33;
-    
-        @media screen and (max-width: 769.5px) {
-            //    padding: 13px 11px 13px 13px;
-            max-width: 161px;
-            width: 100%;
-            padding: 13px 7px 13px 7px;
-        }
-    
-        &:hover {
-            color: var(--text-color-light);
-            text-transform: uppercase;
-            background: var(--bg-color-modal-orange);
-            outline: none;
-            border: 2px solid #ff6b01;
-            border-radius: 5px;
-        }
-}
-</style> -->
+</style>

@@ -13,6 +13,7 @@
         @onChekfind="onChekfind"
         :class="{ spec: stateModal }"
         :style="{ paddingRight: scrollWidth + 'px' }"
+        :path="path"
       />
 
       <main>
@@ -72,17 +73,13 @@ export default {
       stateModal: false, //стан модалки
       scrollWidth: 0, //ширина скролу
       path: "",
-      currentPage: this.$route.name,
     };
   },
   created() {
     this.watchPath();
     console.log(this.path);
   },
-  beforeRouteEnter() {
-    console.log(this.$route.name);
-    console.log(this.path);
-  },
+
   methods: {
     onChekfind(triger) {
       //тригер пошуку
@@ -144,6 +141,8 @@ export default {
 :root {
   /* spec style */
   --left-modal: 0;
+  /* biblioteka without items */
+  --no-content: "You haven't added anything yet.";
   /* Шрифти */
   --main-fonts: "Roboto", sans-serif;
   --secondary-fonts: "Titan One", sans-serif;
