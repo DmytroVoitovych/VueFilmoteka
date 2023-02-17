@@ -36,6 +36,10 @@ export default {
     font-size: 44px;
     -webkit-text-stroke: 2px #f0a900;
     color: transparent;
+
+    @include mq(mobile-only) {
+      font-size: 34px;
+    }
   }
 
   @include mq(mobile-only) {

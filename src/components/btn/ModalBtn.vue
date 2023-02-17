@@ -1,12 +1,12 @@
 <template>
-  <button
-    :class="{ selected: see === name }"
-    @click="toggle"
+  <router-link
+    :to="{ path: name }"
     :textcontent="name"
     class="library__header--btn"
+    @click="toggle"
   >
     {{ name }}
-  </button>
+  </router-link>
 </template>
 
 <script>
@@ -19,17 +19,12 @@ export default {
     },
   },
   data() {
-    return {
-      see: "WATCHED",
-    };
+    return {};
   },
-  created() {
-    console.log(this.see);
-  },
+  created() {},
 
   methods: {
-    toggle(e) {
-      this.see = e.target.textContent;
+    toggle() {
       this.$router.push({ path: this.name.toLowerCase() });
     },
   },
@@ -52,6 +47,9 @@ export default {
   border-radius: 5px;
   border: 1px solid #ffffff;
 
+  text-align: center;
+  display: block;
+
   &:hover {
     background-color: #ff00193b;
     box-shadow: 8px 8px 14px -8px rgba(255, 255, 255, 1);
@@ -61,19 +59,7 @@ export default {
     width: 148px;
   }
 
-  &:first-child {
-    margin-right: 16px;
-
-    @include mq(tablet) {
-      margin-right: 32px;
-    }
-
-    @include mq(desktop) {
-      margin-right: 16px;
-    }
-  }
-
-  &.selected {
+  &.router-link-exact-active {
     background-color: #ff6b01;
     border-color: #ff6b01;
   }

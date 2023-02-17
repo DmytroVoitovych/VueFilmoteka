@@ -28,7 +28,7 @@
           >
         </router-link>
         <ul class="nav-list">
-          <li class="nav-item active__page">
+          <li class="nav-item">
             <router-link
               :to="{ name: 'Home' }"
               rel="noopener noreferrer"
@@ -41,6 +41,7 @@
 
           <li class="nav-item" data-auth="false">
             <router-link
+              :class="{ active__page: path.includes('Biblioteka') }"
               :to="{ name: 'BibliotekaWatched' }"
               rel="noopener noreferrer"
               data-lang="library"
@@ -79,7 +80,7 @@
           </svg>
         </button>
       </form>
-      <ul v-else>
+      <ul class="library__btn--wrapper" v-else>
         <li><ModalBtn :name="'WATCHED'" /></li>
         <li><ModalBtn :name="'QUEUE'" /></li>
       </ul>
@@ -368,6 +369,11 @@ export default {
   &.is-hidden {
     display: none;
   }
+
+  & a.router-link-exact-active {
+    display: block;
+    border-bottom: 2.86px solid #ff001b;
+  }
 }
 
 .nav-btn {
@@ -394,6 +400,26 @@ export default {
 }
 .active__page {
   border-bottom: 2.86px solid #ff001b;
+}
+/* biblioteka */
+.library__btn--wrapper {
+  display: flex;
+  justify-content: center;
+
+  gap: 16px;
+
+  position: absolute;
+  top: 124px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  @include mq(tablet) {
+    gap: 32px;
+  }
+
+  @include mq(desktop) {
+    gap: 16px;
+  }
 }
 
 //**animation logo */
