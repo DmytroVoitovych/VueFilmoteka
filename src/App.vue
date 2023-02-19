@@ -33,8 +33,6 @@
       <teleport to="#modalMain">
         <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
       </teleport>
-      <!-- <ModalBtnVue type="button" >Add Watched</ModalBtnVue>
-    <ModalBtnVue type="button" see>Add Que</ModalBtnVue> -->
     </div>
   </div>
 </template>
@@ -44,8 +42,6 @@ import HeaderFilm from "./components/header/HeaderFilm.vue";
 import FooterMain from "./components/footer/FooterMain.vue";
 import TrendMain from "./components/trend/TrendMain.vue";
 import ModalMain from "./components/shared/ModalMain.vue";
-
-// import ModalBtnVue from './components/btn/ModalBtn.vue';
 
 export default {
   name: "App",
@@ -72,7 +68,7 @@ export default {
       locate: 0, //положеня скролу
       stateModal: false, //стан модалки
       scrollWidth: 0, //ширина скролу
-      path: "",
+      path: "", //поточний роут
     };
   },
   created() {
