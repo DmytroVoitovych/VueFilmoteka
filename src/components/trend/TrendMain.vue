@@ -57,18 +57,18 @@
 </template>
 
 <script>
-import ContainerMain from "../shared/ContainerMain.vue";
-import Home from "@/page/Home.vue";
-import MovieAPiServer from "@/helpers/req";
-import PaginationHardVue from "../shared/PaginationHard.vue";
-import { axio } from "../../helpers/axios";
-import { Report, Block } from "notiflix";
+import ContainerMain from '../shared/ContainerMain.vue';
+import Home from '@/page/Home.vue';
+import MovieAPiServer from '@/helpers/req';
+import PaginationHardVue from '../shared/PaginationHard.vue';
+import { axio } from '../../helpers/axios';
+import { Report, Block } from 'notiflix';
 
 const http = new MovieAPiServer();
 let checkParam = false;
 
 export default {
-  name: "TrendMain",
+  name: 'TrendMain',
   components: {
     ContainerMain,
     Home,
@@ -85,11 +85,11 @@ export default {
     },
     path: {
       type: String,
-      default: "",
+      default: '',
     },
   },
   emits: {
-    "get-find-id": (v) => typeof v === "number",
+    'get-find-id': v => typeof v === 'number',
   },
   data() {
     //стейт
@@ -104,15 +104,15 @@ export default {
   },
   async created() {
     // хук для запросов
-    (!this.path || this.path === "Home") && this.startRenderPage();
+    (!this.path || this.path === 'Home') && this.startRenderPage();
   },
   methods: {
     // функції
     async startRenderPage() {
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
-            window.localStorage.getItem("numberPage") ?? 1,
-            window.localStorage.getItem("findedFilms"),
+            window.localStorage.getItem('numberPage') ?? 1,
+            window.localStorage.getItem('findedFilms'),
             this.toMainPage
           )
         : await http.fetchTopMovies(this.page, this.toMainPage);
@@ -126,7 +126,7 @@ export default {
     },
     year(num) {
       // рік
-      return num ? num.slice(0, 4) : "no date";
+      return num ? num.slice(0, 4) : 'no date';
     },
     getPoster(poster) {
       //постери
@@ -135,26 +135,26 @@ export default {
     getGenre(idg) {
       //розбір жанрів
       return idg
-        ?.map((e) => this.genrs.filter(({ id, name }) => id === e && name))
+        ?.map(e => this.genrs.filter(({ id, name }) => id === e && name))
         .flat(3)
         .map(({ name }) => name)
         .slice(0, 2)
-        .join(", ");
+        .join(', ');
     },
     async setPage(num) {
       this.page = num;
-      window.localStorage.setItem("numberPage", num); // добавляю сторінку
+      window.localStorage.setItem('numberPage', num); // добавляю сторінку
 
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
             this.page,
-            window.localStorage.getItem("findedFilms")
+            window.localStorage.getItem('findedFilms')
           )
         : await http.fetchTopMovies(num);
 
       this.trend = data;
       this.max = http.maxPages;
-      window.localStorage.setItem("filmsPage", JSON.stringify(data));
+      window.localStorage.setItem('filmsPage', JSON.stringify(data));
 
       this.locate = window.scrollY; //запис положення
       this.$nextTick().then(() => {
@@ -166,17 +166,17 @@ export default {
     controlStorage() {
       //перевіка локльного стора
       if (
-        JSON.parse(window.localStorage.getItem("numberPage")) &&
-        JSON.parse(window.localStorage.getItem("filmsPage"))
+        JSON.parse(window.localStorage.getItem('numberPage')) &&
+        JSON.parse(window.localStorage.getItem('filmsPage'))
       ) {
-        return JSON.parse(window.localStorage.getItem("filmsPage"));
+        return JSON.parse(window.localStorage.getItem('filmsPage'));
       }
 
       return false;
     },
     checkFind() {
       //перевірка наявності пошуку
-      const check = JSON.parse(window.localStorage.getItem("findedFilms"))
+      const check = JSON.parse(window.localStorage.getItem('findedFilms'))
         ? true
         : false;
       this.check = check;
@@ -185,14 +185,14 @@ export default {
     toMainPage() {
       // добавити вспливаючу підказку (що нічого нема)
       Report.info(
-        "Sorry",
-        "On your request we found nothing , we return you to the main.",
-        "Okay",
+        'Sorry',
+        'On your request we found nothing , we return you to the main.',
+        'Okay',
         () => {
           console.log(this.$router);
           this.$router.go(0);
-          window.localStorage.removeItem("numberPage");
-          window.localStorage.removeItem("findedFilms");
+          window.localStorage.removeItem('numberPage');
+          window.localStorage.removeItem('findedFilms');
         }
       );
     },
@@ -202,36 +202,36 @@ export default {
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
 
-      axio.loader.interceptors.request.use((config) => {
+      axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
-        checkParam = config.url.includes("/3/movie/");
+        checkParam = config.url.includes('/3/movie/');
         if (!checkParam) {
           //якщо потрібний запит
 
           this.checkForStupid() && //перевірка на дурня
-            Block?.dots(".gallery__item", {
+            Block?.dots('.gallery__item', {
               //сам лофдер з конфігураціями
-              svgColor: "var(--text-color-red)",
-              svgSize: "100px",
-              backgroundColor: "var(--bg-loader-basic)",
+              svgColor: 'var(--text-color-red)',
+              svgSize: '100px',
+              backgroundColor: 'var(--bg-loader-basic)',
             });
         }
 
         return config;
       });
 
-      axio.loader.interceptors.response.use((res) => {
+      axio.loader.interceptors.response.use(res => {
         // коли дані нам надійшли  вимикаєм лоадер
         if (!checkParam) {
           //якщо потрібний запит
-          this.checkForStupid() && Block?.remove(".gallery__item");
+          this.checkForStupid() && Block?.remove('.gallery__item');
         }
         return res;
       });
     },
     getIdForModal(id) {
       // отримання данних для модалки
-      this.$emit("get-find-id", id);
+      this.$emit('get-find-id', id);
     },
   },
 
@@ -296,7 +296,7 @@ export default {
       rgba(0, 0, 0, 0.56),
       rgba(0, 0, 0, 0.56)
     ),
-    url("../../assets/images/library.jpeg");
+    url('../../assets/images/library.jpeg');
 }
 
 .gallery__list {

@@ -1,8 +1,12 @@
-import BibliotekaPage from "./page/BibliotekaPage.vue";
-import AuthPage from "./page/AuthPage.vue";
-import HomePage from "./page/Home.vue";
-import LoginForm from "./components/auth/LoginForm.vue";
-import RegisterForm from "./components/auth/RegisterForm.vue";
+const BibliotekaPage = () =>
+  import("./page/BibliotekaPage.vue");
+const AuthPage = () => import("./page/AuthPage.vue");
+const HomePage = () => import("./page/Home.vue");
+const LoginForm = () =>
+  import("./components/auth/LoginForm.vue");
+const RegisterForm = () =>
+  import("./components/auth/RegisterForm.vue");
+import NotFound from "./components/notfound/NotFound.vue";
 import { createWebHistory, createRouter } from "vue-router";
 
 const routes = [
@@ -44,6 +48,11 @@ const routes = [
         component: RegisterForm,
       },
     ],
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotPage",
+    component: NotFound,
   },
 ];
 

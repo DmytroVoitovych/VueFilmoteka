@@ -67,12 +67,14 @@
           data-lang="placeholder"
           name="searchQuery"
           placeholder="Movie search"
+          type="text"
           class="input-form"
         />
 
         <button
           class="submit-btn"
           type="submit"
+          aria-label="search button"
           v-on:click.prevent="searchFilms"
         >
           <svg class="menu__icon" width="12" height="12">
@@ -89,13 +91,13 @@
 </template>;
 
 <script>
-import ContainerMain from "../shared/ContainerMain.vue";
-import CustomInput from "./InputComponent.vue";
-import ModalBtn from "../btn/ModalBtn.vue";
-import { Notify } from "notiflix/build/notiflix-notify-aio";
+import ContainerMain from '../shared/ContainerMain.vue';
+import CustomInput from './InputComponent.vue';
+import ModalBtn from '../btn/ModalBtn.vue';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 export default {
-  name: "HeaderMain",
+  name: 'HeaderMain',
 
   components: {
     ContainerMain,
@@ -109,12 +111,12 @@ export default {
     },
   },
   emits: {
-    onChekfind: (v) => typeof v === "boolean", //передача тригера
+    onChekfind: v => typeof v === 'boolean', //передача тригера
   },
   data() {
     return {
       switcher: false, //тригер пошуку
-      nameFilms: "",
+      nameFilms: '',
     };
   },
 
@@ -122,35 +124,35 @@ export default {
     searchFilms() {
       const specifick =
         this.nameFilms ===
-        JSON.parse(window.localStorage.getItem("findedFilms"));
+        JSON.parse(window.localStorage.getItem('findedFilms'));
 
       if (this.nameFilms && !specifick) {
         this.changeStorage();
         this.switcher = !this.switcher; //або або // логіка тогл
-        this.$emit("onChekfind", this.switcher);
+        this.$emit('onChekfind', this.switcher);
       } else if (specifick) {
         return Notify.failure(
           `You already have movies on request: ${this.nameFilms}`
         );
       } else {
-        return Notify.failure("Search string must have at least one character");
+        return Notify.failure('Search string must have at least one character');
       }
     },
     toMainPage() {
-      window.localStorage.removeItem("numberPage");
-      window.localStorage.removeItem("findedFilms");
-      this.$route.fullPath !== "/"
-        ? this.$router.push({ path: "/" })
+      window.localStorage.removeItem('numberPage');
+      window.localStorage.removeItem('findedFilms');
+      this.$route.fullPath !== '/'
+        ? this.$router.push({ path: '/' })
         : this.$router.go(0);
     },
     changeStorage() {
-      window.localStorage.removeItem("numberPage"); //обнуляю сторінку
-      window.localStorage.removeItem("filmsPage"); // обнуляю старі дані
+      window.localStorage.removeItem('numberPage'); //обнуляю сторінку
+      window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
       window.localStorage.setItem(
-        "findedFilms",
+        'findedFilms',
         JSON.stringify(this.nameFilms)
       ); //передаю в основу
-      this.nameFilms = "";
+      this.nameFilms = '';
     },
   },
   watch: {
@@ -387,7 +389,7 @@ export default {
 }
 
 .nav-btn::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 12px;
@@ -463,7 +465,7 @@ export default {
   color: #fff;
   border-radius: 5px;
   padding: 10px 25px;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   font-weight: 500;
   background: transparent;
   cursor: pointer;
@@ -501,7 +503,7 @@ export default {
 .btn-A:before,
 .btn-A:after {
   position: absolute;
-  content: "";
+  content: '';
   right: 0;
   bottom: 0;
   background: rgba(251, 75, 2, 1);
@@ -537,7 +539,7 @@ export default {
 .btn-A span:before,
 .btn-A span:after {
   position: absolute;
-  content: "";
+  content: '';
   left: 0;
   top: 0;
   background: rgba(251, 75, 2, 1);

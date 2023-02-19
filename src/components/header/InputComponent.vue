@@ -1,9 +1,5 @@
 <template>
-  <input
-    type="text"
-    :value="find"
-    @input="$emit('update:find', $event.target.value)"
-  />
+  <input :value="find" @input="$emit('update:find', $event.target.value)" />
 </template>
 <script>
 export default {

@@ -1,9 +1,11 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
     <span class="login-form-title"> Registration </span>
     <form class="login-form" data-registr>
       <div class="wrap-input" data-validate="Enter username">
-        <input
+        <CustomInput
+          v-model:find.trim="nameReg"
           class="input"
           type="text"
           name="username"
@@ -13,7 +15,8 @@
       </div>
 
       <div class="wrap-input" data-validate="Enter email">
-        <input
+        <CustomInput
+          v-model:find.trim="mailReg"
           class="input"
           type="email"
           name="email"
@@ -23,7 +26,8 @@
       </div>
 
       <div class="wrap-input" data-validate="Enter password">
-        <input
+        <CustomInput
+          v-model:find.trim="passReg"
           class="input"
           type="password"
           name="passReg"
@@ -49,11 +53,27 @@
 </template>
 
 <script>
-export default {};
+import CustomInput from "../header/InputComponent.vue";
+export default {
+  components: {
+    CustomInput,
+  },
+  data() {
+    return {
+      nameReg: "",
+      mailReg: "",
+      passReg: "",
+    };
+  },
+  watch: {
+    nameReg() {
+      console.log(this.nameReg);
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-/* @import "../../assets/scss/fonts"; */
 @import "../../assets/scss/auth";
 
 .form-btn-center {
