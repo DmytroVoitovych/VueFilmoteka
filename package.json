@@ -12,6 +12,7 @@
     "axios": "^0.27.2",
     "axios-extensions": "^3.1.6",
     "core-js": "^3.8.3",
+    "dotenv": "^16.0.3",
     "intersection-observer": "^0.12.2",
     "lru-cache": "^7.16.1",
     "modern-normalize": "^1.1.0",

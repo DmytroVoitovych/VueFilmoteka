@@ -1,57 +1,49 @@
-const BibliotekaPage = () =>
-  import("./page/BibliotekaPage.vue");
-const AuthPage = () => import("./page/AuthPage.vue");
-const HomePage = () => import("./page/Home.vue");
-const LoginForm = () =>
-  import("./components/auth/LoginForm.vue");
-const RegisterForm = () =>
-  import("./components/auth/RegisterForm.vue");
-import NotFound from "./components/notfound/NotFound.vue";
-import { createWebHistory, createRouter } from "vue-router";
+import NotFound from './components/notfound/NotFound.vue';
+import { createWebHistory, createRouter } from 'vue-router';
 
 const routes = [
   {
-    path: "/",
-    name: "Home",
-    component: HomePage,
+    path: '/',
+    name: 'Home',
+    component: () => import('./page/Home.vue'),
   },
   {
-    path: "/biblioteka",
-    name: "Biblioteka",
-    component: BibliotekaPage,
+    path: '/biblioteka',
+    name: 'Biblioteka',
+    component: () => import('./page/BibliotekaPage.vue'),
     children: [
       {
-        path: "watched",
-        name: "BibliotekaWatched",
-        component: LoginForm,
+        path: 'watched',
+        name: 'BibliotekaWatched',
+        component: NotFound,
       },
       {
-        path: "queue",
-        name: "BibliotekaQueue",
-        component: RegisterForm,
+        path: 'queue',
+        name: 'BibliotekaQueue',
+        component: NotFound,
       },
     ],
   },
   {
-    path: "/auth",
-    name: "Auth",
-    component: AuthPage,
+    path: '/auth',
+    name: 'Auth',
+    component: () => import('./page/AuthPage.vue'),
     children: [
       {
-        path: "login",
-        name: "AuthLogin",
-        component: LoginForm,
+        path: 'login',
+        name: 'AuthLogin',
+        component: () => import('./components/auth/LoginForm.vue'),
       },
       {
-        path: "signup",
-        name: "AuthSignup",
-        component: RegisterForm,
+        path: 'signup',
+        name: 'AuthSignup',
+        component: () => import('./components/auth/RegisterForm.vue'),
       },
     ],
   },
   {
-    path: "/:pathMatch(.*)*",
-    name: "NotPage",
+    path: '/:pathMatch(.*)*',
+    name: 'NotPage',
     component: NotFound,
   },
 ];
