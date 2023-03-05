@@ -2,7 +2,7 @@ import { CrossStorageClient, CrossStorageHub } from 'cross-storage';
 
 CrossStorageHub.init([
   {
-    origin: /localhost:8080$/,
+    origin: /[https://vue-filmoteka.vercel.app/]/,
     allow: ['get', 'set', 'del', 'getKeys', 'clear'],
   },
 ]);
