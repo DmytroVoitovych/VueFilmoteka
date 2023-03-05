@@ -84,7 +84,7 @@ export default {
             password: this.passLog,
           });
           await set('tokenfilm', this.$store.state.token);
-          await funcSetGlobal(this.$store.state.token);
+          funcSetGlobal(this.$store.state.token);
           this.$router.push({ path: '/' });
           Notify.success(`User ${window.localStorage.getItem('name')} created`);
         } catch (err) {
