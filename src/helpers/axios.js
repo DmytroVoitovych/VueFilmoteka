@@ -22,3 +22,11 @@ export const axio = {
 };
 
 export default http;
+
+// nodehttp
+const { VUE_APP_FILMOTEKA } = process.env;
+
+export const nodeHttp = axios.create({
+  baseURL: VUE_APP_FILMOTEKA,
+  headers: { 'Cache-Control': 'no-cache' },
+});

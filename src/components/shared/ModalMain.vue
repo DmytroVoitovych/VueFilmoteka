@@ -22,7 +22,7 @@
         "
       />
       <div>
-        <h3 class="modal__titleV t-js">{{ infos.title ?? "No date" }}</h3>
+        <h3 class="modal__titleV t-js">{{ infos.title ?? 'No date' }}</h3>
         <div class="flexboxV">
           <ul class="modal__listV">
             <li class="modal__descV">
@@ -47,10 +47,10 @@
                 {{
                   infos.genres?.length > 0
                     ? infos.genres
-                        .map((g) => g.name + ", ")
-                        .join("")
+                        .map(g => g.name + ', ')
+                        .join('')
                         .slice(0, -2)
-                    : "No date"
+                    : 'No date'
                 }}
               </p>
             </li>
@@ -60,7 +60,7 @@
             <p class="overview t-js">
               {{
                 infos.overview ||
-                "No description will be added soon. Sorry for the inconvenience"
+                'No description will be added soon. Sorry for the inconvenience'
               }}
             </p>
           </div>
@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import MovieAPiServer from "../../helpers/req";
+import MovieAPiServer from '../../helpers/req';
 
 const http = new MovieAPiServer();
 
@@ -110,7 +110,7 @@ export default {
   },
   emits: {
     //передача стана наверх
-    modalstate: (e) => typeof e === "boolean",
+    modalstate: e => typeof e === 'boolean',
   },
   methods: {
     async getInfoOfFilms() {
@@ -122,11 +122,11 @@ export default {
       //закриття модалки
       this.openModal = false;
       this.infos = [];
-      this.$emit("modalstate", false);
+      this.$emit('modalstate', false);
     },
     funcKeyDown(e) {
       // закриття по ескейпу
-      if (this.openModal && e.code === "Escape") {
+      if (this.openModal && e.code === 'Escape') {
         this.onClose();
       }
       return;
@@ -144,13 +144,13 @@ export default {
       if (this.filmsid >= 0) {
         this.getInfoOfFilms();
         this.openModal = true;
-        this.$emit("modalstate", this.openModal);
+        this.$emit('modalstate', this.openModal);
       }
     },
     openModal() {
-      window.addEventListener("keydown", this.funcKeyDown);
+      window.addEventListener('keydown', this.funcKeyDown);
       !this.openModal && //вимикаєм слухач
-        window.removeEventListener("keydown", this.funcKeyDown);
+        window.removeEventListener('keydown', this.funcKeyDown);
     },
   },
 };

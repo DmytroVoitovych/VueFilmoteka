@@ -2,7 +2,7 @@
 <template>
   <div>
     <span class="login-form-title"> Registration </span>
-    <form class="login-form" data-registr>
+    <form v-on:submit.prevent="funcSignUpUser" class="login-form" data-registr>
       <div class="wrap-input" data-validate="Enter username">
         <CustomInput
           v-model:find.trim="nameReg"
@@ -37,7 +37,14 @@
       </div>
 
       <div class="container-login-form-btn">
-        <button class="login-form-btn" type="submit">Registration</button>
+        <button
+          class="login-form-btn"
+          :class="{ disabled: noEmpty }"
+          :disabled="noEmpty"
+          type="submit"
+        >
+          Registration
+        </button>
       </div>
       <router-link
         :to="{ name: 'AuthLogin' }"
@@ -53,28 +60,74 @@
 </template>
 
 <script>
-import CustomInput from "../header/InputComponent.vue";
+import { Loading, Notify, Report } from 'notiflix';
+import CustomInput from '../header/InputComponent.vue';
 export default {
   components: {
     CustomInput,
   },
   data() {
     return {
-      nameReg: "",
-      mailReg: "",
-      passReg: "",
+      nameReg: '',
+      mailReg: '',
+      passReg: '',
     };
+  },
+  created() {
+    console.log(this.$store.state.user);
+  },
+  methods: {
+    async funcSignUpUser() {
+      if ((this.nameReg, this.mailReg, this.passReg)) {
+        Loading.dots();
+        try {
+          await this.$store.dispatch('signUp', {
+            name: this.nameReg,
+            email: this.mailReg,
+            password: this.passReg,
+          });
+          this.$router.push({ path: '/auth/login' });
+          Notify.success(`User ${this.nameReg} created`);
+        } catch (err) {
+          if (err.response) {
+            return Report.failure(
+              `Error ${err.response.data.code}`,
+              err.response.data.message
+            );
+          }
+          return Report.failure(`Error ${err.code}`, err.message);
+        } finally {
+          Loading.remove();
+        }
+      }
+    },
   },
   watch: {
     nameReg() {
       console.log(this.nameReg);
     },
   },
+  computed: {
+    noEmpty() {
+      // контроль кнопки
+      return this.nameReg &&
+        this.mailReg &&
+        this.passReg &&
+        this.passReg.length >= 6
+        ? false
+        : true;
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/auth";
+@import '../../assets/scss/auth';
+
+.disabled {
+  background: var(--disabled);
+  pointer-events: none;
+}
 
 .form-btn-center {
   display: block;

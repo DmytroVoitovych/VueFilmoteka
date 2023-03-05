@@ -23,7 +23,7 @@
 
 <script>
 export default {
-  name: "FooterMain",
+  name: 'FooterMain',
   methods: {
     year() {
       return new Date().getFullYear();
@@ -48,7 +48,7 @@ export default {
   }
 
   @media screen and (min-width: 768px) {
-    min-width: 768px;
+    min-width: 100%;
     height: 79px;
   }
 
@@ -65,7 +65,7 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-weight: 400;
   font-size: 16px;
   color: #545454;
@@ -76,7 +76,7 @@ export default {
   }
 
   @media screen and (min-width: 768px) {
-    min-width: 768px;
+    min-width: 100%;
   }
 
   @media screen and (min-width: 260px) and (max-width: 340px) {

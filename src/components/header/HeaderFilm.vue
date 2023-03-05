@@ -1,12 +1,28 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home">
-    <router-link
-      v-if="!path.includes('Biblioteka')"
-      :to="{ path: 'auth/login' }"
-      class="custom-btn btn-A"
-      ><span>Authorization</span></router-link
-    >
+    <template v-if="show">
+      <router-link
+        v-if="!path.includes('Biblioteka') && checkExpired"
+        :to="{ path: 'auth/login' }"
+        class="custom-btn btn-A"
+        ><span>Authorization</span></router-link
+      >
+      <button
+        class="btn__logout"
+        :data-name="getName"
+        v-if="!path.includes('Biblioteka') && !checkExpired"
+        v-on:click.prevent="funcLogOut"
+      >
+        <svg
+          class="subscribe-form__icon rotate-vert-center"
+          width="32"
+          height="32"
+        >
+          <use href="../../assets/sprite.svg#icon-exit"></use>
+        </svg>
+      </button>
+    </template>
     <ContainerMain>
       <nav class="navigation">
         <router-link
@@ -94,7 +110,8 @@
 import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Report, Notify } from 'notiflix';
+import { get, del } from 'idb-keyval';
 
 export default {
   name: 'HeaderMain',
@@ -117,10 +134,30 @@ export default {
     return {
       switcher: false, //тригер пошуку
       nameFilms: '',
+      show: false,
     };
   },
 
+  created(e) {
+    console.log(e);
+    console.log('11', this.$store.state.token);
+    this.checkTokenStoreOrUpdate();
+  },
   methods: {
+    // spec store function
+    async checkTokenStoreOrUpdate() {
+      if (!this.$store.state.token) {
+        try {
+          const res = await get('tokenfilm');
+          this.$store.commit('setLogin', res);
+          this.show = true;
+          console.log(res);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      return (this.show = true);
+    },
     searchFilms() {
       const specifick =
         this.nameFilms ===
@@ -154,16 +191,48 @@ export default {
       ); //передаю в основу
       this.nameFilms = '';
     },
+
+    async funcLogOut() {
+      try {
+        await this.$store.dispatch('LogOut', this.$store.state.token);
+        await del('tokenfilm');
+      } catch (err) {
+        if (err.response) {
+          return Report.failure(
+            `Error ${err.response.data.code}`,
+            err.response.data.message
+          );
+        }
+        return Report.failure(`Error ${err.code}`, err.message);
+      }
+    },
   },
   watch: {
     nameFilms() {
       console.log(this.nameFilms);
     },
   },
+  computed: {
+    checkExpired() {
+      const token = this.$store.state.token;
+      if (!token) {
+        return true;
+      }
+      const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
+      return Math.floor(new Date() / 1000) > exp;
+    },
+    getName() {
+      return window.localStorage.getItem('name') || this.$store.state.name;
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+[v-cloak] {
+  display: none;
+}
+
 .header {
   padding-top: 40px;
   padding-bottom: 92px;
@@ -407,7 +476,7 @@ export default {
 .library__btn--wrapper {
   display: flex;
   justify-content: center;
-
+  z-index: 99;
   gap: 16px;
 
   position: absolute;
@@ -564,6 +633,34 @@ export default {
 
 .btn-A span:hover:after {
   width: 100%;
+}
+
+.btn__logout {
+  position: absolute;
+  right: 50%;
+  translate: 50%;
+  top: 160px;
+  @extend %reset-style;
+  cursor: pointer;
+
+  svg {
+    stroke: #ff001b;
+    background: brown;
+    border-radius: 2px;
+  }
+
+  &::before {
+    content: attr(data-name);
+    color: var(--text-color-light-grey);
+    font-family: Roboto;
+    font-size: 20px;
+    line-height: 1;
+    transition: color 0.25s;
+
+    position: relative;
+    top: -8px;
+    right: 6px;
+  }
 }
 
 //**special */

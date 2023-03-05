@@ -1,0 +1,24 @@
+:root {
+    /*control style*/
+    --disabled: #cccccc;
+    /* spec style */
+    --left-modal: 0;
+    /* biblioteka without items */
+    --no-content: "You haven't added anything yet.";
+    /* Шрифти */
+    --main-fonts: 'Roboto', sans-serif;
+    --secondary-fonts: 'Titan One', sans-serif;
+    /* Кольори фону */
+    --bg-color-light-grey: #f7f7f7;
+    --bg-color-modal-orange: #ff6b01;
+    --bg-loader-basic: rgba(255, 106, 0, 0.4);
+    /* Кольори шрифтів */
+    --text-color-light: #ffffff;
+    --text-color-light-orange: #ff6b08;
+    --text-color-black: #000000;
+    --text-color-red: #ff001b;
+    --text-color-grey: #545454;
+    --text-color-light-grey: #8c8c8c;
+    --error-color: #ff0000;
+    /* Інші кольори */
+}

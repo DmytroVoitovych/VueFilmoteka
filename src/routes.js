@@ -1,5 +1,9 @@
 import NotFound from './components/notfound/NotFound.vue';
 import { createWebHistory, createRouter } from 'vue-router';
+import BibliotekaPage from './page/BibliotekaPage.vue';
+import AuthPage from './page/AuthPage.vue';
+import LoginForm from './components/auth/LoginForm.vue';
+import RegisterForm from './components/auth/RegisterForm.vue';
 
 const routes = [
   {
@@ -10,7 +14,7 @@ const routes = [
   {
     path: '/biblioteka',
     name: 'Biblioteka',
-    component: () => import('./page/BibliotekaPage.vue'),
+    component: BibliotekaPage,
     children: [
       {
         path: 'watched',
@@ -27,17 +31,17 @@ const routes = [
   {
     path: '/auth',
     name: 'Auth',
-    component: () => import('./page/AuthPage.vue'),
+    component: AuthPage,
     children: [
       {
         path: 'login',
         name: 'AuthLogin',
-        component: () => import('./components/auth/LoginForm.vue'),
+        component: LoginForm,
       },
       {
         path: 'signup',
         name: 'AuthSignup',
-        component: () => import('./components/auth/RegisterForm.vue'),
+        component: RegisterForm,
       },
     ],
   },

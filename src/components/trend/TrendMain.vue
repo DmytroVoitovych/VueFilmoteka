@@ -33,12 +33,12 @@
             <div class="gallery__info">
               <p class="gallery__title them">{{ title }}</p>
               <p class="gallery__text them">
-                <span :class="{ space: getGenre(genre_ids).length > 27 }"
+                <span :class="{ space: getGenre(genre_ids)?.length > 27 }"
                   >{{ getGenre(genre_ids) }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
                 }}<span class="gallery__rating them">{{
-                  vote_average.toFixed(1)
+                  vote_average?.toFixed(1)
                 }}</span>
               </p>
             </div>

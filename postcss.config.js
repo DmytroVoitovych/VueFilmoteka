@@ -1,12 +1,11 @@
+const postcssNormalize = require('postcss-normalize');
 
-const postcssNormalize = require("postcss-normalize");
-
-    module.exports = {
-      css: {
-        loaderOptions: {
-          postcss: {
-            plugins: () => [postcssNormalize({ forceImport: true })]
-          }
-        }
-      }
-    };
+module.exports = {
+  css: {
+    loaderOptions: {
+      postcss: {
+        plugins: () => [postcssNormalize({ forceImport: true })],
+      },
+    },
+  },
+};
