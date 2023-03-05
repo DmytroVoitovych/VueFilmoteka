@@ -59,6 +59,8 @@
 import { Loading, Notify, Report } from 'notiflix';
 import { set } from 'idb-keyval';
 import CustomInput from '../header/InputComponent.vue';
+import { funcSetGlobal } from '@/helpers/syncStorage/globalStorage';
+
 export default {
   data() {
     return {
@@ -82,6 +84,7 @@ export default {
             password: this.passLog,
           });
           await set('tokenfilm', this.$store.state.token);
+          await funcSetGlobal(this.$store.state.token);
           this.$router.push({ path: '/' });
           Notify.success(`User ${window.localStorage.getItem('name')} created`);
         } catch (err) {

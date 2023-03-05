@@ -43,6 +43,7 @@ import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
 import { get } from 'idb-keyval';
+import { funcGetGlobal } from './helpers/syncStorage/globalStorage';
 
 export default {
   name: 'App',
@@ -83,6 +84,7 @@ export default {
       if (token) {
         try {
           this.$store.dispatch('currentUser', token);
+          funcGetGlobal().then(e => console.log(e));
         } catch (err) {
           console.log(err);
         }

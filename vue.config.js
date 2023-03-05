@@ -18,4 +18,24 @@ module.exports = {
         .end();
     });
   },
+  configureWebpack: {
+    resolve: {
+      fallback: {
+        stream: require.resolve('stream-browserify'),
+      },
+    },
+    externals: {
+      sharedb: 'sharedb',
+    },
+  },
 };
+
+// module.exports = {
+//   configureWebpack: {
+//     resolve: {
+//       fallback: {
+//         stream: require.resolve('stream-browserify'),
+//       },
+//     },
+//   },
+// };
