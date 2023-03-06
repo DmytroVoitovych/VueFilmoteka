@@ -59,7 +59,7 @@
 import { Loading, Notify, Report } from 'notiflix';
 import { set } from 'idb-keyval';
 import CustomInput from '../header/InputComponent.vue';
-import { funcSetGlobal } from '@/helpers/syncStorage/globalStorage';
+import { localDB, remoteDB } from '@/helpers/syncStorage/globalStorage';
 
 export default {
   data() {
@@ -84,7 +84,13 @@ export default {
             password: this.passLog,
           });
           await set('tokenfilm', this.$store.state.token);
-          funcSetGlobal(this.$store.state.token);
+          const result = await localDB.post({ token: this.$store.state.token });
+          console.log('Данные успешно сохранены в базе данных: ', result);
+          const doc = await remoteDB.put({
+            _id: 'mytoken',
+            token: this.$store.state.token,
+          });
+          console.log('Токен сохранен в базе данных:', doc);
           this.$router.push({ path: '/' });
           Notify.success(`User ${window.localStorage.getItem('name')} created`);
         } catch (err) {
