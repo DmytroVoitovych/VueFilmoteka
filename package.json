@@ -18,8 +18,6 @@
     "lru-cache": "^7.16.1",
     "modern-normalize": "^1.1.0",
     "notiflix": "^3.2.6",
-    "pouchdb": "^8.0.1",
-    "pouchdb-find": "^8.0.1",
     "sass-resources-loader": "^2.2.5",
     "stream-browserify": "^3.0.0",
     "vue": "^3.2.36",

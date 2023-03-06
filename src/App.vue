@@ -43,7 +43,6 @@ import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
 import { get } from 'idb-keyval';
-import { localDB, remoteDB } from './helpers/syncStorage/globalStorage';
 
 export default {
   name: 'App',
@@ -74,46 +73,11 @@ export default {
     };
   },
   created() {
-    console.log(localDB);
     this.watchPath();
     this.currentUser();
-    this.getData();
-    localDB.info().then(function (info) {
-      console.log(info);
-    });
-    localDB
-      .sync(remoteDB, { live: true, retry: true })
-      .on('change', function (info) {
-        this.getData();
-        console.log('Изменения в базе данных: ', info);
-      })
-      .on('error', function (err) {
-        console.error('Ошибка синхронизации баз данных: ', err);
-      });
   },
 
   methods: {
-    async saveData(data) {
-      try {
-        const result = await localDB.post(data);
-        console.log('Данные успешно сохранены в базе данных: ', result);
-      } catch (err) {
-        console.error('Ошибка сохранения данных в базе данных: ', err);
-      }
-    },
-    async getData() {
-      try {
-        const result = await remoteDB.allDocs({ include_docs: true });
-        console.log('Данные успешно получены из базы данных: ', result.rows);
-        return result.rows.map(row => {
-          console.log('row', row);
-          return row.doc;
-        });
-      } catch (err) {
-        console.error('Ошибка получения данных из базы данных: ', err);
-        return [];
-      }
-    },
     async currentUser() {
       const token = await get('tokenfilm');
       if (token) {
