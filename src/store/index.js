@@ -76,7 +76,7 @@ export const store = createStore({
       console.log(res);
       if (res) {
         console.log('tes', res);
-        context.commit('setLogin', res.data.data.access_token);
+        context.commit('setLogin', res.data.data.token);
         // context.commit('setLogin', '');
       }
     },
