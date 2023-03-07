@@ -80,7 +80,7 @@ export default {
   methods: {
     async currentUser() {
       const token = await get('tokenfilm');
-      if (token) {
+      if (!token) {
         try {
           this.$store.dispatch('currentUser', token);
         } catch (err) {

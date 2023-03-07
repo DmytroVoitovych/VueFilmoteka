@@ -73,9 +73,10 @@ export const store = createStore({
       const res = await nodeHttp.get('user/auth/current', {
         headers: { Authorization: 'Bearer ' + payload },
       });
-
+      console.log(res);
       if (res) {
         console.log('tes', res);
+        context.commit('setLogin', res.data.data.access_token);
         // context.commit('setLogin', '');
       }
     },
