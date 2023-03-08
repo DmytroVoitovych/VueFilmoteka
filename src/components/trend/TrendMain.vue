@@ -117,7 +117,7 @@ export default {
           )
         : await http.fetchTopMovies(this.page, this.toMainPage);
 
-      data.length === 0 && this.toMainPage();
+      data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
       this.max = http.maxPages;
 

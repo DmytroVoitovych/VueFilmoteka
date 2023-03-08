@@ -9,6 +9,7 @@ export const store = createStore({
     return {
       token: '',
       user: null,
+      refresh: '',
       infoWatched: [],
       infoQueue: [],
     };
@@ -21,9 +22,9 @@ export const store = createStore({
     setUser(state, payload) {
       state.user = payload;
     },
-    // setEmail(state, payload) {
-    //   state.email = payload;
-    // },
+    setRefresh(state, payload) {
+      state.refresh = payload;
+    },
   },
   actions: {
     // async googleLogin() {
@@ -42,7 +43,6 @@ export const store = createStore({
       // реєстрація
       const res = await nodeHttp.post('user/auth/signup', payload);
       if (res) {
-        console.log(res.data.data.user);
         context.commit('setUser', res.data.data.user);
       }
     },
@@ -56,7 +56,6 @@ export const store = createStore({
         );
         window.localStorage.setItem('name', name);
         context.commit('setLogin', res.data.data.access_token);
-        context.commit('setMail', name);
       }
     },
     async LogOut(context, payload) {
@@ -65,7 +64,6 @@ export const store = createStore({
       });
 
       if (res) {
-        // console.log('tes', res);
         context.commit('setLogin', '');
       }
     },
@@ -73,11 +71,27 @@ export const store = createStore({
       const res = await nodeHttp.get('user/auth/current', {
         headers: { Authorization: 'Bearer ' + payload },
       });
-      console.log(res);
+
       if (res) {
         console.log('tes', res);
+        window.localStorage.setItem('name', res.data.data.name);
         context.commit('setLogin', res.data.data.token);
-        // context.commit('setLogin', '');
+        context.commit('setRefresh', res.data.data.tokenRefresh);
+      }
+    },
+    async refreshToken(context, payload) {
+      // логін ноде
+      const res = await nodeHttp.post('user/auth/refresh', '', {
+        headers: { Authorization: 'Bearer ' + payload },
+      });
+      if (res) {
+        console.log(res.data.data.access_token);
+        const { name } = JSON.parse(
+          window.atob(res.data.data.access_token.split('.')[1])
+        );
+        window.localStorage.setItem('name', name);
+        context.commit('setLogin', res.data.data.access_token);
+        context.commit('setRefresh', res.data.data.refresh_token);
       }
     },
   },

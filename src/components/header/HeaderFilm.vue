@@ -111,7 +111,6 @@ import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
 import { Report, Notify } from 'notiflix';
-import { get, del } from 'idb-keyval';
 
 export default {
   name: 'HeaderMain',
@@ -138,25 +137,15 @@ export default {
     };
   },
 
-  created(e) {
-    console.log(e);
-    console.log('11', this.$store.state.token);
+  created() {
     this.checkTokenStoreOrUpdate();
   },
   methods: {
     // spec store function
-    async checkTokenStoreOrUpdate() {
-      if (!this.$store.state.token) {
-        try {
-          const res = await get('tokenfilm');
-          this.$store.commit('setLogin', res);
-          this.show = true;
-          console.log(res);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      return (this.show = true);
+    checkTokenStoreOrUpdate() {
+      const token = this.$cookies.get('token');
+      this.$store.commit('setLogin', token);
+      this.show = true;
     },
     searchFilms() {
       const specifick =
@@ -195,7 +184,7 @@ export default {
     async funcLogOut() {
       try {
         await this.$store.dispatch('LogOut', this.$store.state.token);
-        await del('tokenfilm');
+        this.$cookies.remove('token');
       } catch (err) {
         if (err.response) {
           return Report.failure(
@@ -215,6 +204,7 @@ export default {
   computed: {
     checkExpired() {
       const token = this.$store.state.token;
+      console.log(this.$store.state.token);
       if (!token) {
         return true;
       }

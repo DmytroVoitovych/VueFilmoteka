@@ -42,7 +42,6 @@ import HeaderFilm from './components/header/HeaderFilm.vue';
 import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
-import { get } from 'idb-keyval';
 
 export default {
   name: 'App',
@@ -74,18 +73,41 @@ export default {
   },
   created() {
     this.watchPath();
+    !this.$cookies.get('token') && this.refreshToken();
     this.currentUser();
   },
 
   methods: {
+    async refreshToken() {
+      try {
+        await this.$store.dispatch('refreshToken', this.$store.state.refresh);
+      } catch (err) {
+        console.log(err);
+      }
+    },
     async currentUser() {
-      const token = await get('tokenfilm');
-      if (!token) {
-        try {
-          this.$store.dispatch('currentUser', token);
-        } catch (err) {
-          console.log(err);
-        }
+      try {
+        await this.$store.dispatch('currentUser', undefined);
+        this.$cookies.set('token', this.$store.state.token, '60MIN');
+        const { exp } = JSON.parse(
+          window?.atob(this.$store.state.token?.split('.')[1])
+        );
+        console.log('refresh', this.$store.state.refresh);
+        const expired = exp - (Math.floor(new Date() / 1000) + 10 * 60);
+        const refresh = setTimeout(
+          async () => {
+            await this.$store.dispatch(
+              'refreshToken',
+              this.$store.state.refresh
+            );
+            clearTimeout(refresh);
+            console.log('clear');
+          },
+          expired > 0 ? expired * 1000 : 0
+        );
+      } catch (err) {
+        this.$cookies.remove('token');
+        console.log(err);
       }
     },
     onChekfind(triger) {

@@ -57,7 +57,6 @@
 
 <script>
 import { Loading, Notify, Report } from 'notiflix';
-import { set } from 'idb-keyval';
 import CustomInput from '../header/InputComponent.vue';
 
 export default {
@@ -82,7 +81,7 @@ export default {
             email: this.mailLog,
             password: this.passLog,
           });
-          await set('tokenfilm', this.$store.state.token);
+          this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
           this.$router.push({ path: '/' });
           Notify.success(`User ${window.localStorage.getItem('name')} created`);
         } catch (err) {
