@@ -186,6 +186,7 @@ export default {
         await this.$store.dispatch('LogOut', this.$store.state.token);
         this.$cookies.remove('token');
       } catch (err) {
+        console.log(err);
         if (err.response) {
           return Report.failure(
             `Error ${err.response.data.code}`,

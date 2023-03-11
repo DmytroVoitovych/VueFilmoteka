@@ -250,8 +250,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.$route);
-    console.log(1, this.path);
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
 };

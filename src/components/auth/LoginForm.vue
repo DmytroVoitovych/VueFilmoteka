@@ -81,9 +81,7 @@ export default {
             email: this.mailLog,
             password: this.passLog,
           });
-          this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
-          this.$router.push({ path: '/' });
-          Notify.success(`User ${window.localStorage.getItem('name')} created`);
+          this.funcRedirectAfterLogin();
         } catch (err) {
           if (err.response) {
             return Report.failure(
@@ -97,8 +95,22 @@ export default {
         }
       }
     },
-    googleLogin() {
-      this.$store.dispatch('googleLogin');
+    async googleLogin() {
+      Loading.dots();
+      try {
+        await this.$store.dispatch('googleLogin');
+        this.funcRedirectAfterLogin();
+      } catch (err) {
+        console.log(err);
+        this.$router.push({ path: '/auth/login' });
+      } finally {
+        Loading.remove();
+      }
+    },
+    funcRedirectAfterLogin() {
+      this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
+      this.$router.push({ path: '/' });
+      Notify.success(`User ${window.localStorage.getItem('name')} created`);
     },
   },
 

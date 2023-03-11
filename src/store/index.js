@@ -1,7 +1,9 @@
-// import { auth, provider } from '@/helpers/firebase/config';
-// import { signInWithPopup } from 'firebase/auth';
+import { provider } from '@/helpers/firebase/config';
+import { signInWithPopup, getAuth, signOut } from 'firebase/auth';
 import { nodeHttp } from '@/helpers/axios';
 import { createStore } from 'vuex';
+
+const auth = getAuth();
 
 export const store = createStore({
   state() {
@@ -27,23 +29,49 @@ export const store = createStore({
     },
   },
   actions: {
-    // async googleLogin() {
-    //   try {
-    //     // console.log(auth, provider);
-    //     const res = await signInWithPopup(auth, provider);
-    //     const token = res.user.accessToken;
-    //     console.log(token);
-    //     console.log(JSON.parse(window.atob(token.split('.')[1])).email);
-    //     // console.log( credential);
-    //   } catch (error) {
-    //     // console.log(error);
-    //   }
-    // },
+    async googleAuthInfo(state) {
+      try {
+        const res = await nodeHttp.get('user/auth/googleIP');
+        console.log('info', !!res);
+        if (!res) {
+          this.dispatch('googleLogin');
+        }
+      } catch (err) {
+        await signOut(auth);
+        state.commit('setLogin', '');
+        console.log(err);
+      }
+    },
+    async googleLogin(context) {
+      // через гугл
+      try {
+        console.log(auth);
+        const res = await signInWithPopup(auth, provider);
+
+        const token = res.user.accessToken;
+        if (token) {
+          const { name, email } = JSON.parse(window.atob(token.split('.')[1]));
+          window.localStorage.setItem('name', name);
+          context.commit('setLogin', token);
+
+          await nodeHttp.post('user/auth/googleauth', {
+            name,
+            email,
+            token,
+            tokenRefresh: token + name[0],
+          });
+        }
+        // console.log( credential);
+      } catch (error) {
+        console.log(error);
+      }
+    },
     async signUp(context, payload) {
       // реєстрація
       const res = await nodeHttp.post('user/auth/signup', payload);
       if (res) {
         context.commit('setUser', res.data.data.user);
+        // ??? подумать про необхідність зберігання на клієнті
       }
     },
     async signIn(context, payload) {
@@ -59,11 +87,20 @@ export const store = createStore({
       }
     },
     async LogOut(context, payload) {
-      const res = await nodeHttp.get('user/auth/logout', {
-        headers: { Authorization: 'Bearer ' + payload },
-      });
+      console.log(!!auth.currentUser);
+      if (auth.currentUser) {
+        await nodeHttp.get('user/auth/logout', {
+          headers: { Authorization: 'Bearer ' + payload },
+        });
 
-      if (res) {
+        context.commit('setLogin', '');
+        await signOut(auth);
+
+        return;
+      } else {
+        await nodeHttp.get('user/auth/logout', {
+          headers: { Authorization: 'Bearer ' + payload },
+        });
         context.commit('setLogin', '');
       }
     },

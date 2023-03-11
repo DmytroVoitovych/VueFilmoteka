@@ -42,6 +42,7 @@ import HeaderFilm from './components/header/HeaderFilm.vue';
 import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default {
   name: 'App',
@@ -72,41 +73,70 @@ export default {
     };
   },
   created() {
+    window.addEventListener('focus', this.checkFocus);
     this.watchPath();
-    !this.$cookies.get('token') && this.refreshToken();
-    this.currentUser();
+    this.controlLogin();
   },
 
   methods: {
+    checkFocus() {
+      const auth = getAuth();
+      if (auth) {
+        this.$store.dispatch('googleAuthInfo');
+      }
+    },
+    async controlLogin() {
+      const auth = getAuth();
+
+      onAuthStateChanged(auth, user => {
+        // контроль змін
+        if (user) {
+          console.log('рефрешфаербейс');
+          user
+            .getIdToken(true) // дає новий токен
+            .then(newToken => {
+              this.$store.commit('setLogin', newToken);
+            }) //записую в стейт
+            .catch(err => console.log(err));
+          console.log('useryes');
+        } else {
+          this.$store.dispatch('googleAuthInfo'); //перевіряю на зміну браузера
+          !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
+          this.currentUser(); // звичайний контроль  користувача
+        }
+      });
+    },
     async refreshToken() {
+      // вертає нову пару ключів
       try {
         await this.$store.dispatch('refreshToken', this.$store.state.refresh);
+        console.log(this.$store.state.refresh);
       } catch (err) {
         console.log(err);
       }
     },
     async currentUser() {
       try {
-        await this.$store.dispatch('currentUser', undefined);
-        this.$cookies.set('token', this.$store.state.token, '60MIN');
+        await this.$store.dispatch('currentUser', undefined); // сигналізую про можливий вхід іншим браузером
+        this.$cookies.set('token', this.$store.state.token, '60MIN'); // на годину зберігаю
         const { exp } = JSON.parse(
-          window?.atob(this.$store.state.token?.split('.')[1])
+          window?.atob(this.$store.state.token?.split('.')[1]) // парсю час смерті
         );
-        console.log('refresh', this.$store.state.refresh);
-        const expired = exp - (Math.floor(new Date() / 1000) + 10 * 60);
+
+        const expired = exp - (Math.floor(new Date() / 1000) + 10 * 60); // роблю 10 хвилин запаса для рефреш токена
         const refresh = setTimeout(
           async () => {
             await this.$store.dispatch(
+              // відправляю рефреш токеном
               'refreshToken',
               this.$store.state.refresh
             );
-            clearTimeout(refresh);
-            console.log('clear');
+            clearTimeout(refresh); // чищу після виконання
           },
-          expired > 0 ? expired * 1000 : 0
+          expired > 0 ? expired * 1000 : 0 // слідкую за часом в разі перезавантаження сторінки {in/now}
         );
       } catch (err) {
-        this.$cookies.remove('token');
+        this.$cookies.remove('token'); // при приході помилки вбиваю токен
         console.log(err);
       }
     },
@@ -167,17 +197,8 @@ export default {
     },
   },
   mounted() {},
-
-  computed: {
-    authTest() {
-      let b = this.$store.state.user;
-
-      function test() {
-        return b;
-      }
-
-      return test;
-    },
+  beforeUnmount() {
+    window.removeEventListener('focus', this.checkFocus);
   },
 };
 </script>
