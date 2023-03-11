@@ -10,7 +10,7 @@
       >
       <button
         class="btn__logout"
-        :data-name="window.localStorage.getItem('name')"
+        :data-name="getName"
         v-if="!path.includes('Biblioteka') && !checkExpired"
         v-on:click.prevent="funcLogOut"
       >
@@ -196,6 +196,9 @@ export default {
         return Report.failure(`Error ${err.code}`, err.message);
       }
     },
+    getName() {
+      return window.localStorage.getItem('name');
+    },
   },
   watch: {
     nameFilms() {
@@ -212,9 +215,6 @@ export default {
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(new Date() / 1000) > exp;
     },
-    // getName() {
-    //   return window.localStorage.getItem('name');
-    // },
   },
 };
 </script>
