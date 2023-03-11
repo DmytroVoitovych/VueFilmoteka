@@ -116,6 +116,7 @@ export default {
         console.log(this.$store.state.refresh);
       } catch (err) {
         console.log(err);
+        window.localStorage.removeItem('name');
       }
     },
     async currentUser() {
