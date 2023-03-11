@@ -10,7 +10,7 @@
       >
       <button
         class="btn__logout"
-        :data-name="getName"
+        :data-name="window.localStorage.getItem('name')"
         v-if="!path.includes('Biblioteka') && !checkExpired"
         v-on:click.prevent="funcLogOut"
       >
@@ -212,9 +212,9 @@ export default {
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(new Date() / 1000) > exp;
     },
-    getName() {
-      return window.localStorage.getItem('name');
-    },
+    // getName() {
+    //   return window.localStorage.getItem('name');
+    // },
   },
 };
 </script>
