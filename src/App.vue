@@ -83,6 +83,9 @@ export default {
       const auth = getAuth();
       if (auth.currentUser) {
         this.$store.dispatch('googleAuthInfo');
+      } else {
+        !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
+        this.currentUser(); // звичайний контроль  користувача
       }
     },
     async controlLogin() {
