@@ -213,7 +213,7 @@ export default {
       return Math.floor(new Date() / 1000) > exp;
     },
     getName() {
-      return window.localStorage.getItem('name') || this.$store.state.name;
+      return window.localStorage.getItem('name');
     },
   },
 };
