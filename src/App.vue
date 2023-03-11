@@ -81,7 +81,7 @@ export default {
   methods: {
     checkFocus() {
       const auth = getAuth();
-      if (auth) {
+      if (auth.currentUser) {
         this.$store.dispatch('googleAuthInfo');
       }
     },
