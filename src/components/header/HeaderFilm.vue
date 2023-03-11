@@ -10,7 +10,7 @@
       >
       <button
         class="btn__logout"
-        :data-name="getName"
+        :data-name="getName()"
         v-if="!path.includes('Biblioteka') && !checkExpired"
         v-on:click.prevent="funcLogOut"
       >
