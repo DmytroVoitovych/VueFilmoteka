@@ -103,7 +103,7 @@ export default {
             .catch(err => console.log(err));
           console.log('useryes');
         } else {
-          this.$store.dispatch('googleAuthInfo'); //перевіряю на зміну браузера
+          // this.$store.dispatch('googleAuthInfo'); //перевіряю на зміну браузера
           !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
           this.currentUser(); // звичайний контроль  користувача
         }
