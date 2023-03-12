@@ -115,8 +115,12 @@ export default {
         await this.$store.dispatch('refreshToken', this.$store.state.refresh);
         console.log(this.$store.state.refresh);
       } catch (err) {
-        this.$store.commit('setLogin', '');
-        window.localStorage.removeItem('name');
+        const auth = getAuth();
+        if (!auth) {
+          this.$store.commit('setLogin', '');
+          window.localStorage.removeItem('name');
+        }
+        console.log(err);
       }
     },
     async currentUser() {
