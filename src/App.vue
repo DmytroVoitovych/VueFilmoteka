@@ -84,8 +84,8 @@ export default {
       if (auth.currentUser) {
         this.$store.dispatch('googleAuthInfo');
       } else {
-        !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         this.currentUser(); // звичайний контроль  користувача
+        !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
       }
     },
     async controlLogin() {
@@ -104,8 +104,8 @@ export default {
           console.log('useryes');
         } else {
           // this.$store.dispatch('googleAuthInfo'); //перевіряю на зміну браузера
-          !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
           this.currentUser(); // звичайний контроль  користувача
+          !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         }
       });
     },
