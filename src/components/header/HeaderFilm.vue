@@ -125,6 +125,10 @@ export default {
       type: String,
       required: true,
     },
+    show: {
+      type: Boolean,
+      required: true,
+    },
   },
   emits: {
     onChekfind: v => typeof v === 'boolean', //передача тригера
@@ -133,20 +137,19 @@ export default {
     return {
       switcher: false, //тригер пошуку
       nameFilms: '',
-      show: false,
+      // show: false,
     };
   },
 
   created() {
-    this.checkTokenStoreOrUpdate();
+    // this.checkTokenStoreOrUpdate();
   },
   methods: {
     // spec store function
-    checkTokenStoreOrUpdate() {
-      const token = this.$cookies.get('token');
-      this.$store.commit('setLogin', token);
-      this.show = true;
-    },
+    //  checkTokenStoreOrUpdate() {
+
+    //   this.show = true;
+    // },
     searchFilms() {
       const specifick =
         this.nameFilms ===

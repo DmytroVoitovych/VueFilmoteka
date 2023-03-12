@@ -14,6 +14,7 @@
         :class="{ spec: stateModal }"
         :style="{ paddingRight: scrollWidth + 'px' }"
         :path="path"
+        :show="show"
       />
 
       <main>
@@ -70,6 +71,7 @@ export default {
       stateModal: false, //стан модалки
       scrollWidth: 0, //ширина скролу
       path: '', //поточний роут
+      show: false,
     };
   },
   created() {
@@ -84,8 +86,8 @@ export default {
       if (auth.currentUser) {
         this.$store.dispatch('googleAuthInfo');
       } else {
+        this.refreshToken(); // рефрещ пр  звичайному вході
         this.currentUser(); // звичайний контроль  користувача
-        !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
       }
     },
     async controlLogin() {
@@ -116,11 +118,14 @@ export default {
         console.log(this.$store.state.refresh);
       } catch (err) {
         const auth = getAuth();
-        if (!auth) {
+        if (!auth.currentUser) {
           this.$store.commit('setLogin', '');
           window.localStorage.removeItem('name');
+          this.$store.dispatch('googleAuthInfo');
         }
         console.log(err);
+      } finally {
+        this.show = true;
       }
     },
     async currentUser() {
@@ -145,8 +150,9 @@ export default {
         );
       } catch (err) {
         this.$cookies.remove('token'); // при приході помилки вбиваю токен
-        this.$store.commit('setLogin', '');
         console.log(err);
+      } finally {
+        this.show = true;
       }
     },
     onChekfind(triger) {

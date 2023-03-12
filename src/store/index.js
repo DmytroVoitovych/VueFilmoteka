@@ -34,7 +34,7 @@ export const store = createStore({
         const res = await nodeHttp.get('user/auth/googleIP');
         console.log('info', !!res);
         // if (!state.token) {
-        console.log(res);
+        window.localStorage.setItem('name', res.data.data.name);
         console.log('пішов вхід');
         state.commit('setLogin', res.data.data.token);
         // }
@@ -43,7 +43,6 @@ export const store = createStore({
         const auth = getAuth();
         if (!state.token) {
           console.log('чи є вхід звичайним сбособом', !!state.token);
-
           await signOut(auth);
           console.log('бекенд не знайшов такого користувача');
           state.commit('setLogin', '');
@@ -53,26 +52,20 @@ export const store = createStore({
     },
     async googleLogin(context) {
       // через гугл
-      try {
-        console.log(auth);
-        const res = await signInWithPopup(auth, provider);
+      const res = await signInWithPopup(auth, provider);
 
-        const token = res.user.accessToken;
-        if (token) {
-          const { name, email } = JSON.parse(window.atob(token.split('.')[1]));
-          window.localStorage.setItem('name', name);
-          context.commit('setLogin', token);
+      const token = res.user.accessToken;
+      if (token) {
+        const { name, email } = JSON.parse(window.atob(token.split('.')[1]));
+        window.localStorage.setItem('name', name);
+        context.commit('setLogin', token);
 
-          await nodeHttp.post('user/auth/googleauth', {
-            name,
-            email,
-            token,
-            tokenRefresh: token + name[0],
-          });
-        }
-        // console.log( credential);
-      } catch (error) {
-        console.log(error);
+        await nodeHttp.post('user/auth/googleauth', {
+          name,
+          email,
+          token,
+          tokenRefresh: token + name[0],
+        });
       }
     },
     async signUp(context, payload) {

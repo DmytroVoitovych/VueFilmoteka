@@ -100,9 +100,10 @@ export default {
       try {
         await this.$store.dispatch('googleLogin');
         this.funcRedirectAfterLogin();
+        console.log('trylogin');
       } catch (err) {
-        console.log(err);
         this.$router.push({ path: '/auth/login' });
+        Notify.info('User stop auth');
       } finally {
         Loading.remove();
       }
