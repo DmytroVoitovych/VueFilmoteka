@@ -81,7 +81,7 @@ export default {
   methods: {
     checkFocus() {
       const auth = getAuth();
-      if (auth) {
+      if (auth.currentUser) {
         this.$store.dispatch('googleAuthInfo');
       } else {
         this.currentUser(); // звичайний контроль  користувача
@@ -145,6 +145,7 @@ export default {
         );
       } catch (err) {
         this.$cookies.remove('token'); // при приході помилки вбиваю токен
+        this.$store.commit('setLogin', '');
         console.log(err);
       }
     },

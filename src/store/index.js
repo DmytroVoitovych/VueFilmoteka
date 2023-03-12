@@ -33,12 +33,21 @@ export const store = createStore({
       try {
         const res = await nodeHttp.get('user/auth/googleIP');
         console.log('info', !!res);
-        if (!res) {
-          this.dispatch('googleLogin');
-        }
+        // if (!state.token) {
+        console.log(res);
+        console.log('пішов вхід');
+        state.commit('setLogin', res.data.data.token);
+        // }
+        // // this.dispatch('googleLogin');
       } catch (err) {
-        this.dispatch('LogOut');
-        state.commit('setLogin', '');
+        const auth = getAuth();
+        if (!state.token) {
+          console.log('чи є вхід звичайним сбособом', !!state.token);
+
+          await signOut(auth);
+          console.log('бекенд не знайшов такого користувача');
+          state.commit('setLogin', '');
+        }
         console.log(err);
       }
     },
