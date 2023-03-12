@@ -37,7 +37,7 @@ export const store = createStore({
           this.dispatch('googleLogin');
         }
       } catch (err) {
-        await signOut(auth);
+        this.dispatch('LogOut');
         state.commit('setLogin', '');
         console.log(err);
       }
