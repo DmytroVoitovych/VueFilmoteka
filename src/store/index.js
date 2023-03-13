@@ -9,36 +9,36 @@ export const store = createStore({
   state() {
     //глобальний стейт //доступний в любому місці
     return {
-      token: '',
-      user: null,
+      token: '', // місце для токена
+      user: null, // під питанням ??
       refresh: '',
-      infoWatched: [],
-      infoQueue: [],
+      infoWatched: [], // переглянуті
+      infoQueue: [], // черга
     };
   },
   mutations: {
     // методи для оновлення стейту
     setLogin(state, payload) {
+      //закидую токен
       state.token = payload;
     },
     setUser(state, payload) {
+      // юзер
       state.user = payload;
     },
     setRefresh(state, payload) {
+      // рефреш
       state.refresh = payload;
     },
   },
   actions: {
     async googleAuthInfo(state) {
       try {
-        const res = await nodeHttp.get('user/auth/googleIP');
-        console.log('info', !!res);
-        // if (!state.token) {
+        const res = await nodeHttp.get('user/auth/googleIP'); // пошук по базі
+
         window.localStorage.setItem('name', res.data.data.name);
         console.log('пішов вхід');
         state.commit('setLogin', res.data.data.token);
-        // }
-        // // this.dispatch('googleLogin');
       } catch (err) {
         const auth = getAuth();
         if (!state.token) {
@@ -61,6 +61,7 @@ export const store = createStore({
         context.commit('setLogin', token);
 
         await nodeHttp.post('user/auth/googleauth', {
+          // відправляю у власну базу
           name,
           email,
           token,
@@ -80,7 +81,6 @@ export const store = createStore({
       // логін ноде
       const res = await nodeHttp.post('user/auth/login', payload);
       if (res) {
-        console.log(res.data.data.access_token);
         const { name } = JSON.parse(
           window.atob(res.data.data.access_token.split('.')[1])
         );
@@ -89,7 +89,6 @@ export const store = createStore({
       }
     },
     async LogOut(context, payload) {
-      console.log(!!auth.currentUser);
       if (auth.currentUser) {
         await nodeHttp.get('user/auth/logout', {
           headers: { Authorization: 'Bearer ' + payload },
@@ -112,7 +111,6 @@ export const store = createStore({
       });
 
       if (res) {
-        console.log('tes', res);
         window.localStorage.setItem('name', res.data.data.name);
         context.commit('setLogin', res.data.data.token);
         context.commit('setRefresh', res.data.data.tokenRefresh);

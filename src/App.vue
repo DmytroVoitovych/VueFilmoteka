@@ -71,20 +71,21 @@ export default {
       stateModal: false, //стан модалки
       scrollWidth: 0, //ширина скролу
       path: '', //поточний роут
-      show: false,
+      show: false, // ?? під питанням чи потрібно мені це(обдумать)
     };
   },
   created() {
-    window.addEventListener('focus', this.checkFocus);
-    this.watchPath();
-    this.controlLogin();
+    window.addEventListener('focus', this.checkFocus); //рефреш логіна
+    this.watchPath(); //контроль поточного шляху
+    this.controlLogin(); // постій контроль авторизації
   },
 
   methods: {
     checkFocus() {
-      const auth = getAuth();
+      const auth = getAuth(); //обєкт входу firebase
       if (auth.currentUser) {
-        this.$store.dispatch('googleAuthInfo');
+        // чи є юзер
+        this.$store.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
       } else {
         this.refreshToken(); // рефрещ пр  звичайному вході
         this.currentUser(); // звичайний контроль  користувача
@@ -103,9 +104,7 @@ export default {
               this.$store.commit('setLogin', newToken);
             }) //записую в стейт
             .catch(err => console.log(err));
-          console.log('useryes');
         } else {
-          // this.$store.dispatch('googleAuthInfo'); //перевіряю на зміну браузера
           this.currentUser(); // звичайний контроль  користувача
           !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         }
@@ -114,17 +113,18 @@ export default {
     async refreshToken() {
       // вертає нову пару ключів
       try {
-        await this.$store.dispatch('refreshToken', this.$store.state.refresh);
-        console.log(this.$store.state.refresh);
+        await this.$store.dispatch('refreshToken', this.$store.state.refresh); // записую токен в незалежності від його наявності
       } catch (err) {
+        // !!можлива детальна обробка
         const auth = getAuth();
         if (!auth.currentUser) {
-          this.$store.commit('setLogin', '');
-          window.localStorage.removeItem('name');
-          this.$store.dispatch('googleAuthInfo');
+          this.$store.commit('setLogin', ''); //  обнулюю
+          window.localStorage.removeItem('name'); // чищу сторедж
+          this.$store.dispatch('googleAuthInfo'); // перевіряю google вхід
         }
         console.log(err);
       } finally {
+        // костиль для появу потрібної кнопки // малюю по готовності
         this.show = true;
       }
     },
@@ -211,9 +211,9 @@ export default {
       }
     },
   },
-  mounted() {},
+
   beforeUnmount() {
-    window.removeEventListener('focus', this.checkFocus);
+    window.removeEventListener('focus', this.checkFocus); // видалення
   },
 };
 </script>
