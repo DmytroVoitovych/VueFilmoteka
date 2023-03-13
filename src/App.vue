@@ -114,6 +114,7 @@ export default {
       // вертає нову пару ключів
       try {
         await this.$store.dispatch('refreshToken', this.$store.state.refresh); // записую токен в незалежності від його наявності
+        this.show = true;
       } catch (err) {
         // !!можлива детальна обробка
         const auth = getAuth();
@@ -137,6 +138,7 @@ export default {
         );
 
         const expired = exp - (Math.floor(new Date() / 1000) + 10 * 60); // роблю 10 хвилин запаса для рефреш токена
+        this.show = true;
         const refresh = setTimeout(
           async () => {
             await this.$store.dispatch(
