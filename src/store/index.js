@@ -12,8 +12,6 @@ export const store = createStore({
       token: '', // місце для токена
       user: null, // під питанням ??
       refresh: '',
-      infoWatched: [], // переглянуті
-      infoQueue: [], // черга
     };
   },
   mutations: {

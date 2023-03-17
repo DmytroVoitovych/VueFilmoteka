@@ -66,12 +66,22 @@
           </div>
           <ul class="modal__button--listV">
             <li>
-              <button data-btn="${id}" type="button" class="modal__watchV">
+              <button
+                @click.prevent="addFilmToWatch"
+                data-btn="${id}"
+                type="button"
+                class="modal__watchV"
+              >
                 add to Watched
               </button>
             </li>
             <li>
-              <button :data-btn="infos.id" type="button" class="modal__queV">
+              <button
+                @click.prevent="addFilmToQueue"
+                :data-btn="infos.id"
+                type="button"
+                class="modal__queV"
+              >
                 add to queue
               </button>
             </li>
@@ -84,6 +94,8 @@
 
 <script>
 import MovieAPiServer from '../../helpers/req';
+import { store } from '@/store/filmsStore';
+import { keys, get, set } from 'idb-keyval';
 
 const http = new MovieAPiServer();
 
@@ -137,6 +149,52 @@ export default {
         this.onClose();
       }
       return;
+    },
+    async addFilmToWatch() {
+      // додавання в переглянуті
+      try {
+        await store.dispatch('addFilmToWatched', {
+          type: 'watched', // тип для беку
+          idFilm: this.infos.id, // id для резервування на беку
+          token: this.$store.state.token, // токен для пропуску
+        });
+
+        this.addFilmsToIndexDbAndStore('watched', 'setWatched'); // додаю в локальну базу
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    async addFilmToQueue() {
+      // додавання в переглянуті
+      try {
+        await store.dispatch('addFilmToQueue', {
+          type: 'queue', // тип для беку
+          idFilm: this.infos.id, // id для резервування на беку
+          token: this.$store.state.token, // токен для пропуску
+        });
+
+        this.addFilmsToIndexDbAndStore('queue', 'setQueue'); // додаю в локальну базу
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    addFilmsToIndexDbAndStore(type, setToBiblioteka) {
+      keys()
+        .then(
+          keys =>
+            keys.includes(type) // перевіряю наявність локальної бази
+              ? get(type).then(e => {
+                  //
+                  const concat = Object.assign(JSON.parse(e), this.infos);
+                  // додаю новий фільм до вже існуючих
+                  set(type, JSON.stringify(concat)); //схлопую массиви
+                })
+              : set(type, JSON.stringify(this.infos)) // якущо нема створюю
+        )
+        .then(() =>
+          // пишу в стор
+          get(type).then(e => store.commit(setToBiblioteka, JSON.parse(e)))
+        );
     },
   },
   watch: {
