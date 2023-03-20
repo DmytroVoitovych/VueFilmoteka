@@ -71,8 +71,9 @@
                 data-btn="${id}"
                 type="button"
                 class="modal__watchV"
+                :class="doneWatched && 'remove'"
               >
-                add to Watched
+                {{ !doneWatched ? 'add to Watched' : 'remove from watched' }}
               </button>
             </li>
             <li>
@@ -81,8 +82,9 @@
                 :data-btn="infos.id"
                 type="button"
                 class="modal__queV"
+                :class="doneQueue && 'remove'"
               >
-                add to queue
+                {{ !doneQueue ? 'add to queue' : 'remove from queue' }}
               </button>
             </li>
           </ul>
@@ -94,8 +96,7 @@
 
 <script>
 import MovieAPiServer from '../../helpers/req';
-import { store } from '@/store/filmsStore';
-import { keys, get, set } from 'idb-keyval';
+import { myDatabase, store } from '@/store/filmsStore';
 
 const http = new MovieAPiServer();
 
@@ -123,6 +124,10 @@ export default {
   emits: {
     //передача стана наверх
     modalstate: e => typeof e === 'boolean',
+  },
+  created() {
+    this.syncIndexDBandStore(); // синхрон стора і бази
+    myDatabase.getItem('watched').then(e => console.log('for', JSON.parse(e)));
   },
   methods: {
     async getInfoOfFilms() {
@@ -158,8 +163,9 @@ export default {
           idFilm: this.infos.id, // id для резервування на беку
           token: this.$store.state.token, // токен для пропуску
         });
-
-        this.addFilmsToIndexDbAndStore('watched', 'setWatched'); // додаю в локальну базу
+        store.commit('setWatched', this.infos);
+        myDatabase.setItem('watched', JSON.stringify(store.state.infoWatched));
+        // додаю в локальну базу
       } catch (err) {
         console.log(err);
       }
@@ -173,28 +179,27 @@ export default {
           token: this.$store.state.token, // токен для пропуску
         });
 
-        this.addFilmsToIndexDbAndStore('queue', 'setQueue'); // додаю в локальну базу
+        store.commit('setQueue', this.infos);
+        myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue)); // додаю в локальну базу
       } catch (err) {
         console.log(err);
       }
     },
-    addFilmsToIndexDbAndStore(type, setToBiblioteka) {
-      keys()
-        .then(
-          keys =>
-            keys.includes(type) // перевіряю наявність локальної бази
-              ? get(type).then(e => {
-                  //
-                  const concat = Object.assign(JSON.parse(e), this.infos);
-                  // додаю новий фільм до вже існуючих
-                  set(type, JSON.stringify(concat)); //схлопую массиви
-                })
-              : set(type, JSON.stringify(this.infos)) // якущо нема створюю
-        )
-        .then(() =>
-          // пишу в стор
-          get(type).then(e => store.commit(setToBiblioteka, JSON.parse(e)))
-        );
+    syncIndexDBandStore() {
+      myDatabase.keys().then(keys => {
+        if (keys.includes('watched')) {
+          // перевірка ключа
+          myDatabase.getItem('watched').then(e => {
+            store.commit('setWatched', JSON.parse(e)); // якщо гуд коміт в стор
+          });
+        }
+        if (keys.includes('queue')) {
+          myDatabase
+            .getItem('queue')
+            .then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
+        }
+        return;
+      });
     },
   },
   watch: {
@@ -209,6 +214,16 @@ export default {
       window.addEventListener('keydown', this.funcKeyDown);
       !this.openModal && //вимикаєм слухач
         window.removeEventListener('keydown', this.funcKeyDown);
+    },
+  },
+  computed: {
+    doneWatched() {
+      // звірка з наявністю в базі і зміна класів від результату
+      return store.getters.doneWatcheds(this.infos.id);
+    },
+    doneQueue() {
+      // звірка з наявністю в базі і зміна класів від результату
+      return store.getters.doneQueues(this.infos.id);
     },
   },
 };
@@ -507,5 +522,7 @@ export default {
 
 .remove {
   background-color: #ff001b;
+  color: var(--text-color-light);
+  outline: none;
 }
 </style>

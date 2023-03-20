@@ -120,7 +120,6 @@ export const store = createStore({
         headers: { Authorization: 'Bearer ' + payload },
       });
       if (res) {
-        console.log(res.data.data.access_token);
         const { name } = JSON.parse(
           window.atob(res.data.data.access_token.split('.')[1])
         );

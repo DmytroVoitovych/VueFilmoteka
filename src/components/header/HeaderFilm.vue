@@ -203,18 +203,15 @@ export default {
       return window.localStorage.getItem('name');
     },
   },
-  watch: {
-    nameFilms() {
-      console.log(this.nameFilms);
-    },
-  },
+
   computed: {
     checkExpired() {
       const token = this.$store.state.token;
-      console.log(this.$store.state.token);
+
       if (!token) {
         return true;
       }
+
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(new Date() / 1000) > exp;
     },
