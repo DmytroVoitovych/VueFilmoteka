@@ -67,7 +67,10 @@
           <ul class="modal__button--listV">
             <li>
               <button
-                @click.prevent="addFilmToWatch"
+                @click.prevent="
+                  () =>
+                    !doneWatched ? addFilmToWatch() : dellFilmFromDb('watched')
+                "
                 data-btn="${id}"
                 type="button"
                 class="modal__watchV"
@@ -78,7 +81,10 @@
             </li>
             <li>
               <button
-                @click.prevent="addFilmToQueue"
+                @click.prevent="
+                  () =>
+                    !doneQueue ? addFilmToQueue() : dellFilmFromDb('queue')
+                "
                 :data-btn="infos.id"
                 type="button"
                 class="modal__queV"
@@ -181,6 +187,19 @@ export default {
 
         store.commit('setQueue', this.infos);
         myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue)); // додаю в локальну базу
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async dellFilmFromDb(type) {
+      // видалення
+      try {
+        await store.dispatch('dellFilmFromDb', {
+          type, // тип для беку
+          idFilm: this.infos.id, // id для резервування на беку
+          token: this.$store.state.token, // токен для пропуску
+        });
       } catch (err) {
         console.log(err);
       }

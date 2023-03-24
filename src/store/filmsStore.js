@@ -1,8 +1,6 @@
 import { nodeHttp } from '@/helpers/axios';
-// import { set } from 'idb-keyval';
 import { createStore } from 'vuex';
 import localForage from 'localforage';
-// import serialize from 'serialize-javascript';
 
 // Создаем базу данных с именем 'myDatabase'
 export const myDatabase = localForage.createInstance({
@@ -36,7 +34,15 @@ export const store = createStore({
       }
       state.infoQueue.push(payload);
     },
+    delWatched(state, payload) {
+      console.log(payload);
+      state.infoWatched = payload;
+    },
+    delQueue(state, payload) {
+      state.infoQueue = payload;
+    },
   },
+
   getters: {
     doneWatcheds: state => id => {
       return state.infoWatched.some(todo => todo.id === id);
@@ -63,6 +69,30 @@ export const store = createStore({
           headers: { Authorization: 'Bearer ' + payload.token },
         }
       );
+    },
+    async dellFilmFromDb(context, { type, idFilm, token }) {
+      await nodeHttp.delete(
+        `/films/remove/${type}/${idFilm}`,
+
+        {
+          headers: { Authorization: 'Bearer ' + token },
+        }
+      );
+
+      if (type === 'watched') {
+        const removeItemFromArr = context.state.infoWatched.filter(
+          e => e.id !== idFilm
+        );
+        console.log('rem', removeItemFromArr);
+        context.commit('delWatched', removeItemFromArr);
+        myDatabase.setItem('watched', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
+      } else {
+        const removeItemFromArr = context.state.infoQueue.filter(
+          e => e.id !== idFilm
+        );
+        context.commit('delQueue', removeItemFromArr);
+        myDatabase.setItem('queue', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
+      }
     },
   },
 });
