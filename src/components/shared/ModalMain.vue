@@ -75,6 +75,7 @@
                 type="button"
                 class="modal__watchV"
                 :class="doneWatched && 'remove'"
+                :disabled="!getAuth || (checkParam && loading)"
               >
                 {{ !doneWatched ? 'add to Watched' : 'remove from watched' }}
               </button>
@@ -89,6 +90,7 @@
                 type="button"
                 class="modal__queV"
                 :class="doneQueue && 'remove'"
+                :disabled="!getAuth || (!checkParam && loading)"
               >
                 {{ !doneQueue ? 'add to queue' : 'remove from queue' }}
               </button>
@@ -103,6 +105,7 @@
 <script>
 import MovieAPiServer from '../../helpers/req';
 import { myDatabase, store } from '@/store/filmsStore';
+import { nodeHttp } from '@/helpers/axios';
 
 const http = new MovieAPiServer();
 
@@ -125,6 +128,8 @@ export default {
     return {
       openModal: false, //стан модалки
       infos: [],
+      checkParam: false,
+      loading: false,
     };
   },
   emits: {
@@ -135,6 +140,7 @@ export default {
     this.syncIndexDBandStore(); // синхрон стора і бази
     myDatabase.getItem('watched').then(e => console.log('for', JSON.parse(e)));
   },
+
   methods: {
     async getInfoOfFilms() {
       //отримання деталей по фільму
@@ -163,6 +169,7 @@ export default {
     },
     async addFilmToWatch() {
       // додавання в переглянуті
+      this.loaderBasic();
       try {
         await store.dispatch('addFilmToWatched', {
           type: 'watched', // тип для беку
@@ -178,6 +185,7 @@ export default {
     },
     async addFilmToQueue() {
       // додавання в переглянуті
+      this.loaderBasic();
       try {
         await store.dispatch('addFilmToQueue', {
           type: 'queue', // тип для беку
@@ -194,6 +202,7 @@ export default {
 
     async dellFilmFromDb(type) {
       // видалення
+      this.loaderBasic();
       try {
         await store.dispatch('dellFilmFromDb', {
           type, // тип для беку
@@ -220,6 +229,24 @@ export default {
         return;
       });
     },
+    loaderBasic() {
+      // функція відповідальна за основний лоадер на сайті
+      nodeHttp.interceptors.request.use(config => {
+        //перехоплюєм запит
+        this.loading = true; //включаю блок кнопки
+        this.checkParam = // поточна кнопка
+          (config.url.includes('add') &&
+            config?.data?.type.includes('watched')) ||
+          config.url.includes('watched');
+
+        return config;
+      });
+
+      nodeHttp.interceptors.response.use(res => {
+        this.loading = false; // вимикаю лоудер
+        return res;
+      });
+    },
   },
   watch: {
     filmsid() {
@@ -244,11 +271,21 @@ export default {
       // звірка з наявністю в базі і зміна класів від результату
       return store.getters.doneQueues(this.infos.id);
     },
+    getAuth() {
+      return this.$store.state.token;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+button[disabled] {
+  background: var(--disabled);
+  pointer-events: none;
+  outline-color: var(--disabled);
+  color: var(--text-color-light);
+}
+
 .modalV {
   position: absolute;
   left: calc(50% - var(--left-modal));

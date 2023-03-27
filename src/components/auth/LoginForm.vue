@@ -110,7 +110,7 @@ export default {
     },
     funcRedirectAfterLogin() {
       this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
-      this.$router.push({ path: '/' });
+      this.$router.push({ path: '/', replace: true });
       Notify.success(`User ${window.localStorage.getItem('name')} created`);
     },
   },
