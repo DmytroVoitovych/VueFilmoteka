@@ -138,7 +138,6 @@ export default {
   },
   created() {
     this.syncIndexDBandStore(); // синхрон стора і бази
-    myDatabase.getItem('watched').then(e => console.log('for', JSON.parse(e)));
   },
 
   methods: {
@@ -229,6 +228,40 @@ export default {
         return;
       });
     },
+    // syncServerDBandStore() {
+    //   myDatabase.keys().then(keys => {
+    //     if (!keys.includes('watched')) {
+    //       // перевірка ключа
+    //       this.getFromServerFilmId().then(e => {
+    //         const watched = e.data.allList.filter(e => e.type === 'watched');
+    //         store.commit('setWatched', watched);
+    //         myDatabase.setItem(
+    //           'watched',
+    //           JSON.stringify(store.state.infoWatched)
+    //         );
+    //       });
+    //     }
+    //     if (!keys.includes('queue')) {
+    //       this.getFromServerFilmId().then(e => {
+    //         const watched = e.data.allList.filter(e => e.type === 'queue');
+    //         store.commit('setQueue', watched);
+    //         myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue));
+    //       });
+    //     }
+    //     return;
+    //   });
+    // },
+    // async getFromServerFilmId() {
+    //   try {
+    //     const res = await nodeHttp.get('/films/', {
+    //       headers: { Authorization: 'Bearer ' + this.$store.state.token },
+    //     });
+    //     return res;
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // },
+
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
       nodeHttp.interceptors.request.use(config => {
@@ -257,6 +290,7 @@ export default {
       }
     },
     openModal() {
+      this.openModal && this.syncServerDBandStore();
       window.addEventListener('keydown', this.funcKeyDown);
       !this.openModal && //вимикаєм слухач
         window.removeEventListener('keydown', this.funcKeyDown);

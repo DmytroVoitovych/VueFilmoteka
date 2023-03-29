@@ -82,13 +82,19 @@ export default {
 
   methods: {
     checkFocus() {
-      const auth = getAuth(); //обєкт входу firebase
-      if (auth.currentUser) {
-        // чи є юзер
-        this.$store.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
-      } else {
-        this.refreshToken(); // рефрещ пр  звичайному вході
-        this.currentUser(); // звичайний контроль  користувача
+      this.refreshToken(); // обовязкова перевірка логіна
+      if (this.$store.state.token) {
+        // тест на сторонній бекенд
+        const checkOwnerOfToken = window
+          .atob(this.$store.state.token.split('.')[1])
+          .includes('firebase');
+        if (checkOwnerOfToken) {
+          // чи є юзер
+          this.$store.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
+        } else {
+          // рефрещ пр  звичайному вході
+          this.currentUser(this.$store.state.token); // звичайний контроль  користувача
+        }
       }
     },
     async controlLogin() {
@@ -102,6 +108,7 @@ export default {
             .getIdToken(true) // дає новий токен
             .then(newToken => {
               this.$store.commit('setLogin', newToken);
+              this.refreshToken(); // форсстейт
             }) //записую в стейт
             .catch(err => console.log(err));
         } else {
@@ -129,9 +136,9 @@ export default {
         this.show = true;
       }
     },
-    async currentUser() {
+    async currentUser(t) {
       try {
-        await this.$store.dispatch('currentUser', undefined); // сигналізую про можливий вхід іншим браузером
+        await this.$store.dispatch('currentUser', t); // сигналізую про можливий вхід іншим браузером
         this.$cookies.set('token', this.$store.state.token, '60MIN'); // на годину зберігаю
         const { exp } = JSON.parse(
           window?.atob(this.$store.state.token?.split('.')[1]) // парсю час смерті

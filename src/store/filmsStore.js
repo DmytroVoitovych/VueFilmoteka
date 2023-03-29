@@ -45,10 +45,10 @@ export const store = createStore({
 
   getters: {
     doneWatcheds: state => id => {
-      return state.infoWatched.some(todo => todo.id === id);
+      return state.infoWatched.some(todo => (todo.id || todo.idFilm) === id);
     },
     doneQueues: state => id => {
-      return state.infoQueue.some(todo => todo.id === id);
+      return state.infoQueue.some(todo => (todo.id || todo.idFilm) === id);
     },
   },
   actions: {
