@@ -2,7 +2,7 @@ import { provider } from '@/helpers/firebase/config';
 import { signInWithPopup, getAuth, signOut } from 'firebase/auth';
 import { nodeHttp } from '@/helpers/axios';
 import { createStore } from 'vuex';
-import filmStore from './filmsStore';
+import { store as filmStore } from './filmsStore';
 
 const auth = getAuth();
 

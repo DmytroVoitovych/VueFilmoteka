@@ -52,9 +52,10 @@ import ContainerMain from '../shared/ContainerMain.vue';
 // import Home from '@/page/Home.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
-import { axio } from '../../helpers/axios';
-import { Report, Block, Loading } from 'notiflix';
+import { axio, nodeHttp } from '../../helpers/axios';
+import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
+import intersectionWith from 'lodash.intersectionwith';
 // import isEqual from 'lodash.isequal';
 
 const http = new MovieAPiServer();
@@ -143,23 +144,47 @@ export default {
     },
     async setPage(num) {
       this.page = num;
-      window.localStorage.setItem('numberPage', num); // добавляю сторінку
+      if (this.path === 'Home') {
+        window.localStorage.setItem('numberPage', num); // добавляю сторінку
 
-      const data = this.checkFind()
-        ? await http.fetchMovieByQuery(this.page, window.localStorage.getItem('findedFilms'))
-        : await http.fetchTopMovies(num);
+        const data = this.checkFind()
+          ? await http.fetchMovieByQuery(this.page, window.localStorage.getItem('findedFilms'))
+          : await http.fetchTopMovies(num);
 
-      this.trend = data;
-      this.max = http.maxPages;
-      window.localStorage.setItem('filmsPage', JSON.stringify(data));
-
+        this.trend = data;
+        this.max = http.maxPages;
+        window.localStorage.setItem('filmsPage', JSON.stringify(data));
+      } else if (this.path.includes('Biblioteka')) {
+        await this.setPageBiblioteka(num); // контроль пагинації в бібліотеці
+      }
       this.locate = window.scrollY; //запис положення
       this.$nextTick().then(() => {
         //прибиваю скролл
         this.locate > 1000 && window.scrollBy(0, this.locate);
       });
     },
-
+    async setPageBiblioteka(num) {
+      try {
+        const res = await nodeHttp.get('/films/', {
+          headers: { Authorization: 'Bearer ' + this.$store.state.token },
+          params: { page: num, limit: 20 }, // пока на тесті
+        }); // забираю з беку списки юзера
+        const watchedFilter = intersectionWith(
+          //звіряю з локальною базою і беру тіки ті які приіс бекенд
+          store.state.infoWatched, // локальна база
+          res.data.watchedFilms.map(e => e.idFilm), // бекенд
+          (a, b) => a.id === b // фідвільтровую по id фільмів
+        );
+        const queueFilter = intersectionWith(
+          store.state.infoQueue,
+          res.data.queueFilms.map(e => e.idFilm),
+          (a, b) => a.id === b
+        );
+        this.funcUpdateIfChangePath(watchedFilter, queueFilter); // передаю аргументи в функію зміни стану
+      } catch (error) {
+        console.log(error);
+      }
+    },
     controlStorage() {
       //перевіка локльного стора
       if (
@@ -227,16 +252,31 @@ export default {
       // отримання данних для модалки
       this.$emit('get-find-id', id);
     },
+    funcUpdateIfChangePath(watched, queue) {
+      switch (
+        this.path // звіряю по положеню
+      ) {
+        case 'BibliotekaWatched':
+          this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
+          this.max = store.state.max.numWatch; // всі сторінки
+          break;
+        case 'BibliotekaQueue':
+          this.trend = queue ?? store.state.infoQueue.slice(0, 20);
+          this.max = store.state.max.numQue;
+          break;
+        default:
+          break;
+      }
+    },
     funcUpdateBibliotekaPage() {
-      Loading.dots();
+      // Loading.dots();
       store
         .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
         .then(() => {
           console.log('test', store.state.infoWatched);
-          this.path === 'BibliotekaWatched' && (this.trend = store.state.infoWatched);
-          this.path === 'BibliotekaQueue' && (this.trend = store.state.infoQueue);
-        })
-        .finally(() => Loading.remove());
+          this.funcUpdateIfChangePath();
+        });
+      // .finally(() => Loading.remove());
     },
   },
 

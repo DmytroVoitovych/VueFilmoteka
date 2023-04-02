@@ -3,6 +3,7 @@ import { createStore } from 'vuex';
 import localForage from 'localforage';
 import { getAndCompare } from './helpers/getId';
 import { syncDb } from './helpers/syncDbServerAndClient';
+import { getTotalPageB } from './helpers/getTotalPageB';
 
 // Создаем базу данных с именем 'myDatabase'
 export const myDatabase = localForage.createInstance({
@@ -43,13 +44,14 @@ export const store = createStore({
     delQueue(state, payload) {
       state.infoQueue = payload;
     },
-    // setMaxPageForBiblioteka(state, { type, num }) {
-    //   if (type && type === 'watched') {
-    //     state.max.numWatch = num ?? 1;
-    //     return;
-    //   }
-    //   state.max.numQue = num ?? 1;
-    // },
+    setMaxPageForBiblioteka(state, { type, num }) {
+      console.log('type', type);
+      if (type && type === 'watched') {
+        state.max.numWatch = num ?? 1;
+        return;
+      }
+      state.max.numQue = num ?? 1;
+    },
   },
 
   getters: {
@@ -80,13 +82,9 @@ export const store = createStore({
       );
     },
     async dellFilmFromDb(context, { type, idFilm, token }) {
-      await nodeHttp.delete(
-        `/films/remove/${type}/${idFilm}`,
-
-        {
-          headers: { Authorization: 'Bearer ' + token },
-        }
-      );
+      await nodeHttp.delete(`/films/remove/${type}/${idFilm}`, {
+        headers: { Authorization: 'Bearer ' + token },
+      });
 
       if (type === 'watched') {
         const removeItemFromArr = context.state.infoWatched.filter(e => e.id !== idFilm);
@@ -108,13 +106,13 @@ export const store = createStore({
         });
 
         if (res) {
-          // this.commit('setMaxPageForBiblioteka', res.data.queueFilms[0]?.totalPage);
-          // console.log(state.max);
-          const watched = getAndCompare(state.infoWatched, res.data.watchedFilms); // порівнюю переглянуті
-          const queue = getAndCompare(state.infoQueue, res.data.queueFilms); // порівнюю чергу
+          getTotalPageB(res);
+          console.log('count total page biblioteka', state.max);
+          const watched = getAndCompare(state.infoWatched, res.data.data.watchedFilms); // порівнюю переглянуті
+          const queue = getAndCompare(state.infoQueue, res.data.data.queueFilms); // порівнюю чергу
 
-          !watched && syncDb(res.data.watchedFilms, 'watched');
-          !queue && syncDb(res.data.queueFilms, 'queue');
+          !watched && syncDb(res.data.data.watchedFilms, 'watched');
+          !queue && syncDb(res.data.data.queueFilms, 'queue');
         }
       } catch (error) {
         console.log(error);
@@ -122,5 +120,3 @@ export const store = createStore({
     },
   },
 });
-
-export default store;
