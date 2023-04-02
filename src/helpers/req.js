@@ -1,12 +1,12 @@
-import http from "./axios";
+import http from './axios';
 // import { Block } from "notiflix";
 
 export default class MovieAPiServer {
   constructor() {
-    this.searchQuery = "";
+    this.searchQuery = '';
     this.pageCounter = 1;
 
-    this.API_KEY = "a1157fee69973f579feaed0c038c358a";
+    this.API_KEY = 'a1157fee69973f579feaed0c038c358a';
     this.movieId = null;
 
     // добавив
@@ -34,6 +34,7 @@ export default class MovieAPiServer {
     const URL = `/3/genre/movie/list?api_key=${this.API_KEY}`;
     try {
       const response = await http.get(URL);
+      window.localStorage.setItem('genres', JSON.stringify(response.data.genres)); // важно для синхронизации
       return response.data.genres;
     } catch (error) {
       return error;
@@ -53,10 +54,8 @@ export default class MovieAPiServer {
   }
 
   async fetchMovieByQuery(n, q, toBack) {
-    console.log("test");
-    const URL = `/3/search/movie?api_key=${
-      this.API_KEY
-    }&page=${n}&query=${q.replaceAll('"', "")}`;
+    console.log('test');
+    const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${n}&query=${q.replaceAll('"', '')}`;
 
     try {
       const response = await http.get(URL);

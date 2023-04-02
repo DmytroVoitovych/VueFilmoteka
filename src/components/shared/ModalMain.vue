@@ -59,18 +59,14 @@
             <p class="modal__aboutV t-js">About</p>
             <p class="overview t-js">
               {{
-                infos.overview ||
-                'No description will be added soon. Sorry for the inconvenience'
+                infos.overview || 'No description will be added soon. Sorry for the inconvenience'
               }}
             </p>
           </div>
           <ul class="modal__button--listV">
             <li>
               <button
-                @click.prevent="
-                  () =>
-                    !doneWatched ? addFilmToWatch() : dellFilmFromDb('watched')
-                "
+                @click.prevent="() => (!doneWatched ? addFilmToWatch() : dellFilmFromDb('watched'))"
                 data-btn="${id}"
                 type="button"
                 class="modal__watchV"
@@ -82,10 +78,7 @@
             </li>
             <li>
               <button
-                @click.prevent="
-                  () =>
-                    !doneQueue ? addFilmToQueue() : dellFilmFromDb('queue')
-                "
+                @click.prevent="() => (!doneQueue ? addFilmToQueue() : dellFilmFromDb('queue'))"
                 :data-btn="infos.id"
                 type="button"
                 class="modal__queV"
@@ -139,7 +132,6 @@ export default {
   created() {
     this.syncIndexDBandStore(); // синхрон стора і бази
   },
-
   methods: {
     async getInfoOfFilms() {
       //отримання деталей по фільму
@@ -221,46 +213,31 @@ export default {
           });
         }
         if (keys.includes('queue')) {
-          myDatabase
-            .getItem('queue')
-            .then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
+          myDatabase.getItem('queue').then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
         }
         return;
       });
     },
-    // syncServerDBandStore() {
-    //   myDatabase.keys().then(keys => {
-    //     if (!keys.includes('watched')) {
-    //       // перевірка ключа
-    //       this.getFromServerFilmId().then(e => {
-    //         const watched = e.data.allList.filter(e => e.type === 'watched');
-    //         store.commit('setWatched', watched);
-    //         myDatabase.setItem(
-    //           'watched',
-    //           JSON.stringify(store.state.infoWatched)
-    //         );
-    //       });
-    //     }
-    //     if (!keys.includes('queue')) {
-    //       this.getFromServerFilmId().then(e => {
-    //         const watched = e.data.allList.filter(e => e.type === 'queue');
-    //         store.commit('setQueue', watched);
-    //         myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue));
-    //       });
-    //     }
-    //     return;
-    //   });
-    // },
-    // async getFromServerFilmId() {
-    //   try {
-    //     const res = await nodeHttp.get('/films/', {
-    //       headers: { Authorization: 'Bearer ' + this.$store.state.token },
-    //     });
-    //     return res;
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // },
+    syncServerDBandStore() {
+      myDatabase.keys().then(keys => {
+        if (!keys.includes('watched')) {
+          // перевірка ключа
+          this.getFromServerFilmId().then(e => {
+            const watched = e.data.allList.filter(e => e.type === 'watched');
+            store.commit('setWatched', watched);
+            myDatabase.setItem('watched', JSON.stringify(store.state.infoWatched));
+          });
+        }
+        if (!keys.includes('queue')) {
+          this.getFromServerFilmId().then(e => {
+            const watched = e.data.allList.filter(e => e.type === 'queue');
+            store.commit('setQueue', watched);
+            myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue));
+          });
+        }
+        return;
+      });
+    },
 
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
@@ -268,8 +245,7 @@ export default {
         //перехоплюєм запит
         this.loading = true; //включаю блок кнопки
         this.checkParam = // поточна кнопка
-          (config.url.includes('add') &&
-            config?.data?.type.includes('watched')) ||
+          (config.url.includes('add') && config?.data?.type.includes('watched')) ||
           config.url.includes('watched');
 
         return config;
@@ -290,7 +266,6 @@ export default {
       }
     },
     openModal() {
-      this.openModal && this.syncServerDBandStore();
       window.addEventListener('keydown', this.funcKeyDown);
       !this.openModal && //вимикаєм слухач
         window.removeEventListener('keydown', this.funcKeyDown);

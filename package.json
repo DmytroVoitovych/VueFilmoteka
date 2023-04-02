@@ -16,6 +16,7 @@
     "idb-keyval": "^6.2.0",
     "intersection-observer": "^0.12.2",
     "localforage": "^1.10.0",
+    "lodash.isequal": "^4.5.0",
     "lru-cache": "^7.16.1",
     "modern-normalize": "^1.1.0",
     "notiflix": "^3.2.6",

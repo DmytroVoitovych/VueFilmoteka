@@ -4,12 +4,13 @@ import BibliotekaPage from './page/BibliotekaPage.vue';
 import AuthPage from './page/AuthPage.vue';
 import LoginForm from './components/auth/LoginForm.vue';
 import RegisterForm from './components/auth/RegisterForm.vue';
+import Home from './page/Home.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('./page/Home.vue'),
+    component: Home,
   },
   {
     path: '/biblioteka',

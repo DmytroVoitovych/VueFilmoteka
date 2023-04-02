@@ -1,5 +1,5 @@
 <template>
-  <Home :switcher="switcher" :path="path">
+  <div>
     <div class="gallery__item" style="display: none"></div>
     <ContainerMain>
       <section class="container gallery section">
@@ -15,6 +15,7 @@
               poster_path,
               genre_ids,
               vote_average,
+              genres,
             } in trend"
             :key="id"
             class="gallery__item"
@@ -23,46 +24,38 @@
             <img
               class="gallery__img"
               loading="lazy"
-              :src="
-                poster_path
-                  ? getPoster(poster_path)
-                  : require('./../../assets/images/ded.jpg')
-              "
+              :src="poster_path ? getPoster(poster_path) : require('./../../assets/images/ded.jpg')"
               :alt="title"
             />
             <div class="gallery__info">
               <p class="gallery__title them">{{ title }}</p>
               <p class="gallery__text them">
-                <span :class="{ space: getGenre(genre_ids)?.length > 27 }"
-                  >{{ getGenre(genre_ids) }}&ensp;|&ensp;</span
+                <span :class="{ space: getGenre(genre_ids ?? genres.map(e => e.id))?.length > 27 }"
+                  >{{ getGenre(genre_ids ?? genres.map(e => e.id)) }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
-                }}<span class="gallery__rating them">{{
-                  vote_average?.toFixed(1)
-                }}</span>
+                }}<span class="gallery__rating them">{{ vote_average?.toFixed(1) }}</span>
               </p>
             </div>
           </li>
         </ul>
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
-          <PaginationHardVue
-            @numPage="setPage"
-            :proppages="max"
-            ref="downBtn"
-          />
+          <PaginationHardVue @numPage="setPage" :proppages="max" ref="downBtn" />
         </div>
       </section>
     </ContainerMain>
-  </Home>
+  </div>
 </template>
 
 <script>
 import ContainerMain from '../shared/ContainerMain.vue';
-import Home from '@/page/Home.vue';
+// import Home from '@/page/Home.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
 import { axio } from '../../helpers/axios';
-import { Report, Block } from 'notiflix';
+import { Report, Block, Loading } from 'notiflix';
+import { store } from '@/store/filmsStore';
+// import isEqual from 'lodash.isequal';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -71,7 +64,7 @@ export default {
   name: 'TrendMain',
   components: {
     ContainerMain,
-    Home,
+    // Home,
     PaginationHardVue,
   },
   props: {
@@ -80,6 +73,10 @@ export default {
       default: 0,
     },
     switcher: {
+      type: Boolean,
+      default: false,
+    },
+    modalstate: {
       type: Boolean,
       default: false,
     },
@@ -102,9 +99,12 @@ export default {
       check: false,
     };
   },
+  beforeCreate() {
+    http.getGenresList();
+  },
   async created() {
     // хук для запросов
-    (!this.path || this.path === 'Home') && this.startRenderPage();
+    this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
   },
   methods: {
     // функції
@@ -135,7 +135,7 @@ export default {
     getGenre(idg) {
       //розбір жанрів
       return idg
-        ?.map(e => this.genrs.filter(({ id, name }) => id === e && name))
+        ?.map(e => this.criticalGenres.filter(({ id, name }) => id === e && name))
         .flat(3)
         .map(({ name }) => name)
         .slice(0, 2)
@@ -146,10 +146,7 @@ export default {
       window.localStorage.setItem('numberPage', num); // добавляю сторінку
 
       const data = this.checkFind()
-        ? await http.fetchMovieByQuery(
-            this.page,
-            window.localStorage.getItem('findedFilms')
-          )
+        ? await http.fetchMovieByQuery(this.page, window.localStorage.getItem('findedFilms'))
         : await http.fetchTopMovies(num);
 
       this.trend = data;
@@ -176,9 +173,7 @@ export default {
     },
     checkFind() {
       //перевірка наявності пошуку
-      const check = JSON.parse(window.localStorage.getItem('findedFilms'))
-        ? true
-        : false;
+      const check = JSON.parse(window.localStorage.getItem('findedFilms')) ? true : false;
       this.check = check;
       return check;
     },
@@ -201,7 +196,6 @@ export default {
     },
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
-
       axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
         checkParam = config.url.includes('/3/movie/');
@@ -233,6 +227,17 @@ export default {
       // отримання данних для модалки
       this.$emit('get-find-id', id);
     },
+    funcUpdateBibliotekaPage() {
+      Loading.dots();
+      store
+        .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
+        .then(() => {
+          console.log('test', store.state.infoWatched);
+          this.path === 'BibliotekaWatched' && (this.trend = store.state.infoWatched);
+          this.path === 'BibliotekaQueue' && (this.trend = store.state.infoQueue);
+        })
+        .finally(() => Loading.remove());
+    },
   },
 
   watch: {
@@ -251,6 +256,26 @@ export default {
   },
   mounted() {
     this.loaderBasic(); // важливо дочекатись змонтування дерева
+  },
+  updated() {
+    !this.path || this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
+    this.modalstate &&
+      store.subscribe(mutation => {
+        console.log('folow', mutation.payload[0]?.id ?? false);
+        const folowIdDel = mutation.payload[0]?.id ?? false;
+        console.log('folow', folowIdDel);
+        folowIdDel &&
+          !this.modalstate &&
+          this.trend.splice(
+            this.trend.findIndex(e => e === folowIdDel),
+            0
+          );
+      });
+  },
+  computed: {
+    criticalGenres() {
+      return this.genrs.length ? this.genrs : JSON.parse(window.localStorage.getItem('genres'));
+    },
   },
 };
 </script>
@@ -289,11 +314,7 @@ export default {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 30%;
-  background-image: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.56),
-      rgba(0, 0, 0, 0.56)
-    ),
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
     url('../../assets/images/library.jpeg');
 }
 
@@ -320,8 +341,8 @@ export default {
   cursor: pointer;
 }
 .gallery__item:hover {
-  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608),
-    2px 2px 2px rgba(135, 102, 78, 0.456), 2px 3px 2px rgba(244, 157, 94, 0.409);
+  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608), 2px 2px 2px rgba(135, 102, 78, 0.456),
+    2px 3px 2px rgba(244, 157, 94, 0.409);
   border-radius: 2px 2px 5px 5px;
   cursor: pointer;
   transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -443,13 +464,40 @@ export default {
 
 @keyframes load {
   50% {
-    background: linear-gradient(
-        to right,
-        transparent 0%,
-        #e8e8e8 50%,
-        transparent 100%
-      )
-      top right;
+    background: linear-gradient(to right, transparent 0%, #e8e8e8 50%, transparent 100%) top right;
+  }
+}
+//****
+
+.noFilms {
+  text-align: center;
+  background-image: url('@/assets/images/biblioteka/nofilms.jpg'),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56));
+  background-size: 100% 100%;
+  background-position: center;
+  height: 100vh;
+  width: 100vw;
+  z-index: 0;
+  position: fixed;
+  top: 0;
+
+  &::after {
+    content: var(--no-content);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 44px;
+    -webkit-text-stroke: 2px #f0a900;
+    color: transparent;
+
+    @include mq(mobile-only) {
+      font-size: 34px;
+    }
+  }
+
+  @include mq(mobile-only) {
+    background-size: cover;
   }
 }
 </style>

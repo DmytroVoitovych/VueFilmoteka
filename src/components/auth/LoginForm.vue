@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { store } from '@/store/filmsStore';
 import { Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 
@@ -111,6 +112,7 @@ export default {
     funcRedirectAfterLogin() {
       this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
       this.$router.push({ path: '/', replace: true });
+      store.dispatch('getFromServerFilmId', this.$store.state.token);
       Notify.success(`User ${window.localStorage.getItem('name')} created`);
     },
   },

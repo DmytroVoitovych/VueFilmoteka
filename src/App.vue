@@ -18,7 +18,13 @@
       />
 
       <main>
-        <router-view></router-view>
+        <router-view
+          :modalstate="stateModal"
+          :path="path"
+          :switcher="check"
+          @get-find-id="getFindId"
+        ></router-view>
+
         <TrendMain
           v-if="path === 'Home'"
           :path="path"
@@ -44,6 +50,7 @@ import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { store } from './store/filmsStore';
 
 export default {
   name: 'App',
@@ -72,47 +79,60 @@ export default {
       scrollWidth: 0, //ширина скролу
       path: '', //поточний роут
       show: false, // ?? під питанням чи потрібно мені це(обдумать)
+      counterSign: 0,
     };
   },
   created() {
     window.addEventListener('focus', this.checkFocus); //рефреш логіна
     this.watchPath(); //контроль поточного шляху
     this.controlLogin(); // постій контроль авторизації
+    console.log(this.path);
   },
 
   methods: {
-    checkFocus() {
-      this.refreshToken(); // обовязкова перевірка логіна
+    async checkFocus() {
+      // await this.refreshToken(); // обовязкова перевірка логіна
       if (this.$store.state.token) {
         // тест на сторонній бекенд
+        console.log('1токен є');
         const checkOwnerOfToken = window
           .atob(this.$store.state.token.split('.')[1])
           .includes('firebase');
         if (checkOwnerOfToken) {
           // чи є юзер
+          console.log('2вхід фаєрбейс');
           this.$store.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
         } else {
           // рефрещ пр  звичайному вході
+          console.log('3вхід поточного юзера');
           this.currentUser(this.$store.state.token); // звичайний контроль  користувача
+        }
+      } else {
+        if (this.counterSign <= 1) {
+          this.counterSign++;
+          console.log('counter', this.counterSign);
+          await this.refreshToken(); // обовязкова перевірка логіна
         }
       }
     },
     async controlLogin() {
       const auth = getAuth();
-
+      console.log('4start');
       onAuthStateChanged(auth, user => {
         // контроль змін
         if (user) {
-          console.log('рефрешфаербейс');
+          console.log('5googleuser');
           user
             .getIdToken(true) // дає новий токен
             .then(newToken => {
+              console.log('6googleuser exist');
               this.$store.commit('setLogin', newToken);
               this.refreshToken(); // форсстейт
             }) //записую в стейт
             .catch(err => console.log(err));
         } else {
-          this.currentUser(); // звичайний контроль  користувача
+          console.log('7google user dont exist');
+          this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
           !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         }
       });
@@ -121,6 +141,7 @@ export default {
       // вертає нову пару ключів
       try {
         await this.$store.dispatch('refreshToken', this.$store.state.refresh); // записую токен в незалежності від його наявності
+        this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
         this.show = true;
       } catch (err) {
         // !!можлива детальна обробка
@@ -128,6 +149,7 @@ export default {
         if (!auth.currentUser) {
           this.$store.commit('setLogin', ''); //  обнулюю
           window.localStorage.removeItem('name'); // чищу сторедж
+          this.$cookies.remove('token'); // при приході помилки вбиваю токен
           this.$store.dispatch('googleAuthInfo'); // перевіряю google вхід
         }
         console.log(err);
@@ -139,6 +161,7 @@ export default {
     async currentUser(t) {
       try {
         await this.$store.dispatch('currentUser', t); // сигналізую про можливий вхід іншим браузером
+        store.dispatch('getFromServerFilmId', this.$store.state.token); // достаю всі id для синхрона
         this.$cookies.set('token', this.$store.state.token, '60MIN'); // на годину зберігаю
         const { exp } = JSON.parse(
           window?.atob(this.$store.state.token?.split('.')[1]) // парсю час смерті
@@ -159,6 +182,7 @@ export default {
         );
       } catch (err) {
         this.$cookies.remove('token'); // при приході помилки вбиваю токен
+        this.$store.commit('setLogin', ''); //  обнулюю
         console.log(err);
       } finally {
         this.show = true;
@@ -178,8 +202,7 @@ export default {
     },
     scrollCount() {
       //прорахунок ширини
-      this.scrollWidth =
-        window?.innerWidth - window?.document?.documentElement?.clientWidth;
+      this.scrollWidth = window?.innerWidth - window?.document?.documentElement?.clientWidth;
 
       window.document.documentElement.style.setProperty(
         // динамічно міняю положеня модалки

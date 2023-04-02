@@ -1,6 +1,8 @@
 import { nodeHttp } from '@/helpers/axios';
 import { createStore } from 'vuex';
 import localForage from 'localforage';
+import { getAndCompare } from './helpers/getId';
+import { syncDb } from './helpers/syncDbServerAndClient';
 
 // Создаем базу данных с именем 'myDatabase'
 export const myDatabase = localForage.createInstance({
@@ -12,6 +14,7 @@ export const store = createStore({
     return {
       infoWatched: [], // переглянуті
       infoQueue: [], // черга
+      max: { numWatch: 0, numQue: 0 }, // кількість сторінок
     };
   },
   mutations: {
@@ -20,7 +23,6 @@ export const store = createStore({
       if (Array.isArray(payload)) {
         // перевірка на массив
         state.infoWatched = payload;
-
         return;
       }
       // якщо ні значить приходить обьєкт пуш в массив
@@ -41,6 +43,13 @@ export const store = createStore({
     delQueue(state, payload) {
       state.infoQueue = payload;
     },
+    // setMaxPageForBiblioteka(state, { type, num }) {
+    //   if (type && type === 'watched') {
+    //     state.max.numWatch = num ?? 1;
+    //     return;
+    //   }
+    //   state.max.numQue = num ?? 1;
+    // },
   },
 
   getters: {
@@ -80,19 +89,38 @@ export const store = createStore({
       );
 
       if (type === 'watched') {
-        const removeItemFromArr = context.state.infoWatched.filter(
-          e => e.id !== idFilm
-        );
-        console.log('rem', removeItemFromArr);
+        const removeItemFromArr = context.state.infoWatched.filter(e => e.id !== idFilm);
         context.commit('delWatched', removeItemFromArr);
-        myDatabase.setItem('watched', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
+        myDatabase.setItem('watched', JSON.stringify(removeItemFromArr));
+        // context.dispatch('getFromServerFilmId', token); // додаю в локальну базу
       } else {
-        const removeItemFromArr = context.state.infoQueue.filter(
-          e => e.id !== idFilm
-        );
+        const removeItemFromArr = context.state.infoQueue.filter(e => e.id !== idFilm);
         context.commit('delQueue', removeItemFromArr);
         myDatabase.setItem('queue', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
+        // context.dispatch('getFromServerFilmId', token);
+      }
+    },
+    async getFromServerFilmId({ state }, token) {
+      try {
+        const res = await nodeHttp.get('/films/', {
+          headers: { Authorization: 'Bearer ' + token },
+          params: { page: 1, limit: 20 }, // пока на тесті
+        });
+
+        if (res) {
+          // this.commit('setMaxPageForBiblioteka', res.data.queueFilms[0]?.totalPage);
+          // console.log(state.max);
+          const watched = getAndCompare(state.infoWatched, res.data.watchedFilms); // порівнюю переглянуті
+          const queue = getAndCompare(state.infoQueue, res.data.queueFilms); // порівнюю чергу
+
+          !watched && syncDb(res.data.watchedFilms, 'watched');
+          !queue && syncDb(res.data.queueFilms, 'queue');
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
   },
 });
+
+export default store;
