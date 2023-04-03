@@ -1,11 +1,6 @@
 <template>
   <div class="pagination" :proppages="proppages">
-    <button
-      class="arrow pagination__button"
-      v-if="page > 1"
-      type="button"
-      @click.stop="pageMinus"
-    >
+    <button class="arrow pagination__button" v-if="page > 1" type="button" @click.stop="pageMinus">
       &lsaquo;
     </button>
     <ul class="pagination__list">
@@ -34,7 +29,7 @@
 
 <script>
 export default {
-  name: "PaginationHard",
+  name: 'PaginationHard',
   props: {
     proppages: {
       type: Number,
@@ -45,22 +40,20 @@ export default {
   data() {
     return {
       page: 1,
-      arrPage: ["1", "2", "3", "4", "5", "6", "...", "1000"],
+      arrPage: ['1', '2', '3', '4', '5', '6', '...', '1000'],
       serverDate: [],
       target: 1,
     };
   },
   emits: {
     //описую передану функцію
-    numPage: (value) => typeof value === "number" && value > 0,
+    numPage: value => typeof value === 'number' && value > 0,
   },
   methods: {
     setServ() {
       //формування форми пагінації
 
-      const serverDate = [...Array(this.proppages + 1).keys()].filter(
-        (e) => e > 0
-      );
+      const serverDate = [...Array(this.proppages + 1).keys()].filter(e => e > 0);
 
       return (this.serverDate = serverDate);
     },
@@ -75,45 +68,35 @@ export default {
 
       if (choose) {
         this.page = choose;
-        this.$emit("numPage", this.page); //передаю наверх для запиту
+        this.$emit('numPage', this.page); //передаю наверх для запиту
       }
       return;
     },
     pagePlus() {
       //кнопка права
       this.page++;
-      this.$emit("numPage", this.page);
+      this.$emit('numPage', this.page);
     },
     pageMinus() {
       //кнопка ліва
       this.page--;
-      this.$emit("numPage", this.page);
+      this.$emit('numPage', this.page);
     },
     setPagination() {
       //базовий вид [доопрацювати не готово]
-      this.arrPage = [
-        ...this.serverDate.slice(0, 6),
-        "...",
-        this.serverDate.at(-1),
-      ];
+      this.arrPage = [...this.serverDate.slice(0, 6), '...', this.serverDate.at(-1)];
     },
     mutateArr() {
       // мутація великої кількості схов
       const fillNum = [];
 
-      fillNum.push(
-        this.page + 1,
-        this.page + 2,
-        this.page - 1,
-        this.page - 2,
-        this.page
-      );
+      fillNum.push(this.page + 1, this.page + 2, this.page - 1, this.page - 2, this.page);
 
       return (this.arrPage = [
         this.serverDate[0],
-        "...",
+        '...',
         ...fillNum.sort((a, b) => a - b),
-        "...",
+        '...',
         this.serverDate.at(-1),
       ]);
     },
@@ -122,8 +105,8 @@ export default {
 
       return (this.arrPage = [
         this.serverDate[0],
-        ...[...Array(7).keys()].filter((e) => e > 1),
-        "...",
+        ...[...Array(7).keys()].filter(e => e > 1),
+        '...',
         `${this.serverDate.at(-1)}`,
       ]);
     },
@@ -131,7 +114,7 @@ export default {
       //кінцевий вид
       this.arrPage = [
         this.serverDate[0],
-        "...",
+        '...',
         ...this.serverDate.slice(this.serverDate.length - 5),
       ];
     },
@@ -140,11 +123,11 @@ export default {
     },
     controlStorage() {
       if (
-        JSON.parse(window.localStorage.getItem("numberPage")) &&
-        JSON.parse(window.localStorage.getItem("filmsPage"))
+        JSON.parse(window.localStorage.getItem('numberPage')) &&
+        JSON.parse(window.localStorage.getItem('filmsPage'))
       ) {
         // window.localStorage.removeItem("filmsPage");
-        return JSON.parse(window.localStorage.getItem("numberPage"));
+        return JSON.parse(window.localStorage.getItem('numberPage'));
       }
 
       return 1;

@@ -49,14 +49,12 @@
 
 <script>
 import ContainerMain from '../shared/ContainerMain.vue';
-// import Home from '@/page/Home.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
 import { axio, nodeHttp } from '../../helpers/axios';
 import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
 import intersectionWith from 'lodash.intersectionwith';
-// import isEqual from 'lodash.isequal';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -167,10 +165,10 @@ export default {
       try {
         const res = await nodeHttp.get('/films/', {
           headers: { Authorization: 'Bearer ' + this.$store.state.token },
-          params: { page: num, limit: 20 }, // пока на тесті
+          params: { page: num ?? this.page, limit: 20 }, // пока на тесті
         }); // забираю з беку списки юзера
         const watchedFilter = intersectionWith(
-          //звіряю з локальною базою і беру тіки ті які приіс бекенд
+          //звіряю з локальною базою і беру тіки ті які приніс бекенд
           store.state.infoWatched, // локальна база
           res.data.watchedFilms.map(e => e.idFilm), // бекенд
           (a, b) => a.id === b // фідвільтровую по id фільмів
@@ -209,7 +207,6 @@ export default {
         'On your request we found nothing , we return you to the main.',
         'Okay',
         () => {
-          console.log(this.$router);
           this.$router.go(0);
           window.localStorage.removeItem('numberPage');
           window.localStorage.removeItem('findedFilms');
@@ -253,6 +250,8 @@ export default {
       this.$emit('get-find-id', id);
     },
     funcUpdateIfChangePath(watched, queue) {
+      // const checkArr = this.trend.length ? this.trend : null;
+
       switch (
         this.path // звіряю по положеню
       ) {
@@ -273,10 +272,28 @@ export default {
       store
         .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
         .then(() => {
-          console.log('test', store.state.infoWatched);
+          window.localStorage.key('numberPage') && window.localStorage.removeItem('numberPage');
           this.funcUpdateIfChangePath();
         });
       // .finally(() => Loading.remove());
+    },
+    funcSubscribeForDelAction() {
+      this.modalstate && // якщо модалка відкрита підписуюсь на зміни
+        store.subscribe(mutation => {
+          // слідкую за мутаціями стору
+          console.log('openm', this.trend, mutation);
+
+          const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
+
+          folowIdDel && // якщо є
+            // і модалка виключена
+            !this.modalstate &&
+            this.trend.splice(
+              //  видаляю з масиву
+              this.trend.findIndex(e => e === folowIdDel),
+              0
+            );
+        });
     },
   },
 
@@ -293,24 +310,29 @@ export default {
       this.startRenderPage();
       this.max = 0;
     },
+    path() {
+      this.funcUpdateBibliotekaPage();
+      if (this.path.includes('Biblioteka')) {
+        this.page = 1;
+      }
+    },
+    modalstate() {
+      this.funcSubscribeForDelAction();
+    },
+    trend(newTrend) {
+      newTrend.length < 1 && this.funcUpdateBibliotekaPage();
+    },
   },
   mounted() {
+    console.log(this.page);
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
   updated() {
-    !this.path || this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
-    this.modalstate &&
-      store.subscribe(mutation => {
-        console.log('folow', mutation.payload[0]?.id ?? false);
-        const folowIdDel = mutation.payload[0]?.id ?? false;
-        console.log('folow', folowIdDel);
-        folowIdDel &&
-          !this.modalstate &&
-          this.trend.splice(
-            this.trend.findIndex(e => e === folowIdDel),
-            0
-          );
-      });
+    console.log('test upd');
+    (!this.path || this.path === 'Home') && this.startRenderPage();
+    this.page === 1 && !this.modalstate // контроль пагінації
+      ? this.funcUpdateBibliotekaPage()
+      : this.setPageBiblioteka();
   },
   computed: {
     criticalGenres() {

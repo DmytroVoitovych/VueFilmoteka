@@ -79,59 +79,50 @@ export default {
       scrollWidth: 0, //ширина скролу
       path: '', //поточний роут
       show: false, // ?? під питанням чи потрібно мені це(обдумать)
-      counterSign: 0,
+      counterSign: 0, // для контроля кількості фокусів при гості
     };
   },
   created() {
     window.addEventListener('focus', this.checkFocus); //рефреш логіна
     this.watchPath(); //контроль поточного шляху
     this.controlLogin(); // постій контроль авторизації
-    console.log(this.path);
   },
 
   methods: {
     async checkFocus() {
-      // await this.refreshToken(); // обовязкова перевірка логіна
       if (this.$store.state.token) {
         // тест на сторонній бекенд
-        console.log('1токен є');
         const checkOwnerOfToken = window
           .atob(this.$store.state.token.split('.')[1])
           .includes('firebase');
         if (checkOwnerOfToken) {
           // чи є юзер
-          console.log('2вхід фаєрбейс');
           this.$store.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
         } else {
           // рефрещ пр  звичайному вході
-          console.log('3вхід поточного юзера');
           this.currentUser(this.$store.state.token); // звичайний контроль  користувача
         }
       } else {
         if (this.counterSign <= 1) {
           this.counterSign++;
-          console.log('counter', this.counterSign);
           await this.refreshToken(); // обовязкова перевірка логіна
         }
       }
     },
     async controlLogin() {
       const auth = getAuth();
-      console.log('4start');
+
       onAuthStateChanged(auth, user => {
         // контроль змін
         if (user) {
-          console.log('5googleuser');
           user
             .getIdToken(true) // дає новий токен
             .then(newToken => {
-              console.log('6googleuser exist');
               this.$store.commit('setLogin', newToken);
               this.refreshToken(); // форсстейт
             }) //записую в стейт
             .catch(err => console.log(err));
         } else {
-          console.log('7google user dont exist');
           this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
           !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         }
@@ -219,7 +210,6 @@ export default {
       this.$watch(
         () => this.$route.name,
         fullPath => {
-          console.log(fullPath);
           this.path = fullPath.replace('/', '');
         }
       );
