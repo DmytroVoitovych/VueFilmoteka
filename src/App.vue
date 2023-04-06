@@ -162,11 +162,7 @@ export default {
         this.show = true;
         const refresh = setTimeout(
           async () => {
-            await this.$store.dispatch(
-              // відправляю рефреш токеном
-              'refreshToken',
-              this.$store.state.refresh
-            );
+            await this.refreshToken(); //??
             clearTimeout(refresh); // чищу після виконання
           },
           expired > 0 ? expired * 1000 : 0 // слідкую за часом в разі перезавантаження сторінки {in/now}

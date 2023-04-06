@@ -38,14 +38,12 @@ export const store = createStore({
       state.infoQueue.push(payload);
     },
     delWatched(state, payload) {
-      console.log(payload);
       state.infoWatched = payload;
     },
     delQueue(state, payload) {
       state.infoQueue = payload;
     },
     setMaxPageForBiblioteka(state, { type, num }) {
-      console.log('type', type);
       if (type && type === 'watched') {
         state.max.numWatch = num ?? 1;
         return;
@@ -90,12 +88,10 @@ export const store = createStore({
         const removeItemFromArr = context.state.infoWatched.filter(e => e.id !== idFilm);
         context.commit('delWatched', removeItemFromArr);
         myDatabase.setItem('watched', JSON.stringify(removeItemFromArr));
-        // context.dispatch('getFromServerFilmId', token); // додаю в локальну базу
       } else {
         const removeItemFromArr = context.state.infoQueue.filter(e => e.id !== idFilm);
         context.commit('delQueue', removeItemFromArr);
         myDatabase.setItem('queue', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
-        // context.dispatch('getFromServerFilmId', token);
       }
     },
     async getFromServerFilmId({ state }, token) {
@@ -107,7 +103,7 @@ export const store = createStore({
 
         if (res) {
           getTotalPageB(res);
-          console.log('count total page biblioteka', state.max);
+
           const watched = getAndCompare(state.infoWatched, res.data.data.watchedFilms); // порівнюю переглянуті
           const queue = getAndCompare(state.infoQueue, res.data.data.queueFilms); // порівнюю чергу
 

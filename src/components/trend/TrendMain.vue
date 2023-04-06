@@ -4,7 +4,7 @@
     <ContainerMain>
       <section class="container gallery section">
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
-          <PaginationHardVue @numPage="setPage" :proppages="max" ref="upBtn" />
+          <PaginationHardVue @numPage="setPage" :proppages="max" ref="upBtn" :path="path" />
         </div>
         <ul class="gallery-js gallery__list">
           <li
@@ -40,7 +40,7 @@
           </li>
         </ul>
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
-          <PaginationHardVue @numPage="setPage" :proppages="max" ref="downBtn" />
+          <PaginationHardVue @numPage="setPage" :proppages="max" ref="downBtn" :path="path" />
         </div>
       </section>
     </ContainerMain>
@@ -99,11 +99,12 @@ export default {
     };
   },
   beforeCreate() {
-    http.getGenresList();
+    !JSON.parse(window.localStorage.getItem('genres')) && http.getGenresList();
   },
   async created() {
     // хук для запросов
     this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
+    this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
   methods: {
     // функції
@@ -120,7 +121,8 @@ export default {
       this.trend = this.controlStorage() || data;
       this.max = http.maxPages;
 
-      const genr = await http.getGenresList();
+      const genr =
+        JSON.parse(window.localStorage.getItem('genres')) ?? (await http.getGenresList());
       this.genrs = genr;
     },
     year(num) {
@@ -167,6 +169,12 @@ export default {
           headers: { Authorization: 'Bearer ' + this.$store.state.token },
           params: { page: num ?? this.page, limit: 20 }, // пока на тесті
         }); // забираю з беку списки юзера
+        console.log(
+          1,
+          store.state.infoWatched,
+          2,
+          res.data.watchedFilms.map(e => e.idFilm)
+        );
         const watchedFilter = intersectionWith(
           //звіряю з локальною базою і беру тіки ті які приніс бекенд
           store.state.infoWatched, // локальна база
@@ -220,10 +228,11 @@ export default {
       // функція відповідальна за основний лоадер на сайті
       axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
+        console.log(this.$store.state.token);
+        config.params = { language: 'uk-UA' };
         checkParam = config.url.includes('/3/movie/');
         if (!checkParam) {
           //якщо потрібний запит
-
           this.checkForStupid() && //перевірка на дурня
             Block?.dots('.gallery__item', {
               //сам лофдер з конфігураціями
@@ -250,8 +259,6 @@ export default {
       this.$emit('get-find-id', id);
     },
     funcUpdateIfChangePath(watched, queue) {
-      // const checkArr = this.trend.length ? this.trend : null;
-
       switch (
         this.path // звіряю по положеню
       ) {
@@ -264,24 +271,22 @@ export default {
           this.max = store.state.max.numQue;
           break;
         default:
+          this.max = store.state.max.numWatch; // всі сторінки
           break;
       }
     },
     funcUpdateBibliotekaPage() {
-      // Loading.dots();
+      store.state.max['numWatch' || 'numQue'] && this.funcUpdateIfChangePath(); // оптимізація швидкості
       store
         .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
         .then(() => {
-          window.localStorage.key('numberPage') && window.localStorage.removeItem('numberPage');
           this.funcUpdateIfChangePath();
         });
-      // .finally(() => Loading.remove());
     },
     funcSubscribeForDelAction() {
       this.modalstate && // якщо модалка відкрита підписуюсь на зміни
         store.subscribe(mutation => {
           // слідкую за мутаціями стору
-          console.log('openm', this.trend, mutation);
 
           const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
 
@@ -312,9 +317,6 @@ export default {
     },
     path() {
       this.funcUpdateBibliotekaPage();
-      if (this.path.includes('Biblioteka')) {
-        this.page = 1;
-      }
     },
     modalstate() {
       this.funcSubscribeForDelAction();
@@ -324,7 +326,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.page);
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
   updated() {

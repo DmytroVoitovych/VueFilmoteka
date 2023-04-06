@@ -1,3 +1,7 @@
-const arr = ['d', 'j', 'H', 'H'].match(/[A-Z]/g);
+const chceckIdFilmData = (storeArr, arr) =>
+  storeArr.every(e => arr.includes(e) && arr.length === storeArr.length);
 
-console.log(arr.join('').match(/[A-Z]/g));
+const arr = [4546, 7878, 7, 90, 34];
+const storeArr = [4546, 7878, 7, 90, 34];
+
+console.log(chceckIdFilmData(storeArr, arr));

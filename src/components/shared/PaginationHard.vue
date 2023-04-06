@@ -36,6 +36,11 @@ export default {
       required: true,
       default: 0,
     },
+    path: {
+      type: String,
+      required: true,
+      default: '',
+    },
   },
   data() {
     return {
@@ -126,8 +131,7 @@ export default {
         JSON.parse(window.localStorage.getItem('numberPage')) &&
         JSON.parse(window.localStorage.getItem('filmsPage'))
       ) {
-        // window.localStorage.removeItem("filmsPage");
-        return JSON.parse(window.localStorage.getItem('numberPage'));
+        return this.path === 'Home' ? JSON.parse(window.localStorage.getItem('numberPage')) : 1;
       }
 
       return 1;
