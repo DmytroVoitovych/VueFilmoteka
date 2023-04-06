@@ -156,12 +156,9 @@ export default {
         window.localStorage.setItem('filmsPage', JSON.stringify(data));
       } else if (this.path.includes('Biblioteka')) {
         await this.setPageBiblioteka(num); // контроль пагинації в бібліотеці
+        this.controlScroll();
       }
-      this.locate = window.scrollY; //запис положення
-      this.$nextTick().then(() => {
-        //прибиваю скролл
-        this.locate > 1000 && window.scrollBy(0, this.locate);
-      });
+      this.controlScroll();
     },
     async setPageBiblioteka(num) {
       try {
@@ -169,12 +166,7 @@ export default {
           headers: { Authorization: 'Bearer ' + this.$store.state.token },
           params: { page: num ?? this.page, limit: 20 }, // пока на тесті
         }); // забираю з беку списки юзера
-        console.log(
-          1,
-          store.state.infoWatched,
-          2,
-          res.data.watchedFilms.map(e => e.idFilm)
-        );
+
         const watchedFilter = intersectionWith(
           //звіряю з локальною базою і беру тіки ті які приніс бекенд
           store.state.infoWatched, // локальна база
@@ -201,6 +193,13 @@ export default {
       }
 
       return false;
+    },
+    controlScroll() {
+      this.locate = window.scrollY; //запис положення
+      this.$nextTick().then(() => {
+        //прибиваю скролл
+        this.locate > 100 && window.scrollBy(0, this.locate * 20);
+      });
     },
     checkFind() {
       //перевірка наявності пошуку
@@ -316,6 +315,7 @@ export default {
       this.max = 0;
     },
     path() {
+      this.page = 1;
       this.funcUpdateBibliotekaPage();
     },
     modalstate() {
