@@ -24,7 +24,6 @@
           :switcher="check"
           @get-find-id="getFindId"
         ></router-view>
-
         <TrendMain
           v-if="path === 'Home'"
           :path="path"

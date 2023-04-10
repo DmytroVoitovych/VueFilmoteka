@@ -5,7 +5,7 @@
 <script>
 // import TrendMain from "@/components/trend/TrendMain.vue";
 export default {
-  name: "HomePage",
+  name: 'HomePage',
 
   components: {
     // TrendMain,

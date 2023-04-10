@@ -5,7 +5,7 @@ import { getAndCompare } from './helpers/getId';
 import { syncDb } from './helpers/syncDbServerAndClient';
 import { getTotalPageB } from './helpers/getTotalPageB';
 
-// Создаем базу данных с именем 'myDatabase'
+// Створюю базу з назвою 'myDatabase'
 export const myDatabase = localForage.createInstance({
   name: 'myDatabase',
 });

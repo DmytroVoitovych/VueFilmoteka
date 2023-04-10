@@ -55,6 +55,7 @@ import { axio, nodeHttp } from '../../helpers/axios';
 import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
 import intersectionWith from 'lodash.intersectionwith';
+import { featuresStore } from '@/store/storeForFeatures';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -227,8 +228,8 @@ export default {
       // функція відповідальна за основний лоадер на сайті
       axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
-        console.log(this.$store.state.token);
-        config.params = { language: 'uk-UA' };
+        console.log(this.getLanguage);
+        config.params = { language: this.getLanguage };
         checkParam = config.url.includes('/3/movie/');
         if (!checkParam) {
           //якщо потрібний запит
@@ -299,6 +300,14 @@ export default {
             );
         });
     },
+    funcSubscribeChangeLanguage() {
+      featuresStore.subscribe(mutation => {
+        if (mutation.type.includes('setLanguage')) {
+          console.log('test', this.getLanguage);
+          this.path === 'Home' ? this.setPage(this.page) : this.funcUpdateBibliotekaPage();
+        }
+      });
+    },
   },
 
   watch: {
@@ -326,10 +335,11 @@ export default {
     },
   },
   mounted() {
+    this.funcSubscribeChangeLanguage();
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
+
   updated() {
-    console.log('test upd');
     (!this.path || this.path === 'Home') && this.startRenderPage();
     this.page === 1 && !this.modalstate // контроль пагінації
       ? this.funcUpdateBibliotekaPage()
@@ -338,6 +348,9 @@ export default {
   computed: {
     criticalGenres() {
       return this.genrs.length ? this.genrs : JSON.parse(window.localStorage.getItem('genres'));
+    },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
     },
   },
 };

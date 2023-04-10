@@ -44,7 +44,7 @@
           <li class="nav-item" data-auth="false">
             <router-link
               :class="{ active__page: path.includes('Biblioteka') }"
-              :to="{ name: 'BibliotekaWatched' }"
+              :to="{ name: !checkExpired ? 'BibliotekaWatched' : 'AuthLogin' }"
               rel="noopener noreferrer"
               data-lang="library"
               class="nav-btn library__btn js-auth"
@@ -84,6 +84,7 @@
         <li><ModalBtn :name="'WATCHED'" /></li>
         <li><ModalBtn :name="'QUEUE'" /></li>
       </ul>
+      <CustomSelected />
     </ContainerMain>
   </header>
 </template>;
@@ -91,6 +92,7 @@
 <script>
 import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
+import CustomSelected from './CustomSelected.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
 import { Report, Notify } from 'notiflix';
 
@@ -101,6 +103,7 @@ export default {
     ContainerMain,
     CustomInput,
     ModalBtn,
+    CustomSelected,
   },
   props: {
     path: {

@@ -16,7 +16,9 @@ export default class MovieAPiServer {
   }
   //зміни запит популярні фільми за тиждень
   async fetchTopMovies(p, toBack) {
-    const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${p}`;
+    const lang = window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ?? 'en';
+    console.log(lang);
+    const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${p}&language=${lang}`;
     try {
       const response = await http.get(URL);
       //добавив
