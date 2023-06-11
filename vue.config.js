@@ -28,10 +28,8 @@ module.exports = {
       sharedb: 'sharedb',
     },
   },
-  publicPath: process.env.NODE_ENV === 'production'
-  ? '/VueFilmoteka/'
-  : '/'
-};
+  publicPath:'/VueFilmoteka/'
+ };
 
 // module.exports = {
 //   configureWebpack: {
