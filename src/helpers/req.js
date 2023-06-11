@@ -1,5 +1,4 @@
 import http from './axios';
-// import { Block } from "notiflix";
 
 export default class MovieAPiServer {
   constructor() {
@@ -14,14 +13,21 @@ export default class MovieAPiServer {
     this.maxPages = null;
     this.isLoadGenres = true;
   }
+
+  getlang() {
+    // метод вертаючий поточну мову
+    return window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ?? 'en';
+  }
   //зміни запит популярні фільми за тиждень
   async fetchTopMovies(p, toBack) {
-    const lang = window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ?? 'en';
-    console.log(lang);
-    const URL = `/3/trending/movie/week?api_key=${this.API_KEY}&page=${p}&language=${lang}`;
+    const URL = `/3/trending/movie/week?api_key=${
+      this.API_KEY
+    }&page=${p}&language=${this.getlang()}`;
+
     try {
       const response = await http.get(URL);
       //добавив
+      console.log('res',response.data);
       this.maxPages = response.data.total_pages;
       // ---
       return response.data.results;
@@ -33,7 +39,7 @@ export default class MovieAPiServer {
 
   //добавив запит на жанри, можна один раз його зробити
   async getGenresList() {
-    const URL = `/3/genre/movie/list?api_key=${this.API_KEY}`;
+    const URL = `/3/genre/movie/list?api_key=${this.API_KEY}&language=${this.getlang()}`;
     try {
       const response = await http.get(URL);
       window.localStorage.setItem('genres', JSON.stringify(response.data.genres)); // важно для синхронизации
@@ -44,7 +50,7 @@ export default class MovieAPiServer {
   }
   // ----
   async fetchMovieById(id) {
-    const URL = `/3/movie/${id}?api_key=${this.API_KEY}`;
+    const URL = `/3/movie/${id}?api_key=${this.API_KEY}&language=${this.getlang()}`;
 
     try {
       const response = await http.get(URL);
@@ -57,7 +63,10 @@ export default class MovieAPiServer {
 
   async fetchMovieByQuery(n, q, toBack) {
     console.log('test');
-    const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${n}&query=${q.replaceAll('"', '')}`;
+    const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${n}&query=${q.replaceAll(
+      '"',
+      ''
+    )}&language=${this.getlang()}`;
 
     try {
       const response = await http.get(URL);

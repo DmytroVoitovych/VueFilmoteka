@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       page: 1,
-      arrPage: ['1', '2', '3', '4', '5', '6', '...', '1000'],
+      arrPage: ['1', '2', '3', '4', '5', '6', '...', '500'],
       serverDate: [],
       target: 1,
     };

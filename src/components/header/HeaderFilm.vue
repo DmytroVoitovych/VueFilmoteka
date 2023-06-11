@@ -84,7 +84,7 @@
         <li><ModalBtn :name="'WATCHED'" /></li>
         <li><ModalBtn :name="'QUEUE'" /></li>
       </ul>
-      <CustomSelected />
+      <CustomSelected v-if="!path.includes('Biblioteka')" />
     </ContainerMain>
   </header>
 </template>;

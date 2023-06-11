@@ -121,10 +121,8 @@ export default {
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
       this.max = http.maxPages;
-
-      const genr =
-        JSON.parse(window.localStorage.getItem('genres')) ?? (await http.getGenresList());
-      this.genrs = genr;
+      console.log('max', this.max);
+      this.getStaticGenres();
     },
     year(num) {
       // рік
@@ -155,6 +153,7 @@ export default {
         this.trend = data;
         this.max = http.maxPages;
         window.localStorage.setItem('filmsPage', JSON.stringify(data));
+        this.getStaticGenres();
       } else if (this.path.includes('Biblioteka')) {
         await this.setPageBiblioteka(num); // контроль пагинації в бібліотеці
         this.controlScroll();
@@ -228,8 +227,7 @@ export default {
       // функція відповідальна за основний лоадер на сайті
       axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
-        console.log(this.getLanguage);
-        config.params = { language: this.getLanguage };
+
         checkParam = config.url.includes('/3/movie/');
         if (!checkParam) {
           //якщо потрібний запит
@@ -257,6 +255,11 @@ export default {
     getIdForModal(id) {
       // отримання данних для модалки
       this.$emit('get-find-id', id);
+    },
+    async getStaticGenres() {
+      const genr =
+        JSON.parse(window.localStorage.getItem('genres')) ?? (await http.getGenresList());
+      this.genrs = genr;
     },
     funcUpdateIfChangePath(watched, queue) {
       switch (
@@ -287,7 +290,6 @@ export default {
       this.modalstate && // якщо модалка відкрита підписуюсь на зміни
         store.subscribe(mutation => {
           // слідкую за мутаціями стору
-
           const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
 
           folowIdDel && // якщо є
@@ -303,7 +305,8 @@ export default {
     funcSubscribeChangeLanguage() {
       featuresStore.subscribe(mutation => {
         if (mutation.type.includes('setLanguage')) {
-          console.log('test', this.getLanguage);
+          window.localStorage.removeItem('genres');
+          console.log(window.localStorage.getItem('genres'));
           this.path === 'Home' ? this.setPage(this.page) : this.funcUpdateBibliotekaPage();
         }
       });
