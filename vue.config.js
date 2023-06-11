@@ -28,6 +28,9 @@ module.exports = {
       sharedb: 'sharedb',
     },
   },
+  publicPath: process.env.NODE_ENV === 'production'
+  ? '/VueFilmoteka/'
+  : '/'
 };
 
 // module.exports = {
