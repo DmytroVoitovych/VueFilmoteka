@@ -120,7 +120,7 @@ export default {
 
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
-      this.max = http.maxPages;
+      this.max = http.maxPages > 500?500:http.maxPages;
       console.log('max', this.max);
       this.getStaticGenres();
     },
@@ -151,7 +151,7 @@ export default {
           : await http.fetchTopMovies(num);
 
         this.trend = data;
-        this.max = http.maxPages;
+        this.max = http.maxPages > 500?500:http.maxPages;
         window.localStorage.setItem('filmsPage', JSON.stringify(data));
         this.getStaticGenres();
       } else if (this.path.includes('Biblioteka')) {
