@@ -2,13 +2,11 @@
   "name": "filmoteka",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://dmytrovoitovych.github.io/VueFilmoteka/",
-  "scripts": {
+   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "deploy": "sh deploy.sh"
-  },
+    "lint": "vue-cli-service lint"
+    },
   "dependencies": {
     "autoprefixer": "^10.4.13",
     "axios": "^0.27.2",

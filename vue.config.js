@@ -28,7 +28,7 @@ module.exports = {
       sharedb: 'sharedb',
     },
   },
-  publicPath:'/VueFilmoteka/'
+  
  };
 
 // module.exports = {
