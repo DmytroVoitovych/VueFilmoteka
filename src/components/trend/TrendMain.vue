@@ -110,7 +110,7 @@ export default {
   methods: {
     // функції
     async startRenderPage() {
-      this.max = 0;
+      
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
             window.localStorage.getItem('numberPage') ?? 1,
@@ -122,7 +122,7 @@ export default {
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
       this.max = http.maxPages > 500?500:http.maxPages;
-      console.log('max', this.max);
+     
       this.getStaticGenres();
     },
     year(num) {
@@ -199,7 +199,7 @@ export default {
       this.locate = window.scrollY; //запис положення
       this.$nextTick().then(() => {
         //прибиваю скролл
-        this.locate > 100 && window.scrollBy(0, this.locate * 20);
+        this.locate > 500 && window.scrollBy(0, this.locate * 20);
       });
     },
     checkFind() {
