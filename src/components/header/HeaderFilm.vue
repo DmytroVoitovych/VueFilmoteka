@@ -95,7 +95,7 @@ import CustomInput from './InputComponent.vue';
 import CustomSelected from './CustomSelected.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
 import { Report, Notify } from 'notiflix';
-import { cacheOptions } from '@/helpers/axios';
+// import { cacheOptions } from '@/helpers/axios';
 
 export default {
   name: 'HeaderMain',
@@ -133,7 +133,7 @@ export default {
       const specifick = this.nameFilms === JSON.parse(window.localStorage.getItem('findedFilms'));
 
       if (this.nameFilms && !specifick) {
-        cacheOptions.clear();  // видаляю кеш для коректного пошуку
+        // cacheOptions.clear();  // видаляю кеш для коректного пошуку
         this.changeStorage();
         this.switcher = !this.switcher; //або або // логіка тогл
         this.$emit('onChekfind', this.switcher);

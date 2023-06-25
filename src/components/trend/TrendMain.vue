@@ -110,6 +110,7 @@ export default {
   methods: {
     // функції
     async startRenderPage() {
+      this.max = 0;
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
             window.localStorage.getItem('numberPage') ?? 1,
@@ -274,7 +275,7 @@ export default {
           this.max = store.state.max.numQue;
           break;
         default:
-          this.max = store.state.max.numWatch; // всі сторінки
+        this.max = http.maxPages > 500?500:http.maxPages; // всі сторінки
           break;
       }
     },
@@ -325,7 +326,7 @@ export default {
       // тригер пошуку // завязано за імпут в хедері
       this.startRenderPage();
       this.max = 0;
-    },
+      },
     path() {
       this.page = 1;
       this.funcUpdateBibliotekaPage();
