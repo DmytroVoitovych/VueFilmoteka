@@ -2,7 +2,7 @@ import axios from 'axios';
 import { cacheAdapterEnhancer } from 'axios-extensions';
 import LRUCache from 'lru-cache';
 
-const cacheOptions = new LRUCache({
+export const cacheOptions = new LRUCache({
   ttl: 10 * 60 * 1000, // час життя елемента кешу
   max: 100, //максимальна кількість елементів
   ttlAutopurge: true, //автоматичне видаленн протухших елементів

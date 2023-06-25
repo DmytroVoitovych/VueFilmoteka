@@ -355,8 +355,7 @@ button[disabled] {
     }
 
     @media screen and (orientation: landscape) {
-      width: 100%;
-      height: auto;
+     height: auto;
     }
 
     @media screen and (max-width: 769.5px) {
