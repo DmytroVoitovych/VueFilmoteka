@@ -26,7 +26,7 @@
         <div class="flexboxV">
           <ul class="modal__listV">
             <li class="modal__descV">
-              <p class="modal__pV">Vote / Votes</p>
+              <p class="modal__pV">{{ getModalContent()[0] }}</p>
               <p class="modal__rV">
                 <span class="reitV">{{ infos.vote_average?.toFixed(1) }}</span>
                 /
@@ -34,15 +34,15 @@
               </p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">Popularity</p>
+              <p class="modal__pV">{{getModalContent()[1]}}</p>
               <p class="modal__valV t-js">{{ infos.popularity?.toFixed(1) }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">Original Title</p>
+              <p class="modal__pV">{{getModalContent()[2]}}</p>
               <p class="modal__valV uperV t-js">{{ infos.original_title }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">Genre</p>
+              <p class="modal__pV">{{getModalContent()[3]}}</p>
               <p class="modal__valV t-js">
                 {{
                   infos.genres?.length > 0
@@ -56,7 +56,7 @@
             </li>
           </ul>
           <div>
-            <p class="modal__aboutV t-js">About</p>
+            <p class="modal__aboutV t-js">{{getModalContent()[4]}}</p>
             <p class="overview t-js">
               {{
                 infos.overview || 'No description will be added soon. Sorry for the inconvenience'
@@ -99,6 +99,8 @@
 import MovieAPiServer from '../../helpers/req';
 import { myDatabase, store } from '@/store/filmsStore';
 import { nodeHttp } from '@/helpers/axios';
+import { featuresStore } from '@/store/storeForFeatures';
+import {getModalContent} from './contentLang';
 
 const http = new MovieAPiServer();
 
@@ -256,6 +258,10 @@ export default {
         return res;
       });
     },
+
+    getModalContent(){
+      return getModalContent(this.getLanguage);
+    }
   },
   watch: {
     filmsid() {
@@ -280,9 +286,13 @@ export default {
       // звірка з наявністю в базі і зміна класів від результату
       return store.getters.doneQueues(this.infos.id);
     },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
+    },
     getAuth() {
       return this.$store.state.token;
     },
+
   },
 };
 </script>
