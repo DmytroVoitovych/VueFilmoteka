@@ -118,11 +118,12 @@ export default {
             this.toMainPage
           )
         : await http.fetchTopMovies(this.page, this.toMainPage);
-
+        
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
+      console.log(http.maxPages > 500,http.maxPages);
       this.max = http.maxPages > 500?500:http.maxPages;
-     
+    
       this.getStaticGenres();
     },
     year(num) {
@@ -324,8 +325,8 @@ export default {
 
     switcher() {
       // тригер пошуку // завязано за імпут в хедері
-      this.startRenderPage();
       this.max = 0;
+      this.startRenderPage();
       },
     path() {
       this.page = 1;

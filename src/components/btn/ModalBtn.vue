@@ -5,7 +5,7 @@
     class="library__header--btn"
     @click="toggle"
   >
-    {{ name }}
+   {{ content }}
   </router-link>
 </template>
 
@@ -17,12 +17,11 @@ export default {
       type: String,
       requried: true,
     },
+    content:{
+      type: String,
+      requried: true,
+    },
   },
-  data() {
-    return {};
-  },
-  created() {},
-
   methods: {
     toggle() {
       this.$router.push({ path: this.name.toLowerCase() });

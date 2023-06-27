@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       page: 1,
-      arrPage: ['1', '2', '3', '4', '5', '6', '...', '500'],
+      arrPage: ['1', '2', '3', '4', '5', '6', '...', this.proppages],
       serverDate: [],
       target: 1,
     };
@@ -57,7 +57,6 @@ export default {
   methods: {
     setServ() {
       //формування форми пагінації
-
       const serverDate = [...Array(this.proppages + 1).keys()].filter(e => e > 0);
 
       return (this.serverDate = serverDate);

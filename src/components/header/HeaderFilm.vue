@@ -6,7 +6,7 @@
         v-if="!path.includes('Biblioteka') && checkExpired"
         :to="{ path: 'auth/login' }"
         class="custom-btn btn-A"
-        ><span>Authorization</span></router-link
+        ><span>{{ getHeaderContent('authcontent') }}</span></router-link
       >
       <button
         class="btn__logout"
@@ -37,7 +37,7 @@
               data-lang="home"
               class="nav-btn home__btn"
             >
-              home
+            {{  getHeaderContent('navcontent')[0] }}
             </router-link>
           </li>
 
@@ -49,7 +49,7 @@
               data-lang="library"
               class="nav-btn library__btn js-auth"
             >
-              my library
+            {{ getHeaderContent('navcontent')[1] }}
             </router-link>
             <div class="auth-chek">
               <svg width="32px" height="32px">
@@ -64,7 +64,7 @@
           v-model:find.trim="nameFilms"
           data-lang="placeholder"
           name="searchQuery"
-          placeholder="Movie search"
+          :placeholder="getHeaderContent('holdercontent')"
           type="text"
           class="input-form"
         />
@@ -81,8 +81,8 @@
         </button>
       </form>
       <ul class="library__btn--wrapper" v-else>
-        <li><ModalBtn :name="'WATCHED'" /></li>
-        <li><ModalBtn :name="'QUEUE'" /></li>
+        <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
+        <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1] " /></li>
       </ul>
       <CustomSelected v-if="!path.includes('Biblioteka')" />
     </ContainerMain>
@@ -95,7 +95,8 @@ import CustomInput from './InputComponent.vue';
 import CustomSelected from './CustomSelected.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
 import { Report, Notify } from 'notiflix';
-// import { cacheOptions } from '@/helpers/axios';
+import { featuresStore } from '@/store/storeForFeatures';
+import { getCont } from './contentLang';
 
 export default {
   name: 'HeaderMain',
@@ -171,6 +172,20 @@ export default {
     getName() {
       return window.localStorage.getItem('name');
     },
+    getHeaderContent(type){
+      if(type === 'authcontent'){
+      return getCont.getAuthContent(this.getLanguage);
+    }
+    else if(type === 'navcontent'){
+    return getCont.getLinkContent(this.getLanguage);
+    }
+    else if(type === 'holdercontent'){
+    return getCont.getInputContent(this.getLanguage);
+    }
+    else{
+      return  getCont.getButtonContent(this.getLanguage);
+    }
+    }
   },
 
   computed: {
@@ -183,6 +198,9 @@ export default {
 
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(new Date() / 1000) > exp;
+    },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
     },
   },
 };

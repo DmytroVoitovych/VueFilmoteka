@@ -62,7 +62,7 @@ export default class MovieAPiServer {
   }
 
   async fetchMovieByQuery(n, q, toBack) {
-    console.log('test');
+    this.maxPages = null;
     const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${n}&query=${q.replaceAll(
       '"',
       ''
