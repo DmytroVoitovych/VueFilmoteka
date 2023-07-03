@@ -357,8 +357,8 @@ button[disabled] {
     max-width: 375px;
     border-radius: 5px;
     max-height: 478px;
-    width: 100%;
-
+    width: auto;
+    
     @media screen and (max-width: 479.5px) and (orientation: portrait) {
       width: 100%;
       height: auto;
@@ -374,6 +374,7 @@ button[disabled] {
 
     @media screen and (min-width: 768px) and (max-width: 1279.5px) {
       max-width: 264px;
+      width: auto;
       max-height: 373px;
     }
   }
