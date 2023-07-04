@@ -27,7 +27,7 @@ export default class MovieAPiServer {
     try {
       const response = await http.get(URL);
       //добавив
-      console.log('res',response.data);
+      console.log('res', response.data);
       this.maxPages = response.data.total_pages;
       // ---
       return response.data.results;

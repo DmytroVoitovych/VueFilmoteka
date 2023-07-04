@@ -8,7 +8,7 @@
 
 <script>
 export default {
-  name: "AuthPage",
+  name: 'AuthPage',
 };
 </script>
 
@@ -30,7 +30,7 @@ export default {
   justify-content: center;
   align-items: center;
   padding: 15px;
-  background-image: url("../assets/images/auth/bg-01.jpg");
+  background-image: url('../assets/images/auth/bg-01.jpg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -38,7 +38,7 @@ export default {
   z-index: 1;
 
   &:before {
-    content: "";
+    content: '';
     z-index: -1;
     width: 100%;
     height: 100%;

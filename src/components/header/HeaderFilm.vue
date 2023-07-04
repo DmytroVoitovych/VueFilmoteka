@@ -20,45 +20,48 @@
       </button>
     </template>
     <ContainerMain>
-      <nav class="navigation">
-        <router-link :to="{ name: 'Home' }" v-on:click="toMainPage" class="logo-link">
-          <svg class="subscribe-form__icon rotate-vert-center" width="24" height="24">
-            <use href="../../assets/sprite.svg#icon-logo"></use>
-          </svg>
-          <span class="logo-text tracking-in-expand"
-            ><abbr title="Go to page main" role="contentinfo">Filmoteka</abbr></span
-          >
-        </router-link>
-        <ul class="nav-list">
-          <li class="nav-item">
-            <router-link
-              :to="{ name: 'Home' }"
-              rel="noopener noreferrer"
-              data-lang="home"
-              class="nav-btn home__btn"
+      <div>
+        <nav class="navigation">
+          <router-link :to="{ name: 'Home' }" v-on:click="toMainPage" class="logo-link">
+            <svg class="subscribe-form__icon rotate-vert-center" width="24" height="24">
+              <use href="../../assets/sprite.svg#icon-logo"></use>
+            </svg>
+            <span class="logo-text tracking-in-expand"
+              ><abbr title="Go to page main" role="contentinfo">Filmoteka</abbr></span
             >
-            {{  getHeaderContent('navcontent')[0] }}
-            </router-link>
-          </li>
+          </router-link>
+          <ul class="nav-list">
+            <li class="nav-item">
+              <router-link
+                :to="{ name: 'Home' }"
+                rel="noopener noreferrer"
+                data-lang="home"
+                class="nav-btn home__btn"
+              >
+                {{ getHeaderContent('navcontent')[0] }}
+              </router-link>
+            </li>
 
-          <li class="nav-item" data-auth="false">
-            <router-link
-              :class="{ active__page: path.includes('Biblioteka') }"
-              :to="{ name: !checkExpired ? 'BibliotekaWatched' : 'AuthLogin' }"
-              rel="noopener noreferrer"
-              data-lang="library"
-              class="nav-btn library__btn js-auth"
-            >
-            {{ getHeaderContent('navcontent')[1] }}
-            </router-link>
-            <div class="auth-chek">
-              <svg width="32px" height="32px">
-                <use href="../../assets/sprite.svg#icon-yes"></use>
-              </svg>
-            </div>
-          </li>
-        </ul>
-      </nav>
+            <li class="nav-item" data-auth="false">
+              <router-link
+                :class="{ active__page: path.includes('Biblioteka') }"
+                :to="{ name: !checkExpired ? 'BibliotekaWatched' : 'AuthLogin' }"
+                rel="noopener noreferrer"
+                data-lang="library"
+                class="nav-btn library__btn js-auth"
+              >
+                {{ getHeaderContent('navcontent')[1] }}
+              </router-link>
+              <div class="auth-chek">
+                <svg width="32px" height="32px">
+                  <use href="../../assets/sprite.svg#icon-yes"></use>
+                </svg>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <ThemeMode />
+      </div>
       <form v-if="!path.includes('Biblioteka')" action="" class="search-form js-form">
         <CustomInput
           v-model:find.trim="nameFilms"
@@ -82,18 +85,20 @@
       </form>
       <ul class="library__btn--wrapper" v-else>
         <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
-        <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1] " /></li>
+        <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1]" /></li>
       </ul>
       <CustomSelected v-if="!path.includes('Biblioteka')" />
     </ContainerMain>
   </header>
-</template>;
+</template>
+;
 
 <script>
 import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
 import CustomSelected from './CustomSelected.vue';
 import ModalBtn from '../btn/ModalBtn.vue';
+import ThemeMode from './ThemeMode.vue';
 import { Report, Notify } from 'notiflix';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getCont } from './contentLang';
@@ -106,6 +111,7 @@ export default {
     CustomInput,
     ModalBtn,
     CustomSelected,
+    ThemeMode,
   },
   props: {
     path: {
@@ -129,7 +135,6 @@ export default {
   },
 
   methods: {
-    
     searchFilms() {
       const specifick = this.nameFilms === JSON.parse(window.localStorage.getItem('findedFilms'));
 
@@ -138,7 +143,6 @@ export default {
         this.changeStorage();
         this.switcher = !this.switcher; //або або // логіка тогл
         this.$emit('onChekfind', this.switcher);
-        
       } else if (specifick) {
         return Notify.failure(`You already have movies on request: ${this.nameFilms}`);
       } else {
@@ -172,20 +176,17 @@ export default {
     getName() {
       return window.localStorage.getItem('name');
     },
-    getHeaderContent(type){
-      if(type === 'authcontent'){
-      return getCont.getAuthContent(this.getLanguage);
-    }
-    else if(type === 'navcontent'){
-    return getCont.getLinkContent(this.getLanguage);
-    }
-    else if(type === 'holdercontent'){
-    return getCont.getInputContent(this.getLanguage);
-    }
-    else{
-      return  getCont.getButtonContent(this.getLanguage);
-    }
-    }
+    getHeaderContent(type) {
+      if (type === 'authcontent') {
+        return getCont.getAuthContent(this.getLanguage);
+      } else if (type === 'navcontent') {
+        return getCont.getLinkContent(this.getLanguage);
+      } else if (type === 'holdercontent') {
+        return getCont.getInputContent(this.getLanguage);
+      } else {
+        return getCont.getButtonContent(this.getLanguage);
+      }
+    },
   },
 
   computed: {

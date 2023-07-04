@@ -110,7 +110,6 @@ export default {
   methods: {
     // функції
     async startRenderPage() {
-      
       const data = this.checkFind()
         ? await http.fetchMovieByQuery(
             window.localStorage.getItem('numberPage') ?? 1,
@@ -118,12 +117,12 @@ export default {
             this.toMainPage
           )
         : await http.fetchTopMovies(this.page, this.toMainPage);
-        
+
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
-      console.log(http.maxPages > 500,http.maxPages);
-      this.max = http.maxPages > 500?500:http.maxPages;
-    
+      console.log(http.maxPages > 500, http.maxPages);
+      this.max = http.maxPages > 500 ? 500 : http.maxPages;
+
       this.getStaticGenres();
     },
     year(num) {
@@ -153,7 +152,7 @@ export default {
           : await http.fetchTopMovies(num);
 
         this.trend = data;
-        this.max = http.maxPages > 500?500:http.maxPages;
+        this.max = http.maxPages > 500 ? 500 : http.maxPages;
         window.localStorage.setItem('filmsPage', JSON.stringify(data));
         this.getStaticGenres();
       } else if (this.path.includes('Biblioteka')) {
@@ -276,7 +275,7 @@ export default {
           this.max = store.state.max.numQue;
           break;
         default:
-        this.max = http.maxPages > 500?500:http.maxPages; // всі сторінки
+          this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
           break;
       }
     },
@@ -327,7 +326,7 @@ export default {
       // тригер пошуку // завязано за імпут в хедері
       this.max = 0;
       this.startRenderPage();
-      },
+    },
     path() {
       this.page = 1;
       this.funcUpdateBibliotekaPage();

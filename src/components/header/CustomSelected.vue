@@ -93,9 +93,9 @@ export default {
   position: relative;
   top: -23px;
 
-  @include mq(mobile-only){
-   top: 3px;
-   float: none;
+  @include mq(mobile-only) {
+    top: 3px;
+    float: none;
   }
 
   div::after {

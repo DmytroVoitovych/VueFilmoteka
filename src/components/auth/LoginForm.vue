@@ -34,10 +34,7 @@
         >
           Login
         </button>
-        <router-link
-          :to="{ name: 'AuthSignup' }"
-          class="login-form-btn reg"
-          type="button"
+        <router-link :to="{ name: 'AuthSignup' }" class="login-form-btn reg" type="button"
           >Create account</router-link
         >
         <router-link :to="{ name: 'Home' }" class="homeBtnLink">
@@ -86,10 +83,7 @@ export default {
           Notify.success(`User ${window.localStorage.getItem('name')} created`);
         } catch (err) {
           if (err.response) {
-            return Report.failure(
-              `Error ${err.response.data.code}`,
-              err.response.data.message
-            );
+            return Report.failure(`Error ${err.response.data.code}`, err.response.data.message);
           }
           return Report.failure(`Error ${err.code}`, err.message);
         } finally {
@@ -121,9 +115,7 @@ export default {
   computed: {
     noEmpty() {
       // контроль кнопки
-      return this.mailLog && this.passLog && this.passLog.length >= 6
-        ? false
-        : true;
+      return this.mailLog && this.passLog && this.passLog.length >= 6 ? false : true;
     },
     authTest() {
       return this.$store.state.token;

@@ -3,8 +3,8 @@
 </template>
 <script>
 export default {
-  props: ["find"],
-  emits: ["update:find"],
+  props: ['find'],
+  emits: ['update:find'],
 };
 </script>
 

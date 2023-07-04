@@ -1,4 +1,4 @@
- <template   >
+<template>
   <div
     class="backdropV"
     :class="{ visibleV: openModal }"
@@ -34,15 +34,15 @@
               </p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{getModalContent()[1]}}</p>
+              <p class="modal__pV">{{ getModalContent()[1] }}</p>
               <p class="modal__valV t-js">{{ infos.popularity?.toFixed(1) }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{getModalContent()[2]}}</p>
+              <p class="modal__pV">{{ getModalContent()[2] }}</p>
               <p class="modal__valV uperV t-js">{{ infos.original_title }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{getModalContent()[3]}}</p>
+              <p class="modal__pV">{{ getModalContent()[3] }}</p>
               <p class="modal__valV t-js">
                 {{
                   infos.genres?.length > 0
@@ -56,7 +56,7 @@
             </li>
           </ul>
           <div>
-            <p class="modal__aboutV t-js">{{getModalContent()[4]}}</p>
+            <p class="modal__aboutV t-js">{{ getModalContent()[4] }}</p>
             <p class="overview t-js">
               {{
                 infos.overview || 'No description will be added soon. Sorry for the inconvenience'
@@ -100,7 +100,7 @@ import MovieAPiServer from '../../helpers/req';
 import { myDatabase, store } from '@/store/filmsStore';
 import { nodeHttp } from '@/helpers/axios';
 import { featuresStore } from '@/store/storeForFeatures';
-import {getModalContent} from './contentLang';
+import { getModalContent } from './contentLang';
 
 const http = new MovieAPiServer();
 
@@ -259,9 +259,9 @@ export default {
       });
     },
 
-    getModalContent(){
+    getModalContent() {
       return getModalContent(this.getLanguage);
-    }
+    },
   },
   watch: {
     filmsid() {
@@ -292,7 +292,6 @@ export default {
     getAuth() {
       return this.$store.state.token;
     },
-
   },
 };
 </script>
@@ -358,14 +357,14 @@ button[disabled] {
     border-radius: 5px;
     max-height: 478px;
     width: auto;
-    
+
     @media screen and (max-width: 479.5px) and (orientation: portrait) {
       width: 100%;
       height: auto;
     }
 
     @media screen and (orientation: landscape) {
-     height: auto;
+      height: auto;
     }
 
     @media screen and (max-width: 769.5px) {

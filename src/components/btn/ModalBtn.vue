@@ -5,19 +5,19 @@
     class="library__header--btn"
     @click="toggle"
   >
-   {{ content }}
+    {{ content }}
   </router-link>
 </template>
 
 <script>
 export default {
-  name: "ModalBtn",
+  name: 'ModalBtn',
   props: {
     name: {
       type: String,
       requried: true,
     },
-    content:{
+    content: {
       type: String,
       requried: true,
     },

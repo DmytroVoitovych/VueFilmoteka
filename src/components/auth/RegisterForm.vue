@@ -46,11 +46,7 @@
           Registration
         </button>
       </div>
-      <router-link
-        :to="{ name: 'AuthLogin' }"
-        class="form-btn-center"
-        type="button"
-      >
+      <router-link :to="{ name: 'AuthLogin' }" class="form-btn-center" type="button">
         <svg width="46px" height="46px" class="formArrow">
           <use href="../../assets/sprite.svg#icon-backbutton"></use>
         </svg>
@@ -90,10 +86,7 @@ export default {
           Notify.success(`User ${this.nameReg} created`);
         } catch (err) {
           if (err.response) {
-            return Report.failure(
-              `Error ${err.response.data.code}`,
-              err.response.data.message
-            );
+            return Report.failure(`Error ${err.response.data.code}`, err.response.data.message);
           }
           return Report.failure(`Error ${err.code}`, err.message);
         } finally {
@@ -110,10 +103,7 @@ export default {
   computed: {
     noEmpty() {
       // контроль кнопки
-      return this.nameReg &&
-        this.mailReg &&
-        this.passReg &&
-        this.passReg.length >= 6
+      return this.nameReg && this.mailReg && this.passReg && this.passReg.length >= 6
         ? false
         : true;
     },
