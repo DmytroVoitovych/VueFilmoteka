@@ -243,7 +243,6 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ffffff;
   min-height: 100vh;
 }
 

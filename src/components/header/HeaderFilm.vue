@@ -213,6 +213,7 @@ export default {
 }
 
 .header {
+  position: relative;
   padding-top: 40px;
   padding-bottom: 92px;
   height: 230px;

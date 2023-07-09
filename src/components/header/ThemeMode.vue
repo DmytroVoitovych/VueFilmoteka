@@ -1,7 +1,14 @@
 <template>
   <div class="btn-container">
     <label class="switch btn-color-mode-switch">
-      <input type="checkbox" name="color_mode" id="color_mode" value="1" />
+      <input
+        type="checkbox"
+        name="color_mode"
+        id="color_mode"
+        value="1"
+        v-on:change="test"
+        :checked="dark"
+      />
       <label
         for="color_mode"
         data-on="&#127770;"
@@ -13,14 +20,38 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      dark: false,
+    };
+  },
+  created() {
+    this.getUserTheme();
+  },
+  methods: {
+    test(e) {
+      console.log('lab', e.target.checked);
+    },
+    getUserTheme() {
+      this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      console.log(this.dark);
+    },
+  },
+};
 </script>
 
 <style lang="scss">
 div.btn-container {
-  display: inline-block;
+  display: grid;
   vertical-align: middle;
   text-align: center;
+  position: absolute;
+
+  @include mq(mobile-only) {
+    right: 0;
+    bottom: -30px;
+  }
 }
 
 div.btn-container i {
@@ -31,7 +62,7 @@ div.btn-container i {
 
 label {
   font-size: 13px;
-  color: #424242;
+  color: var(--extra-grey);
   font-weight: 500;
 }
 
@@ -45,12 +76,13 @@ label {
   margin: 0px;
   width: 140px;
   height: 30px;
-  background: #e0e0e0;
+  background: var(--extra-white);
   border-radius: 26px;
   overflow: hidden;
   position: relative;
   transition: all 0.3s ease;
   display: block;
+  border: 1px solid var(--text-color-light-orange);
 }
 
 .btn-color-mode-switch > label.btn-color-mode-switch-inner:before {
@@ -65,7 +97,7 @@ label {
 .btn-color-mode-switch > label.btn-color-mode-switch-inner:after {
   content: attr(data-off);
   width: 70px;
-  background: #fff;
+  background: var(--text-color-light);
   border-radius: 26px;
   position: absolute;
   left: 2px;
@@ -73,13 +105,7 @@ label {
   transition: all 0.3s ease;
   box-shadow: 0px 0px 6px -2px #111;
   padding: 5px 0px;
-}
-
-.btn-color-mode-switch > .alert {
-  display: none;
-  background: #ff9800;
-  border: none;
-  color: #fff;
+  cursor: pointer;
 }
 
 .btn-color-mode-switch input[type='checkbox'] {
@@ -95,7 +121,7 @@ label {
 
 .btn-color-mode-switch input[type='checkbox']:checked + label.btn-color-mode-switch-inner {
   background: #151515;
-  color: #fff;
+  color: var(--text-color-light);
 }
 
 .btn-color-mode-switch input[type='checkbox']:checked + label.btn-color-mode-switch-inner:after {
@@ -124,12 +150,12 @@ label {
 }
 
 .dark-preview div.btn-container i.fa-moon-o {
-  color: #fff;
-  text-shadow: 0px 0px 11px #fff;
+  color: var(--text-color-light);
+  text-shadow: 0px 0px 11px var(--text-color-light);
 }
 
 .white-preview {
-  background: #fff;
+  background: var(--text-color-light);
 }
 
 .white-preview div.btn-container i.fa-sun-o {
@@ -138,19 +164,19 @@ label {
 }
 
 .white-preview div.btn-container i.fa-moon-o {
-  color: #777;
+  color: var(--extra-light-grey);
 }
 
 p.by a {
   text-decoration: none;
-  color: #000;
+  color: var(--text-color-black);
 }
 
 .dark-preview p.by a {
-  color: #777;
+  color: var(--extra-light-grey);
 }
 
 .white-preview p.by a {
-  color: #000;
+  color: var(--text-color-black);
 }
 </style>
