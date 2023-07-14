@@ -1,28 +1,16 @@
 @import '~/node_modules/modern-normalize/modern-normalize.css';
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --body-background-theme: #ffffff;
-    --body-text-theme: #000000;
-  }
-}
 
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --body-background-theme: #000000;
-    --body-text-theme: #ffffff;
-  }
-}
 
 body {
   position: relative;
   font-family: Roboto, sans-serif;
   line-height: 1.5;
-  background: var(--body-background-theme);
-  color: var(--body-text-theme);
-  justify-content: center;
+  background: var(--base-background-theme);
+  color: var(--base-text-theme);
   margin: 0px;
+  
 }
 
 h1,

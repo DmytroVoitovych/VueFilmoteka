@@ -313,7 +313,7 @@ button[disabled] {
   justify-content: flex-start;
   padding: 40px 12px;
   gap: 16px;
-  background-color: var(--text-color-light);
+  background-color: var(--base-modal-background);
 
   max-width: 806px;
   height: auto;
@@ -390,7 +390,6 @@ button[disabled] {
 }
 
 .modal__titleV {
-  color: var(--text-color-black);
   font-weight: 500;
   font-size: 30px;
   line-height: 1.16;
@@ -410,7 +409,7 @@ button[disabled] {
   }
 
   .modal__pV {
-    color: var(--text-color-light-grey);
+    color: var(--modal-grey);
     font-weight: 500;
     font-size: 12px;
     line-height: 1.33;
@@ -477,7 +476,6 @@ button[disabled] {
   font-size: 12px;
   line-height: 1.33;
   text-transform: uppercase;
-  color: var(--text-color-black);
   margin-bottom: 8px;
 }
 
@@ -485,7 +483,6 @@ button[disabled] {
   font-weight: 500;
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-color-black);
 }
 
 .modal__button--listV {
@@ -598,5 +595,9 @@ button[disabled] {
   background-color: #ff001b;
   color: var(--text-color-light);
   outline: none;
+}
+
+.t-js {
+  color: var(--base-text-theme);
 }
 </style>

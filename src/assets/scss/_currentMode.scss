@@ -1,0 +1,28 @@
+
+@media (prefers-color-scheme: dark) {
+
+    :root.dark {
+    --base-background-theme: var(--dark-background-theme);
+        --base-text-theme: var(--white-text-theme);
+        --base-modal-background: var(--red-modal-background);
+        --modal-grey: var(--modal-grey-ultra);
+        --pagination-transparent-bg: var(--transparent);
+        --pagination-border: var(--border-arrow);
+        --footer-background: var(--bordo-background);
+        --footer-text:var(--text-color-grey);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+       :root.dark {
+            --base-background-theme: var(--dark-background-theme);
+            --base-text-theme: var(--white-text-theme);
+            --base-modal-background: var(--red-modal-background);
+            --modal-grey: var(--modal-grey-ultra);
+            --pagination-transparent-bg: var(--transparent);
+            --pagination-border: var(--border-arrow);
+            --footer-background: var(--bordo-background);
+            --footer-text: var(--text-color-grey);
+        }
+}
+    

@@ -6,7 +6,7 @@
         name="color_mode"
         id="color_mode"
         value="1"
-        v-on:change="test"
+        v-on:change="changeThemeMode"
         :checked="dark"
       />
       <label
@@ -30,12 +30,12 @@ export default {
     this.getUserTheme();
   },
   methods: {
-    test(e) {
-      console.log('lab', e.target.checked);
+    changeThemeMode() {
+      document.documentElement.classList.toggle('dark');
     },
     getUserTheme() {
       this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      console.log(this.dark);
+      this.dark && document.documentElement.classList.add('dark');
     },
   },
 };
@@ -64,6 +64,7 @@ label {
   font-size: 13px;
   color: var(--extra-grey);
   font-weight: 500;
+  cursor: pointer;
 }
 
 .btn-color-mode-switch {

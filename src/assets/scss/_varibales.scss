@@ -2,7 +2,7 @@
   /*control style*/
   --disabled: #cccccc;
   /* spec style */
-  --left-modal: 0;
+  --left-modal: 0px;
   /* biblioteka without items */
   --no-content: "You haven't added anything yet.";
   /* Шрифти */
@@ -10,6 +10,7 @@
   --secondary-fonts: 'Titan One', sans-serif;
   /* Кольори фону */
   --bg-color-light-grey: #f7f7f7;
+  --bg-color-light-white: #ffffff;
   --bg-color-modal-orange: #ff6b01;
   --bg-loader-basic: rgba(255, 106, 0, 0.4);
   /* Кольори шрифтів */
@@ -24,5 +25,22 @@
   --extra-grey: #424242;
   --extra-white: #e0e0e0;
   --extra-light-grey: #777777;
+  /* Кольори для теми  (темна)*/ 
+  --dark-background-theme: #2d2a2a;
+  --white-text-theme: #ffffff;
+  --red-modal-background: #a52a2a;
+  --modal-grey-ultra: #d4d4d4;
+  --transparent: transparent;
+  --bordo-background: #751d1d;
+  --border-arrow: 1px solid var(--text-color-light-orange);
+  --text-light-grey:#f7f7f7;
+   /* Кольори для теми  (світла)*/
+  --base-background-theme: var(--bg-color-light-white);
+    --base-text-theme: var(--text-color-black);
+    --base-modal-background: var(--bg-color-light-white);
+    --modal-grey: var(--text-color-light-grey);
+    
+  }
 
-}
+
+

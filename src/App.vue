@@ -17,7 +17,7 @@
         :show="show"
       />
 
-      <main>
+      <main :class="show && 'main-usual'">
         <router-view
           :modalstate="stateModal"
           :path="path"
@@ -33,7 +33,7 @@
       </main>
 
       <FooterMain
-        :class="{ spec: stateModal }"
+        :class="{ spec: stateModal, 'show-footer': show }"
         :style="{ paddingRight: scrollWidth + 'px' }"
       ></FooterMain>
       <teleport to="#modalMain">
@@ -219,6 +219,11 @@ export default {
       //слідкування за станом модалки
       if (!this.stateModal) {
         //якщо закрита
+        window.document.documentElement.style.setProperty(
+          // динамічно міняю положеня модалки
+          '--left-modal',
+          0 + 'px'
+        );
         this.scrollWidth = 0; //скрол по дефолту
         this.$nextTick().then(() => {
           //чекаеєм виконня всього а вже потім
@@ -253,5 +258,20 @@ export default {
 
 .spec {
   width: 100vw;
+}
+
+footer {
+  opacity: 0;
+}
+main {
+  height: 100vh;
+}
+
+.main-usual {
+  height: auto;
+}
+
+.show-footer {
+  opacity: 1;
 }
 </style>

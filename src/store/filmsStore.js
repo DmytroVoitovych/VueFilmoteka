@@ -96,12 +96,14 @@ export const store = createStore({
     },
     async getFromServerFilmId({ state }, token) {
       try {
+        console.log('token', token);
         const res = await nodeHttp.get('/films/', {
           headers: { Authorization: 'Bearer ' + token },
           params: { page: 1, limit: 20 }, // пока на тесті
         });
 
         if (res) {
+          console.log('res', res);
           getTotalPageB(res);
 
           const watched = getAndCompare(state.infoWatched, res.data.data.watchedFilms); // порівнюю переглянуті

@@ -56,6 +56,7 @@ import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
 import intersectionWith from 'lodash.intersectionwith';
 import { featuresStore } from '@/store/storeForFeatures';
+import { myDatabase } from '@/store/filmsStore';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -103,7 +104,6 @@ export default {
     !JSON.parse(window.localStorage.getItem('genres')) && http.getGenresList();
   },
   async created() {
-    // хук для запросов
     this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
@@ -120,7 +120,6 @@ export default {
 
       data?.length === 0 && this.toMainPage();
       this.trend = this.controlStorage() || data;
-      console.log(http.maxPages > 500, http.maxPages);
       this.max = http.maxPages > 500 ? 500 : http.maxPages;
 
       this.getStaticGenres();
@@ -263,23 +262,31 @@ export default {
       this.genrs = genr;
     },
     funcUpdateIfChangePath(watched, queue) {
+      if (!store.state.infoWatched.length && !store.state.infoQueue.length) {
+        this.syncIndexDBandStore();
+      }
+
       switch (
         this.path // звіряю по положеню
       ) {
         case 'BibliotekaWatched':
           this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
+          console.log(1);
           this.max = store.state.max.numWatch; // всі сторінки
           break;
         case 'BibliotekaQueue':
           this.trend = queue ?? store.state.infoQueue.slice(0, 20);
           this.max = store.state.max.numQue;
+          console.log(2);
           break;
         default:
+          console.log('d');
           this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
           break;
       }
     },
     funcUpdateBibliotekaPage() {
+      console.log(this.$cookies.get('token'));
       store.state.max['numWatch' || 'numQue'] && this.funcUpdateIfChangePath(); // оптимізація швидкості
       store
         .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
@@ -312,6 +319,25 @@ export default {
         }
       });
     },
+    syncIndexDBandStore() {
+      myDatabase.keys().then(keys => {
+        console.log(this.path);
+        if (keys.includes('watched') && this.path === 'BibliotekaWatched') {
+          // перевірка ключа
+          myDatabase.getItem('watched').then(e => {
+            this.trend = JSON.parse(e).slice(0, 20); // якщо гуд коміт в стор
+            this.max = Math.ceil(JSON.parse(e).length / 20);
+          });
+        }
+        if (keys.includes('queue') && this.path === 'BibliotekaQueue') {
+          myDatabase.getItem('queue').then(e => {
+            this.trend = JSON.parse(e).slice(0, 20);
+            this.max = Math.ceil(JSON.parse(e).length / 20);
+          }); // якщо гуд коміт в стор
+        }
+        return;
+      });
+    },
   },
 
   watch: {
@@ -334,9 +360,9 @@ export default {
     modalstate() {
       this.funcSubscribeForDelAction();
     },
-    trend(newTrend) {
-      newTrend.length < 1 && this.funcUpdateBibliotekaPage();
-    },
+    // trend(newTrend) {
+    //   newTrend.length < 1 && this.funcUpdateBibliotekaPage();
+    // },
   },
   mounted() {
     this.funcSubscribeChangeLanguage();
@@ -428,7 +454,7 @@ export default {
   transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .gallery__item:hover .gallery__info {
-  font-weight: 600;
+  color: #ff7f00;
   transition: font-weight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

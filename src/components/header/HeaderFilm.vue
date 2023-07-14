@@ -1,25 +1,25 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home">
-    <template v-if="show">
-      <router-link
-        v-if="!path.includes('Biblioteka') && checkExpired"
-        :to="{ path: 'auth/login' }"
-        class="custom-btn btn-A"
-        ><span>{{ getHeaderContent('authcontent') }}</span></router-link
-      >
-      <button
-        class="btn__logout"
-        :data-name="getName()"
-        v-if="!path.includes('Biblioteka') && !checkExpired"
-        v-on:click.prevent="funcLogOut"
-      >
-        <svg class="subscribe-form__icon rotate-vert-center" width="32" height="32">
-          <use href="../../assets/sprite.svg#icon-exit"></use>
-        </svg>
-      </button>
-    </template>
     <ContainerMain>
+      <template v-if="show">
+        <router-link
+          v-if="!path.includes('Biblioteka') && checkExpired"
+          :to="{ path: 'auth/login' }"
+          class="custom-btn btn-A"
+          ><span>{{ getHeaderContent('authcontent') }}</span></router-link
+        >
+        <button
+          class="btn__logout"
+          :data-name="getName()"
+          v-if="!path.includes('Biblioteka') && !checkExpired"
+          v-on:click.prevent="funcLogOut"
+        >
+          <svg class="subscribe-form__icon rotate-vert-center" width="32" height="32">
+            <use href="../../assets/sprite.svg#icon-exit"></use>
+          </svg>
+        </button>
+      </template>
       <div>
         <nav class="navigation">
           <router-link :to="{ name: 'Home' }" v-on:click="toMainPage" class="logo-link">
@@ -437,7 +437,7 @@ export default {
 
   position: absolute;
   top: 124px;
-  left: 50%;
+  left: calc(50% - var(--left-modal));
   transform: translateX(-50%);
 
   @include mq(tablet) {
@@ -492,14 +492,14 @@ export default {
   font-weight: 500;
   background: transparent;
   cursor: pointer;
-  transition: all 0.3s ease;
+  /* transition: all 0.3s ease; */
   position: absolute;
   display: inline-block;
   box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, 0.5), 7px 7px 20px 0px rgba(0, 0, 0, 0.1),
     4px 4px 5px 0px rgba(0, 0, 0, 0.1);
   outline: none;
   text-align: center;
-  right: 50%;
+  right: calc(50% + var(--left-modal));
   translate: 50%;
   top: 160px;
   font-size: 14px;

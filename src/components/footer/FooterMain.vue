@@ -38,9 +38,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100px;
-  background-color: #f7f7f7;
+  background-color: var(--footer-background, var(--bg-color-light-grey));
   z-index: 0;
-  // transition: opacity 350ms;
 
   @media screen and (min-width: 1200px) {
     min-width: 1200px;
@@ -68,7 +67,7 @@ export default {
   font-family: 'Roboto', sans-serif;
   font-weight: 400;
   font-size: 16px;
-  color: #545454;
+  color: var(--footer-text, --text-color-grey);
   min-width: 320px;
 
   @media screen and (min-width: 1200px) {

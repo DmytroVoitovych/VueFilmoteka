@@ -187,7 +187,7 @@ export default {
 .pagination__button {
   border-radius: 5px;
   border: 0px;
-  background-color: var(--text-color-light);
+  background-color: var(--pagination-transparent-bg, var(--text-color-light));
   color: var(--text-color-light-grey);
   cursor: pointer;
   padding: 3px;
@@ -214,8 +214,8 @@ export default {
 .arrow {
   width: 40px;
   height: 40px;
-
-  background-color: var(--bg-color-light-grey);
+  background-color: var(--pagination-transparent-bg, var(--bg-color-light-grey));
+  border: var(--pagination-border, none);
   &:active {
     background-color: var(--text-color-light-orange);
     color: var(--text-color-light);
