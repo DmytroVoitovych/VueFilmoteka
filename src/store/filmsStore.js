@@ -103,7 +103,6 @@ export const store = createStore({
         });
 
         if (res) {
-          console.log('res', res);
           getTotalPageB(res);
 
           const watched = getAndCompare(state.infoWatched, res.data.data.watchedFilms); // порівнюю переглянуті

@@ -82,9 +82,12 @@ export default {
     };
   },
   created() {
+    !this.$cookies.get('token') && (this.show = true);
     window.addEventListener('focus', this.checkFocus); //рефреш логіна
     this.watchPath(); //контроль поточного шляху
-    this.controlLogin(); // постій контроль авторизації
+    !window.history.state.current.includes('auth') && this.controlLogin();
+
+    // постій контроль авторизації
   },
 
   methods: {

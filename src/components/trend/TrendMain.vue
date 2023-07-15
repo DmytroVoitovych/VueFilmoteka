@@ -271,22 +271,20 @@ export default {
       ) {
         case 'BibliotekaWatched':
           this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
-          console.log(1);
+
           this.max = store.state.max.numWatch; // всі сторінки
           break;
         case 'BibliotekaQueue':
           this.trend = queue ?? store.state.infoQueue.slice(0, 20);
           this.max = store.state.max.numQue;
-          console.log(2);
+
           break;
         default:
-          console.log('d');
           this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
           break;
       }
     },
     funcUpdateBibliotekaPage() {
-      console.log(this.$cookies.get('token'));
       store.state.max['numWatch' || 'numQue'] && this.funcUpdateIfChangePath(); // оптимізація швидкості
       store
         .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
@@ -314,14 +312,12 @@ export default {
       featuresStore.subscribe(mutation => {
         if (mutation.type.includes('setLanguage')) {
           window.localStorage.removeItem('genres');
-          console.log(window.localStorage.getItem('genres'));
           this.path === 'Home' ? this.setPage(this.page) : this.funcUpdateBibliotekaPage();
         }
       });
     },
     syncIndexDBandStore() {
       myDatabase.keys().then(keys => {
-        console.log(this.path);
         if (keys.includes('watched') && this.path === 'BibliotekaWatched') {
           // перевірка ключа
           myDatabase.getItem('watched').then(e => {
@@ -360,9 +356,6 @@ export default {
     modalstate() {
       this.funcSubscribeForDelAction();
     },
-    // trend(newTrend) {
-    //   newTrend.length < 1 && this.funcUpdateBibliotekaPage();
-    // },
   },
   mounted() {
     this.funcSubscribeChangeLanguage();
