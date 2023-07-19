@@ -16,7 +16,7 @@
         :path="path"
         :show="show"
       />
-
+      <BtnTopandDownVue />
       <main :class="show && 'main-usual'">
         <router-view
           :modalstate="stateModal"
@@ -48,6 +48,7 @@ import HeaderFilm from './components/header/HeaderFilm.vue';
 import FooterMain from './components/footer/FooterMain.vue';
 import TrendMain from './components/trend/TrendMain.vue';
 import ModalMain from './components/shared/ModalMain.vue';
+import BtnTopandDownVue from './components/shared/BtnTopandDown.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { store } from './store/filmsStore';
 
@@ -58,6 +59,7 @@ export default {
     FooterMain,
     TrendMain,
     ModalMain,
+    BtnTopandDownVue,
     // ModalBtnVue
   },
   props: {

@@ -31,11 +31,11 @@ export default {
   },
   methods: {
     changeThemeMode() {
-      document.documentElement.classList.toggle('dark');
+      document.documentElement.classList.toggle('dark'); // міняєм клас в залежності від стану
     },
     getUserTheme() {
-      this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.dark && document.documentElement.classList.add('dark');
+      this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches; // перевіряю тему юзера
+      this.dark && document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
     },
   },
 };

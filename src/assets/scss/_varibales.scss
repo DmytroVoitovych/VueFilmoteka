@@ -25,7 +25,7 @@
   --extra-grey: #424242;
   --extra-white: #e0e0e0;
   --extra-light-grey: #777777;
-  /* Кольори для теми  (темна)*/ 
+  /* Кольори для теми  (темна)*/
   --dark-background-theme: #2d2a2a;
   --white-text-theme: #ffffff;
   --red-modal-background: #a52a2a;
@@ -33,14 +33,12 @@
   --transparent: transparent;
   --bordo-background: #751d1d;
   --border-arrow: 1px solid var(--text-color-light-orange);
-  --text-light-grey:#f7f7f7;
-   /* Кольори для теми  (світла)*/
+  --text-light-grey: #f7f7f7;
+ 
+  /* Кольори для теми  (світла)*/
   --base-background-theme: var(--bg-color-light-white);
-    --base-text-theme: var(--text-color-black);
-    --base-modal-background: var(--bg-color-light-white);
-    --modal-grey: var(--text-color-light-grey);
-    
-  }
-
-
-
+  --base-text-theme: var(--text-color-black);
+  --base-modal-background: var(--bg-color-light-white);
+  --modal-grey: var(--text-color-light-grey);
+  --scroll-btn: #000000;
+}

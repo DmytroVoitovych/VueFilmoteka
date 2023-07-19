@@ -68,7 +68,7 @@ export default {
       //клік по кнопкам
       this.target = e?.target;
       const choose = +e?.target?.textContent;
-
+      console.log(Boolean(choose));
       if (choose) {
         this.page = choose;
         this.$emit('numPage', this.page); //передаю наверх для запиту
