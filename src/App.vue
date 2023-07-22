@@ -16,7 +16,7 @@
         :path="path"
         :show="show"
       />
-      <BtnTopandDownVue />
+      <BtnTopandDownVue v-if="getRef" />
       <main :class="show && 'main-usual'">
         <router-view
           :modalstate="stateModal"
@@ -51,6 +51,7 @@ import ModalMain from './components/shared/ModalMain.vue';
 import BtnTopandDownVue from './components/shared/BtnTopandDown.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { store } from './store/filmsStore';
+import { featuresStore } from './store/storeForFeatures';
 
 export default {
   name: 'App',
@@ -241,6 +242,11 @@ export default {
 
   beforeUnmount() {
     window.removeEventListener('focus', this.checkFocus); // видалення
+  },
+  computed: {
+    getRef() {
+      return featuresStore?.getters?.getRefItem;
+    },
   },
 };
 </script>

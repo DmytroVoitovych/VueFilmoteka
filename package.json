@@ -2,18 +2,18 @@
   "name": "filmoteka",
   "version": "0.1.0",
   "private": true,
-   "scripts": {
+  "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "format": "prettier --write src/"
-    },
+  },
   "dependencies": {
     "autoprefixer": "^10.4.13",
     "axios": "^0.27.2",
     "axios-extensions": "^3.1.6",
     "core-js": "^3.8.3",
-    "firebase": "^9.17.1",
+    "firebase": "^9.23.0",
     "idb-keyval": "^6.2.0",
     "intersection-observer": "^0.12.2",
     "localforage": "^1.10.0",

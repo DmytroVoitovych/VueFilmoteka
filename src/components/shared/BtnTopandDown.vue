@@ -1,5 +1,5 @@
 <template>
-  <button type="button">
+  <button type="button" :class="toTop && 'rotate'" v-on:click="toTopOrDown">
     <svg
       enable-background="new 0 0 512 512"
       id="Layer_1"
@@ -55,8 +55,71 @@
 </template>
 
 <script lang="js">
+import { featuresStore } from '@/store/storeForFeatures';
 
 
+export default {
+    data() {
+        return {
+          toTop: false,
+          locate: 0,
+
+    }
+    },
+
+  mounted() {
+
+      this.mangeDirectBtn(); 
+
+  },
+
+    methods: {
+      mangeDirectBtn() {
+        if (this.getRef) {
+          const intersectionObserver = new IntersectionObserver((entries) => {
+
+          return !entries[0].isIntersecting && (this.locate = window.scrollY);
+
+          }, { threshold: 1 });
+          // start observing
+
+          intersectionObserver.observe(this.getRef);
+        }
+      },
+      toTopOrDown() {
+
+let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
+    document.body.scrollHeight, document.documentElement.scrollHeight,
+    document.body.offsetHeight, document.documentElement.offsetHeight,
+    document.body.clientHeight, document.documentElement.clientHeight
+  );
+
+        if (this.toTop) {
+          window.scroll({ top: 0, behavior: 'smooth', });
+          this.toTop = false;
+          return;
+        }
+        window.scrollBy({ top: scrollHeight, behavior: "smooth" });
+        this.toTop = true;
+  }
+  },
+
+  watch: {
+    locate(n,o) {
+       n < o ? (this.toTop = false) : (this.toTop = true);
+    },
+    getRef(n,o) {
+      n !== o && this.mangeDirectBtn();
+   }
+  },
+    computed: {
+        getRef() {
+
+            return featuresStore?.getters?.getRefItem;
+        }
+    }
+
+}
 </script>
 
 <style lang="scss" scoped>
@@ -64,9 +127,10 @@ button {
   background: none;
   position: fixed;
   bottom: 90px;
-  right: 15px;
+  right: calc(15px + var(--left-modal) * 2);
   padding: 0;
   border: none;
+  z-index: 1;
   cursor: pointer;
 
   &:hover {
@@ -76,5 +140,9 @@ button {
   &:active {
     scale: 90%;
   }
+}
+
+.rotate {
+  rotate: 180deg;
 }
 </style>

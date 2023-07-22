@@ -17,6 +17,7 @@
               vote_average,
               genres,
             } in trend"
+            ref="observer"
             :key="id"
             class="gallery__item"
             @click="getIdForModal(id)"
@@ -249,6 +250,7 @@ export default {
           //якщо потрібний запит
           this.checkForStupid() && Block?.remove('.gallery__item');
         }
+
         return res;
       });
     },
@@ -334,6 +336,16 @@ export default {
         return;
       });
     },
+    sendRef() {
+      //передаю реф
+      const time = setTimeout(() => {
+        featuresStore.commit(
+          'setRefItem',
+          this.trend.length > 8 ? this.$refs.observer[8] : this.$refs.observer.reverse()[2]
+        );
+        clearTimeout(time);
+      }, 200);
+    },
   },
 
   watch: {
@@ -355,6 +367,9 @@ export default {
     },
     modalstate() {
       this.funcSubscribeForDelAction();
+    },
+    trend() {
+      this.trend.length > 2 ? this.sendRef() : featuresStore.commit('setRefItem', null);
     },
   },
   mounted() {

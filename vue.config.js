@@ -28,15 +28,4 @@ module.exports = {
       sharedb: 'sharedb',
     },
   },
-  
- };
-
-// module.exports = {
-//   configureWebpack: {
-//     resolve: {
-//       fallback: {
-//         stream: require.resolve('stream-browserify'),
-//       },
-//     },
-//   },
-// };
+};
