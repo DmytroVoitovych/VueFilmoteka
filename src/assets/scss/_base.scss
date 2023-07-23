@@ -1,5 +1,9 @@
 @import '~/node_modules/modern-normalize/modern-normalize.css';
 
+html{
+  pointer-events: var(--pointer);
+}
+
 body {
   position: relative;
   font-family: Roboto, sans-serif;
@@ -7,7 +11,7 @@ body {
   background: var(--base-background-theme);
   color: var(--base-text-theme);
   margin: 0px;
-}
+  }
 
 h1,
 h2,

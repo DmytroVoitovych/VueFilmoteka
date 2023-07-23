@@ -10,6 +10,7 @@
           ref="point"
           class="pagination__button"
           :class="{ active: +p === page }"
+          v-bind="p === '...' && checkSupport() ? { popovertarget: 'pagination-popover' } : {}"
         >
           {{ p }}
         </button>
@@ -23,12 +24,17 @@
     >
       &rsaquo;
     </button>
+    <ModalExperementalVue v-if="checkSupport()" @forcePage="setPage" :max="proppages" />
   </div>
 </template>
 
 <script>
+import Bowser from 'bowser';
+import ModalExperementalVue from './ModalExperemental.vue'; // popover api on this moment 23.07.2023 only chrome ande edge
+
 export default {
   name: 'PaginationHard',
+  components: { ModalExperementalVue },
   props: {
     proppages: {
       type: Number,
@@ -47,6 +53,7 @@ export default {
       arrPage: ['1', '2', '3', '4', '5', '6', '...', this.proppages],
       serverDate: [],
       target: 1,
+      browser: Bowser.getParser(window.navigator.userAgent).getBrowserName().toLowerCase(),
     };
   },
   emits: {
@@ -54,6 +61,11 @@ export default {
     numPage: value => typeof value === 'number' && value > 0,
   },
   methods: {
+    checkSupport() {
+      // перевіряю користувацбкий браузер
+      return this.browser.includes('chrome') || this.browser.includes('edge');
+    },
+
     setServ() {
       //формування форми пагінації
       const serverDate = [...Array(this.proppages + 1).keys()].filter(e => e > 0);
@@ -68,11 +80,17 @@ export default {
       //клік по кнопкам
       this.target = e?.target;
       const choose = +e?.target?.textContent;
-      console.log(Boolean(choose));
+
       if (choose) {
         this.page = choose;
         this.$emit('numPage', this.page); //передаю наверх для запиту
+        return;
+      } else if (typeof e === 'number') {
+        // вказує на прихід сторінки з інпута модалки
+        this.page = e;
+        this.$emit('numPage', this.page); //передаю наверх для запиту
       }
+
       return;
     },
     pagePlus() {

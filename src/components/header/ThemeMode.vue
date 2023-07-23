@@ -31,7 +31,8 @@ export default {
   },
   methods: {
     changeThemeMode() {
-      document.documentElement.classList.toggle('dark'); // міняєм клас в залежності від стану
+      const html = document.documentElement.classList;
+      html.toggle('dark'); // міняєм клас в залежності від стану
     },
     getUserTheme() {
       this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches; // перевіряю тему юзера

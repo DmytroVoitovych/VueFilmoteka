@@ -77,13 +77,14 @@ export default {
       mangeDirectBtn() {
         if (this.getRef) {
           const intersectionObserver = new IntersectionObserver((entries) => {
-
-          return !entries[0].isIntersecting && (this.locate = window.scrollY);
+          
+            return !entries[0].isIntersecting && (this.locate = window.scrollY); 
 
           }, { threshold: 1 });
           // start observing
-
+  
           intersectionObserver.observe(this.getRef);
+           
         }
       },
       toTopOrDown() {
@@ -106,7 +107,8 @@ let scrollHeight = Math.max( // взнаємо висоту скролу (мож
 
   watch: {
     locate(n,o) {
-       n < o ? (this.toTop = false) : (this.toTop = true);
+      n < o ? (this.toTop = false) : (this.toTop = true);
+      
     },
     getRef(n,o) {
       n !== o && this.mangeDirectBtn();

@@ -73,7 +73,7 @@
                 :class="doneWatched && 'remove'"
                 :disabled="!getAuth || (checkParam && loading)"
               >
-                {{ !doneWatched ? 'add to Watched' : 'remove from watched' }}
+                {{ !doneWatched ? getModalContent()[5] : getModalContent()[6] }}
               </button>
             </li>
             <li>
@@ -85,7 +85,7 @@
                 :class="doneQueue && 'remove'"
                 :disabled="!getAuth || (!checkParam && loading)"
               >
-                {{ !doneQueue ? 'add to queue' : 'remove from queue' }}
+                {{ !doneQueue ? getModalContent()[7] : getModalContent()[8] }}
               </button>
             </li>
           </ul>
@@ -395,6 +395,10 @@ button[disabled] {
   line-height: 1.16;
   text-transform: uppercase;
   margin-bottom: 20px;
+
+  @include mq(mobile-only) {
+    font-size: 18px;
+  }
 }
 
 .modal__listV {
@@ -489,6 +493,10 @@ button[disabled] {
   display: flex;
   gap: 15px;
 
+  li {
+    width: 100%;
+  }
+
   @media screen and (max-width: 767.5px) {
     gap: 20px;
     display: grid;
@@ -514,6 +522,7 @@ button[disabled] {
   font-size: 12px;
   line-height: 1.33;
   cursor: pointer;
+  width: 100%;
 
   @media screen and (max-width: 769.5px) {
     padding: 6px 27px;
@@ -523,7 +532,7 @@ button[disabled] {
     color: var(--bg-color-modal-orange);
     text-transform: uppercase;
     background: var(--text-color-light);
-    border: 2px solid #ff6b01;
+    outline: 2px solid #ff6b01;
     border-radius: 5px;
   }
 }
@@ -541,6 +550,7 @@ button[disabled] {
   font-weight: 500;
   font-size: 12px;
   line-height: 1.33;
+  width: inherit;
 
   @media screen and (max-width: 769.5px) {
     //    padding: 13px 11px 13px 13px;
@@ -552,8 +562,7 @@ button[disabled] {
     color: var(--text-color-light);
     text-transform: uppercase;
     background: var(--bg-color-modal-orange);
-    outline: none;
-    border: 2px solid #ff6b01;
+    outline: 2px solid var(--extra-light-grey);
     border-radius: 5px;
   }
 }
