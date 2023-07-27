@@ -4,6 +4,16 @@ html{
   pointer-events: var(--pointer);
 }
 
+// #app {
+//   font-family: Roboto, Helvetica, Arial, sans-serif;
+//   -webkit-font-smoothing: antialiased;
+//   -moz-osx-font-smoothing: grayscale;
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: space-between;
+//   min-height: 100vh;
+// }
+
 body {
   position: relative;
   font-family: Roboto, sans-serif;
@@ -11,6 +21,7 @@ body {
   background: var(--base-background-theme);
   color: var(--base-text-theme);
   margin: 0px;
+  
   }
 
 h1,
@@ -72,3 +83,8 @@ img {
     font-size: 32px;
   }
 }
+
+
+// #app > div {
+//   height: 100%;
+// }

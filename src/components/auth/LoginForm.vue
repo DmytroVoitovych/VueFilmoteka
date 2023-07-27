@@ -67,9 +67,7 @@ export default {
   components: {
     CustomInput,
   },
-  created() {
-    console.log(this.$store.state.user);
-  },
+
   methods: {
     async funcSignInUser() {
       if ((this.mailLog, this.passLog)) {
@@ -96,8 +94,7 @@ export default {
       try {
         await this.$store.dispatch('googleLogin');
         this.funcRedirectAfterLogin();
-        Notify.success(`User ${window.localStorage.getItem('name')} created`);
-        console.log('trylogin');
+        Notify.success(`User ${window?.localStorage?.getItem('name')} created`);
       } catch (err) {
         this.$router.push({ path: '/auth/login' });
         Notify.info('User stop auth');

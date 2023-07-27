@@ -40,6 +40,8 @@
             </div>
           </li>
         </ul>
+        <SkeletonTrend v-if="status === 'load' && !this.trend.length" class="gallery__list" />
+
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue @numPage="setPage" :proppages="max" ref="downBtn" :path="path" />
         </div>
@@ -52,6 +54,7 @@
 import ContainerMain from '../shared/ContainerMain.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
+import SkeletonTrend from './SkeletonTrend.vue';
 import { axio, nodeHttp } from '../../helpers/axios';
 import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
@@ -68,6 +71,7 @@ export default {
     ContainerMain,
     // Home,
     PaginationHardVue,
+    SkeletonTrend,
   },
   props: {
     proppages: {
@@ -93,6 +97,7 @@ export default {
   data() {
     //стейт
     return {
+      status: 'load',
       trend: [],
       genrs: [],
       page: 1,
@@ -105,6 +110,9 @@ export default {
     !JSON.parse(window.localStorage.getItem('genres')) && http.getGenresList();
   },
   async created() {
+    window.localStorage.getItem(this.path)
+      ? (this.status = 'ready')
+      : window.localStorage.removeItem(this.path);
     this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
@@ -199,7 +207,8 @@ export default {
       this.locate = window.scrollY; //запис положення
       this.$nextTick().then(() => {
         //прибиваю скролл
-        this.locate > 500 && window.scrollBy(0, this.locate * 20);
+        this.locate > window.document.documentElement.clientHeight / 2 &&
+          window.scrollBy(0, this.locate * 20);
       });
     },
     checkFind() {
@@ -226,6 +235,7 @@ export default {
     },
     loaderBasic() {
       // функція відповідальна за основний лоадер на сайті
+
       axio.loader.interceptors.request.use(config => {
         //перехоплюєм запит
 
@@ -308,6 +318,7 @@ export default {
               this.trend.findIndex(e => e === folowIdDel),
               0
             );
+          !this.trend.length && (this.status = 'ready');
         });
     },
     funcSubscribeChangeLanguage() {
@@ -343,6 +354,7 @@ export default {
           'setRefItem',
           this.trend.length > 8 ? this.$refs.observer[8] : this.$refs.observer.reverse()[2]
         );
+        this.status = 'ready';
         clearTimeout(time);
       }, 200);
     },
@@ -362,6 +374,9 @@ export default {
       this.startRenderPage();
     },
     path() {
+      window.localStorage.getItem(this.path)
+        ? (this.status = 'ready')
+        : window.localStorage.removeItem(this.path);
       this.page = 1;
       this.funcUpdateBibliotekaPage();
     },
@@ -369,9 +384,14 @@ export default {
       this.funcSubscribeForDelAction();
     },
     trend() {
+      !this.trend.length
+        ? window.localStorage.setItem(this.path, 'empty')
+        : window.localStorage.getItem(this.path) && window.localStorage.removeItem(this.path);
+
       this.trend.length > 2 ? this.sendRef() : featuresStore.commit('setRefItem', null);
     },
   },
+
   mounted() {
     this.funcSubscribeChangeLanguage();
     this.loaderBasic(); // важливо дочекатись змонтування дерева
@@ -387,6 +407,7 @@ export default {
     criticalGenres() {
       return this.genrs.length ? this.genrs : JSON.parse(window.localStorage.getItem('genres'));
     },
+
     getLanguage() {
       return featuresStore.getters.getLanguage;
     },

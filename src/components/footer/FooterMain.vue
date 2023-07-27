@@ -33,6 +33,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+footer {
+  position: relative;
+  bottom: 0;
+}
 .footer {
   display: flex;
   justify-content: center;

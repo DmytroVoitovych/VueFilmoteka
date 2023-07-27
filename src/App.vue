@@ -1,46 +1,46 @@
 <template>
-  <div>
-    <div v-if="path.includes('Auth')" id="auth">
-      <router-view></router-view>
-    </div>
-    <div
-      v-else
-      id="app"
-      :class="{ modal: stateModal }"
-      :style="{ top: stateModal && `${-locate}px`, right: scrollWidth + 'px' }"
-    >
-      <HeaderFilm
-        @onChekfind="onChekfind"
-        :class="{ spec: stateModal }"
-        :style="{ paddingRight: scrollWidth + 'px' }"
-        :path="path"
-        :show="show"
-      />
-      <BtnTopandDownVue v-if="getRef" />
-      <main :class="show && 'main-usual'">
-        <router-view
-          :modalstate="stateModal"
-          :path="path"
-          :switcher="check"
-          @get-find-id="getFindId"
-        ></router-view>
-        <TrendMain
-          v-if="path === 'Home'"
-          :path="path"
-          :switcher="check"
-          @get-find-id="getFindId"
-        ></TrendMain>
-      </main>
-
-      <FooterMain
-        :class="{ spec: stateModal, 'show-footer': show }"
-        :style="{ paddingRight: scrollWidth + 'px' }"
-      ></FooterMain>
-      <teleport to="#modalMain">
-        <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
-      </teleport>
-    </div>
+  <!-- <div> -->
+  <div v-if="path.includes('Auth')" id="auth">
+    <router-view></router-view>
   </div>
+  <div
+    class="flex"
+    v-else
+    :class="{ modal: stateModal }"
+    :style="{ top: stateModal && `${-locate}px`, right: scrollWidth + 'px' }"
+  >
+    <HeaderFilm
+      @onChekfind="onChekfind"
+      :class="{ spec: stateModal }"
+      :style="{ paddingRight: scrollWidth + 'px' }"
+      :path="path"
+      :show="show"
+    />
+    <BtnTopandDownVue v-if="getRef" />
+    <main>
+      <router-view
+        :modalstate="stateModal"
+        :path="path"
+        :switcher="check"
+        @get-find-id="getFindId"
+      ></router-view>
+      <TrendMain
+        v-if="path === 'Home'"
+        :path="path"
+        :switcher="check"
+        @get-find-id="getFindId"
+      ></TrendMain>
+    </main>
+
+    <FooterMain
+      :class="{ spec: stateModal, 'show-footer': show }"
+      :style="{ paddingRight: scrollWidth + 'px' }"
+    ></FooterMain>
+    <teleport to="#modalMain">
+      <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
+    </teleport>
+  </div>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -123,9 +123,11 @@ export default {
           user
             .getIdToken(true) // дає новий токен
             .then(newToken => {
-              this.$store.commit('setLogin', newToken);
-              this.refreshToken(); // форсстейт
-            }) //записую в стейт
+              this.$store.dispatch('googleAuthInfo', newToken);
+            })
+            .then(() =>
+              this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined)
+            ) //записую в стейт
             .catch(err => console.log(err));
         } else {
           this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
@@ -148,6 +150,7 @@ export default {
           this.$cookies.remove('token'); // при приході помилки вбиваю токен
           this.$store.dispatch('googleAuthInfo'); // перевіряю google вхід
         }
+
         console.log(err);
       } finally {
         // костиль для появу потрібної кнопки // малюю по готовності
@@ -167,7 +170,9 @@ export default {
         this.show = true;
         const refresh = setTimeout(
           async () => {
-            await this.refreshToken(); //??
+            window.atob(this.$cookies.get('token').split('.')[1]).includes('firebase')
+              ? await this.controlLogin()
+              : await this.refreshToken(); //??
             clearTimeout(refresh); // чищу після виконання
           },
           expired > 0 ? expired * 1000 : 0 // слідкую за часом в разі перезавантаження сторінки {in/now}
@@ -251,11 +256,8 @@ export default {
 };
 </script>
 
-<style>
-#app {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+<style lang="scss" scoped>
+.flex {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -271,18 +273,22 @@ export default {
   width: 100vw;
 }
 
-footer {
+main:has(.gallery__info) footer {
   opacity: 0;
-}
-main {
-  height: 100vh;
-}
-
-.main-usual {
-  height: auto;
 }
 
 .show-footer {
   opacity: 1;
+}
+
+main:not(:has(.gallery__info)) {
+  flex: 1;
+  background-image: url(./assets/images/biblioteka/nofilms.jpg);
+  background-size: 100% 100%;
+
+  @include mq(desktop) {
+    background-size: cover;
+    background-position: center;
+  }
 }
 </style>

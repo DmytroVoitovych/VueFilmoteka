@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <div id="pagination-popover" ref="t" popover class="modal-pagination">
+  <div id="pagination-popover" popover class="modal-pagination">
     <button
       class="close closeV'"
       modal-pagination-close

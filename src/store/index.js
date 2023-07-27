@@ -3,6 +3,7 @@ import { signInWithPopup, getAuth, signOut } from 'firebase/auth';
 import { nodeHttp } from '@/helpers/axios';
 import { createStore } from 'vuex';
 import { store as filmStore } from './filmsStore';
+import cookie from 'vue-cookies';
 
 const auth = getAuth();
 
@@ -31,14 +32,17 @@ export const store = createStore({
     },
   },
   actions: {
-    async googleAuthInfo(state) {
+    async googleAuthInfo(state, payload) {
       try {
-        const res = await nodeHttp.get('user/auth/googleIP'); // пошук по базі
+        const res = await nodeHttp.get('user/auth/googleIP', {
+          headers: { Authorization: 'Bearer ' + payload ?? '' },
+        }); // пошук по базі
 
         window.localStorage.setItem('name', res.data.data.name);
         console.log('пішов вхід');
         state.commit('setLogin', res.data.data.token);
-        filmStore.dispatch('getFromServerFilmId', res.data.data.token); // достаю всі id для синхрона
+        cookie.set('token', res.data.data.token, '60MIN');
+        filmStore.dispatch('getFromServerFilmId', cookie.get('token') ?? res.data.data.token); // достаю всі id для синхрона
       } catch (err) {
         const auth = getAuth();
         if (!state.token) {
@@ -53,8 +57,8 @@ export const store = createStore({
     async googleLogin(context) {
       // через гугл
       const res = await signInWithPopup(auth, provider);
-
       const token = res.user.accessToken;
+
       if (token) {
         const { name, email } = JSON.parse(window.atob(token.split('.')[1]));
         window.localStorage.setItem('name', name);

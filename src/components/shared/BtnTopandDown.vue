@@ -80,7 +80,7 @@ export default {
           
             return !entries[0].isIntersecting && (this.locate = window.scrollY); 
 
-          }, { threshold: 1 });
+          }, { threshold: .5 });
           // start observing
   
           intersectionObserver.observe(this.getRef);
