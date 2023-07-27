@@ -281,6 +281,17 @@ main:has(.gallery__info) footer {
   opacity: 1;
 }
 
+main:not(.gallery__info) {
+  flex: 1;
+  background-image: url(./assets/images/biblioteka/nofilms.jpg);
+  background-size: 100% 100%;
+
+  @include mq(desktop) {
+    background-size: cover;
+    background-position: center;
+  }
+}
+
 main:not(:has(.gallery__info)) {
   flex: 1;
   background-image: url(./assets/images/biblioteka/nofilms.jpg);

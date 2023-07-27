@@ -61,6 +61,7 @@ import { store } from '@/store/filmsStore';
 import intersectionWith from 'lodash.intersectionwith';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
+import { ready } from 'localforage';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -283,13 +284,13 @@ export default {
       ) {
         case 'BibliotekaWatched':
           this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
-
+          !this.trend && window.localStorage.setItem('BibliotekaWatched', 'empty');
           this.max = store.state.max.numWatch; // всі сторінки
           break;
         case 'BibliotekaQueue':
           this.trend = queue ?? store.state.infoQueue.slice(0, 20);
           this.max = store.state.max.numQue;
-
+          !this.trend && window.localStorage.setItem('BibliotekaQueue', 'empty');
           break;
         default:
           this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
@@ -336,12 +337,14 @@ export default {
           myDatabase.getItem('watched').then(e => {
             this.trend = JSON.parse(e).slice(0, 20); // якщо гуд коміт в стор
             this.max = Math.ceil(JSON.parse(e).length / 20);
+            !JSON.parse(e).length && window.localStorage.setItem('BibliotekaWatched', 'empty');
           });
         }
         if (keys.includes('queue') && this.path === 'BibliotekaQueue') {
           myDatabase.getItem('queue').then(e => {
             this.trend = JSON.parse(e).slice(0, 20);
             this.max = Math.ceil(JSON.parse(e).length / 20);
+            !JSON.parse(e).length && window.localStorage.setItem('BibliotekaQueue', 'empty');
           }); // якщо гуд коміт в стор
         }
         return;
@@ -376,7 +379,7 @@ export default {
     path() {
       window.localStorage.getItem(this.path)
         ? (this.status = 'ready')
-        : window.localStorage.removeItem(this.path);
+        : window.localStorage.removeItem(this.path) && (this.status = ready);
       this.page = 1;
       this.funcUpdateBibliotekaPage();
     },
@@ -385,7 +388,7 @@ export default {
     },
     trend() {
       !this.trend.length
-        ? window.localStorage.setItem(this.path, 'empty')
+        ? window.localStorage.setItem(this.path, 'empty') && (this.status = ready)
         : window.localStorage.getItem(this.path) && window.localStorage.removeItem(this.path);
 
       this.trend.length > 2 ? this.sendRef() : featuresStore.commit('setRefItem', null);
