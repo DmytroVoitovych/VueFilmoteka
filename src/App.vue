@@ -17,7 +17,7 @@
       :show="show"
     />
     <BtnTopandDownVue v-if="getRef" />
-    <main>
+    <main :class="polyHas && 'has--poly'">
       <router-view
         :modalstate="stateModal"
         :path="path"
@@ -52,6 +52,7 @@ import BtnTopandDownVue from './components/shared/BtnTopandDown.vue';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { store } from './store/filmsStore';
 import { featuresStore } from './store/storeForFeatures';
+import Bowser from 'bowser';
 
 export default {
   name: 'App',
@@ -82,6 +83,7 @@ export default {
       path: '', //поточний роут
       show: false, // ?? під питанням чи потрібно мені це(обдумать)
       counterSign: 0, // для контроля кількості фокусів при гості
+      browser: Bowser.getParser(window.navigator.userAgent).getBrowserName().toLowerCase(),
     };
   },
   created() {
@@ -252,6 +254,10 @@ export default {
     getRef() {
       return featuresStore?.getters?.getRefItem;
     },
+    polyHas() {
+      // полифил для firefox
+      return this.browser.includes('firefox') && window?.localStorage?.getItem(this.path);
+    },
   },
 };
 </script>
@@ -280,8 +286,7 @@ main:has(.gallery__info) footer {
 .show-footer {
   opacity: 1;
 }
-
-main:not(.gallery__info) {
+.has--poly {
   flex: 1;
   background-image: url(./assets/images/biblioteka/nofilms.jpg);
   background-size: 100% 100%;
