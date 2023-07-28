@@ -50,6 +50,7 @@ export const store = createStore({
           await signOut(auth);
           console.log('бекенд не знайшов такого користувача');
           state.commit('setLogin', '');
+          cookie.remove('token');
         }
         console.log(err);
       }

@@ -6,6 +6,8 @@ import LoginForm from './components/auth/LoginForm.vue';
 import RegisterForm from './components/auth/RegisterForm.vue';
 import Home from './page/Home.vue';
 
+import cookie from 'vue-cookies';
+
 const routes = [
   {
     path: '/',
@@ -33,6 +35,7 @@ const routes = [
     path: '/auth',
     name: 'Auth',
     component: AuthPage,
+
     children: [
       {
         path: 'login',
@@ -57,6 +60,13 @@ const router = createRouter({
   // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
   history: createWebHistory(),
   routes, // short for `routes: routes`
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.name.toLowerCase().includes('auth') && cookie.get('token')) next({ path: '/' });
+  else if (to.name.toLocaleLowerCase().includes('bibl') && !cookie.get('token'))
+    next({ name: 'AuthLogin' });
+  else next();
 });
 
 export default router;

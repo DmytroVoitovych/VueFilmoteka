@@ -80,7 +80,7 @@ export default {
           
             return !entries[0].isIntersecting && (this.locate = window.scrollY); 
 
-          }, { threshold: .5 });
+          }, { threshold: .6 });
           // start observing
   
           intersectionObserver.observe(this.getRef);
@@ -106,8 +106,9 @@ let scrollHeight = Math.max( // взнаємо висоту скролу (мож
   },
 
   watch: {
-    locate(n,o) {
-      n < o ? (this.toTop = false) : (this.toTop = true);
+    locate(n) {
+      
+      n < document.documentElement.scrollHeight / 2  ? (this.toTop = false) : (this.toTop = true);
       
     },
     getRef(n,o) {

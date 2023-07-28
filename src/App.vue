@@ -53,6 +53,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { store } from './store/filmsStore';
 import { featuresStore } from './store/storeForFeatures';
 import Bowser from 'bowser';
+import { nodeHttp } from './helpers/axios';
 
 export default {
   name: 'App',
@@ -91,11 +92,33 @@ export default {
     window.addEventListener('focus', this.checkFocus); //рефреш логіна
     this.watchPath(); //контроль поточного шляху
     !window.history.state.current.includes('auth') && this.controlLogin();
-
     // постій контроль авторизації
+    this.axiosRedirect();
   },
 
   methods: {
+    axiosRedirect() {
+      nodeHttp.interceptors.response.use(
+        response => {
+          this.redirectFromHideRoute();
+          return response;
+        },
+        error => {
+          this.redirectFromHideRoute();
+          return Promise.reject(error);
+        }
+      );
+    },
+    redirectFromHideRoute() {
+      this.path.toLowerCase().includes('bibl') &&
+        !this.$cookies.get('token') &&
+        this.$router.push({ name: 'AuthLogin' });
+
+      this.path.toLowerCase().includes('auth') &&
+        this.$cookies.get('token') &&
+        this.$router.push({ path: '/' });
+    },
+
     async checkFocus() {
       if (this.$store.state.token) {
         // тест на сторонній бекенд
@@ -219,14 +242,17 @@ export default {
         () => this.$route.name,
         fullPath => {
           this.path = fullPath.replace('/', '');
+          this.$route?.redirectedFrom?.fullPath?.includes('auth') && this.checkFocus();
         }
       );
     },
   },
+
   updated() {
     // при оновлені встановлення дефолту
     this.filmsid = -1;
   },
+  mounted() {},
   watch: {
     stateModal() {
       //слідкування за станом модалки

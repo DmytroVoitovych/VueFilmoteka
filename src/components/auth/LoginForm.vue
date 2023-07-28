@@ -69,8 +69,19 @@ export default {
   },
 
   methods: {
+    redirectFromHideRoute() {
+      window.history.state.current.toLowerCase().includes('bibl') &&
+        !this.$cookies.get('token') &&
+        this.$router.push({ name: 'AuthLogin' });
+
+      window.history.state.current.toLowerCase().includes('auth') &&
+        this.$cookies.get('token') &&
+        this.$router.push({ path: '/' });
+    },
     async funcSignInUser() {
-      if ((this.mailLog, this.passLog)) {
+      this.redirectFromHideRoute();
+
+      if ((this.mailLog, this.passLog, !this.$cookies.get('token'))) {
         Loading.dots();
         try {
           await this.$store.dispatch('signIn', {
@@ -90,16 +101,19 @@ export default {
       }
     },
     async googleLogin() {
-      Loading.dots();
-      try {
-        await this.$store.dispatch('googleLogin');
-        this.funcRedirectAfterLogin();
-        Notify.success(`User ${window?.localStorage?.getItem('name')} created`);
-      } catch (err) {
-        this.$router.push({ path: '/auth/login' });
-        Notify.info('User stop auth');
-      } finally {
-        Loading.remove();
+      this.redirectFromHideRoute();
+      if (!this.$cookies.get('token')) {
+        Loading.dots();
+        try {
+          await this.$store.dispatch('googleLogin');
+          this.funcRedirectAfterLogin();
+          Notify.success(`User ${window?.localStorage?.getItem('name')} created`);
+        } catch (err) {
+          this.$router.push({ path: '/auth/login' });
+          Notify.info('User stop auth');
+        } finally {
+          Loading.remove();
+        }
       }
     },
     funcRedirectAfterLogin() {
