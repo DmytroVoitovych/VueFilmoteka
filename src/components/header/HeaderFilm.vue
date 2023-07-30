@@ -587,7 +587,7 @@ export default {
 
 .btn__logout {
   position: absolute;
-  right: 50%;
+  right: calc(50% + var(--left-modal));
   translate: 50%;
   top: 160px;
   @extend %reset-style;

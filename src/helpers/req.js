@@ -50,7 +50,9 @@ export default class MovieAPiServer {
   }
   // ----
   async fetchMovieById(id) {
-    const URL = `/3/movie/${id}?api_key=${this.API_KEY}&language=${this.getlang()}`;
+    const URL = `/3/movie/${id}?api_key=${
+      this.API_KEY
+    }&language=${this.getlang()}&append_to_response=videos`;
 
     try {
       const response = await http.get(URL);

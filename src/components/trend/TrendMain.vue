@@ -19,6 +19,7 @@
             } in trend"
             ref="observer"
             :key="id"
+            :id="id"
             class="gallery__item"
             @click="getIdForModal(id)"
           >
@@ -265,6 +266,7 @@ export default {
         return res;
       });
     },
+
     getIdForModal(id) {
       // отримання данних для модалки
       this.$emit('get-find-id', id);

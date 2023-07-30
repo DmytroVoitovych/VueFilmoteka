@@ -21,6 +21,25 @@
             : require('./../../assets/images/ded.jpg')
         "
       />
+      <button
+        v-if="infos?.videos?.results?.length"
+        type="button"
+        class="btnyou"
+        :style="play && { stroke: 'var(--yt-modal-btn)' }"
+        @click="() => (play = !play)"
+      >
+        <svg width="50" height="50">
+          <use :href="require('./../../assets/sprite.svg') + switcher"></use>
+        </svg>
+      </button>
+      <YouIframeVue
+        v-if="infos?.videos?.results?.length"
+        v-show="play"
+        :video="infos.videos.results"
+        :class="play && 'iframe__main'"
+        :player-vars="{ autoplay: 0, listType: 'user_uploads' }"
+        ref="yt"
+      />
       <div>
         <h3 class="modal__titleV t-js">{{ infos.title ?? 'No date' }}</h3>
         <div class="flexboxV">
@@ -101,10 +120,14 @@ import { myDatabase, store } from '@/store/filmsStore';
 import { nodeHttp } from '@/helpers/axios';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContent } from './contentLang';
+import YouIframeVue from '../iframe/YouIframe.vue';
 
 const http = new MovieAPiServer();
 
 export default {
+  components: {
+    YouIframeVue,
+  },
   props: {
     filmsid: {
       //проп з id
@@ -121,6 +144,7 @@ export default {
   },
   data() {
     return {
+      play: false,
       openModal: false, //стан модалки
       infos: [],
       checkParam: false,
@@ -275,6 +299,10 @@ export default {
       window.addEventListener('keydown', this.funcKeyDown);
       !this.openModal && //вимикаєм слухач
         window.removeEventListener('keydown', this.funcKeyDown);
+      !this.openModal && (this.play = false);
+    },
+    play() {
+      !this.play ? this?.$refs.yt.exitFrame() : this?.$refs?.yt?.runFrame();
     },
   },
   computed: {
@@ -291,6 +319,9 @@ export default {
     },
     getAuth() {
       return this.$store.state.token;
+    },
+    switcher() {
+      return !this.play ? '#icon-btnyou' : '#icon-close';
     },
   },
 };
@@ -314,7 +345,6 @@ button[disabled] {
   padding: 40px 12px;
   gap: 16px;
   background-color: var(--base-modal-background);
-
   max-width: 806px;
   height: auto;
 
@@ -608,5 +638,28 @@ button[disabled] {
 
 .t-js {
   color: var(--base-text-theme);
+}
+
+.iframe__main {
+  position: absolute;
+  inset: 0;
+}
+
+.btnyou {
+  @extend %reset-style;
+  position: absolute;
+  z-index: 1;
+  cursor: pointer;
+  filter: drop-shadow(0px 0px 3px var(--yt-modal-btn));
+
+  svg:hover {
+    stroke: var(--bg-color-modal-orange);
+    scale: 1.1;
+  }
+
+  svg:active {
+    scale: 1;
+    stroke: var(--extra-light-grey);
+  }
 }
 </style>

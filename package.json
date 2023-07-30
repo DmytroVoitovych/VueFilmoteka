@@ -29,7 +29,9 @@
     "vue": "^3.2.36",
     "vue-cookies": "^1.8.2",
     "vue-router": "^4.1.6",
-    "vuex": "^4.0.2"
+    "vue3-ytframe": "^0.3.3",
+    "vuex": "^4.0.2",
+    "webpack": "^5.82.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
