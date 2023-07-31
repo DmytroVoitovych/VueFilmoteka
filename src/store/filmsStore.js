@@ -85,11 +85,15 @@ export const store = createStore({
       });
 
       if (type === 'watched') {
-        const removeItemFromArr = context.state.infoWatched.filter(e => e.id !== idFilm);
+        const removeItemFromArr = context.state.infoWatched.filter(
+          e => e.id !== idFilm
+        );
         context.commit('delWatched', removeItemFromArr);
         myDatabase.setItem('watched', JSON.stringify(removeItemFromArr));
       } else {
-        const removeItemFromArr = context.state.infoQueue.filter(e => e.id !== idFilm);
+        const removeItemFromArr = context.state.infoQueue.filter(
+          e => e.id !== idFilm
+        );
         context.commit('delQueue', removeItemFromArr);
         myDatabase.setItem('queue', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
       }
@@ -104,8 +108,14 @@ export const store = createStore({
         if (res) {
           getTotalPageB(res);
 
-          const watched = getAndCompare(state.infoWatched, res.data.data.watchedFilms); // порівнюю переглянуті
-          const queue = getAndCompare(state.infoQueue, res.data.data.queueFilms); // порівнюю чергу
+          const watched = getAndCompare(
+            state.infoWatched,
+            res.data.data.watchedFilms
+          ); // порівнюю переглянуті
+          const queue = getAndCompare(
+            state.infoQueue,
+            res.data.data.queueFilms
+          ); // порівнюю чергу
 
           !watched && syncDb(res.data.data.watchedFilms, 'watched');
           !queue && syncDb(res.data.data.queueFilms, 'queue');

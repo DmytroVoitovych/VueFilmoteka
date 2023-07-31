@@ -1,6 +1,6 @@
 @import '~/node_modules/modern-normalize/modern-normalize.css';
 
-html{
+html {
   pointer-events: var(--pointer);
 }
 
@@ -21,8 +21,7 @@ body {
   background: var(--base-background-theme);
   color: var(--base-text-theme);
   margin: 0px;
-  
-  }
+}
 
 h1,
 h2,
@@ -83,7 +82,6 @@ img {
     font-size: 32px;
   }
 }
-
 
 // #app > div {
 //   height: 100%;

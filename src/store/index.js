@@ -42,7 +42,10 @@ export const store = createStore({
         console.log('пішов вхід');
         state.commit('setLogin', res.data.data.token);
         cookie.set('token', res.data.data.token, '60MIN');
-        filmStore.dispatch('getFromServerFilmId', cookie.get('token') ?? res.data.data.token); // достаю всі id для синхрона
+        filmStore.dispatch(
+          'getFromServerFilmId',
+          cookie.get('token') ?? res.data.data.token
+        ); // достаю всі id для синхрона
       } catch (err) {
         const auth = getAuth();
         if (!state.token) {
@@ -86,7 +89,9 @@ export const store = createStore({
       // логін ноде
       const res = await nodeHttp.post('user/auth/login', payload);
       if (res) {
-        const { name } = JSON.parse(window.atob(res.data.data.access_token.split('.')[1]));
+        const { name } = JSON.parse(
+          window.atob(res.data.data.access_token.split('.')[1])
+        );
         window.localStorage.setItem('name', name);
         context.commit('setLogin', res.data.data.access_token);
       }
@@ -125,7 +130,9 @@ export const store = createStore({
         headers: { Authorization: 'Bearer ' + payload },
       });
       if (res) {
-        const { name } = JSON.parse(window.atob(res.data.data.access_token.split('.')[1]));
+        const { name } = JSON.parse(
+          window.atob(res.data.data.access_token.split('.')[1])
+        );
         window.localStorage.setItem('name', name);
         context.commit('setLogin', res.data.data.access_token);
         context.commit('setRefresh', res.data.data.refresh_token);

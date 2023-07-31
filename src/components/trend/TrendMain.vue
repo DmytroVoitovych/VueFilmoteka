@@ -4,7 +4,12 @@
     <ContainerMain>
       <section class="container gallery section">
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
-          <PaginationHardVue @numPage="setPage" :proppages="max" ref="upBtn" :path="path" />
+          <PaginationHardVue
+            @numPage="setPage"
+            :proppages="max"
+            ref="upBtn"
+            :path="path"
+          />
         </div>
         <ul class="gallery-js gallery__list">
           <li
@@ -26,25 +31,45 @@
             <img
               class="gallery__img"
               loading="lazy"
-              :src="poster_path ? getPoster(poster_path) : require('./../../assets/images/ded.jpg')"
+              :src="
+                poster_path
+                  ? getPoster(poster_path)
+                  : require('./../../assets/images/ded.jpg')
+              "
               :alt="title"
             />
             <div class="gallery__info">
               <p class="gallery__title them">{{ title }}</p>
               <p class="gallery__text them">
-                <span :class="{ space: getGenre(genre_ids ?? genres.map(e => e.id))?.length > 27 }"
-                  >{{ getGenre(genre_ids ?? genres.map(e => e.id)) }}&ensp;|&ensp;</span
+                <span
+                  :class="{
+                    space:
+                      getGenre(genre_ids ?? genres.map(e => e.id))?.length > 27,
+                  }"
+                  >{{
+                    getGenre(genre_ids ?? genres.map(e => e.id))
+                  }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
-                }}<span class="gallery__rating them">{{ vote_average?.toFixed(1) }}</span>
+                }}<span class="gallery__rating them">{{
+                  vote_average?.toFixed(1)
+                }}</span>
               </p>
             </div>
           </li>
         </ul>
-        <SkeletonTrend v-if="status === 'load' && !this.trend.length" class="gallery__list" />
+        <SkeletonTrend
+          v-if="status === 'load' && !this.trend.length"
+          class="gallery__list"
+        />
 
         <div v-if="trend?.length && max > 1" class="pagination-wrap">
-          <PaginationHardVue @numPage="setPage" :proppages="max" ref="downBtn" :path="path" />
+          <PaginationHardVue
+            @numPage="setPage"
+            :proppages="max"
+            ref="downBtn"
+            :path="path"
+          />
         </div>
       </section>
     </ContainerMain>
@@ -115,7 +140,9 @@ export default {
     window.localStorage.getItem(this.path)
       ? (this.status = 'ready')
       : window.localStorage.removeItem(this.path);
-    this.path === 'Home' ? this.startRenderPage() : this.funcUpdateBibliotekaPage();
+    this.path === 'Home'
+      ? this.startRenderPage()
+      : this.funcUpdateBibliotekaPage();
     this.loaderBasic(); // важливо дочекатись змонтування дерева
   },
   methods: {
@@ -146,7 +173,9 @@ export default {
     getGenre(idg) {
       //розбір жанрів
       return idg
-        ?.map(e => this.criticalGenres.filter(({ id, name }) => id === e && name))
+        ?.map(e =>
+          this.criticalGenres.filter(({ id, name }) => id === e && name)
+        )
         .flat(3)
         .map(({ name }) => name)
         .slice(0, 2)
@@ -158,7 +187,10 @@ export default {
         window.localStorage.setItem('numberPage', num); // добавляю сторінку
 
         const data = this.checkFind()
-          ? await http.fetchMovieByQuery(this.page, window.localStorage.getItem('findedFilms'))
+          ? await http.fetchMovieByQuery(
+              this.page,
+              window.localStorage.getItem('findedFilms')
+            )
           : await http.fetchTopMovies(num);
 
         this.trend = data;
@@ -215,7 +247,9 @@ export default {
     },
     checkFind() {
       //перевірка наявності пошуку
-      const check = JSON.parse(window.localStorage.getItem('findedFilms')) ? true : false;
+      const check = JSON.parse(window.localStorage.getItem('findedFilms'))
+        ? true
+        : false;
       this.check = check;
       return check;
     },
@@ -273,7 +307,8 @@ export default {
     },
     async getStaticGenres() {
       const genr =
-        JSON.parse(window.localStorage.getItem('genres')) ?? (await http.getGenresList());
+        JSON.parse(window.localStorage.getItem('genres')) ??
+        (await http.getGenresList());
       this.genrs = genr;
     },
     funcUpdateIfChangePath(watched, queue) {
@@ -286,13 +321,15 @@ export default {
       ) {
         case 'BibliotekaWatched':
           this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
-          !this.trend && window.localStorage.setItem('BibliotekaWatched', 'empty');
+          !this.trend &&
+            window.localStorage.setItem('BibliotekaWatched', 'empty');
           this.max = store.state.max.numWatch; // всі сторінки
           break;
         case 'BibliotekaQueue':
           this.trend = queue ?? store.state.infoQueue.slice(0, 20);
           this.max = store.state.max.numQue;
-          !this.trend && window.localStorage.setItem('BibliotekaQueue', 'empty');
+          !this.trend &&
+            window.localStorage.setItem('BibliotekaQueue', 'empty');
           break;
         default:
           this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
@@ -302,7 +339,10 @@ export default {
     funcUpdateBibliotekaPage() {
       store.state.max['numWatch' || 'numQue'] && this.funcUpdateIfChangePath(); // оптимізація швидкості
       store
-        .dispatch('getFromServerFilmId', this.$cookies.get('token') ?? this.$store.state.token)
+        .dispatch(
+          'getFromServerFilmId',
+          this.$cookies.get('token') ?? this.$store.state.token
+        )
         .then(() => {
           this.funcUpdateIfChangePath();
         });
@@ -328,7 +368,9 @@ export default {
       featuresStore.subscribe(mutation => {
         if (mutation.type.includes('setLanguage')) {
           window.localStorage.removeItem('genres');
-          this.path === 'Home' ? this.setPage(this.page) : this.funcUpdateBibliotekaPage();
+          this.path === 'Home'
+            ? this.setPage(this.page)
+            : this.funcUpdateBibliotekaPage();
         }
       });
     },
@@ -339,14 +381,16 @@ export default {
           myDatabase.getItem('watched').then(e => {
             this.trend = JSON.parse(e).slice(0, 20); // якщо гуд коміт в стор
             this.max = Math.ceil(JSON.parse(e).length / 20);
-            !JSON.parse(e).length && window.localStorage.setItem('BibliotekaWatched', 'empty');
+            !JSON.parse(e).length &&
+              window.localStorage.setItem('BibliotekaWatched', 'empty');
           });
         }
         if (keys.includes('queue') && this.path === 'BibliotekaQueue') {
           myDatabase.getItem('queue').then(e => {
             this.trend = JSON.parse(e).slice(0, 20);
             this.max = Math.ceil(JSON.parse(e).length / 20);
-            !JSON.parse(e).length && window.localStorage.setItem('BibliotekaQueue', 'empty');
+            !JSON.parse(e).length &&
+              window.localStorage.setItem('BibliotekaQueue', 'empty');
           }); // якщо гуд коміт в стор
         }
         return;
@@ -357,7 +401,9 @@ export default {
       const time = setTimeout(() => {
         featuresStore.commit(
           'setRefItem',
-          this.trend.length > 8 ? this.$refs.observer[8] : this.$refs.observer.reverse()[2]
+          this.trend.length > 8
+            ? this.$refs.observer[8]
+            : this.$refs.observer.reverse()[2]
         );
         this.status = 'ready';
         clearTimeout(time);
@@ -390,10 +436,14 @@ export default {
     },
     trend() {
       !this.trend.length
-        ? window.localStorage.setItem(this.path, 'empty') && (this.status = ready)
-        : window.localStorage.getItem(this.path) && window.localStorage.removeItem(this.path);
+        ? window.localStorage.setItem(this.path, 'empty') &&
+          (this.status = 'ready')
+        : window.localStorage.getItem(this.path) &&
+          window.localStorage.removeItem(this.path);
 
-      this.trend.length > 2 ? this.sendRef() : featuresStore.commit('setRefItem', null);
+      this.trend.length > 2
+        ? this.sendRef()
+        : featuresStore.commit('setRefItem', null);
     },
   },
 
@@ -410,7 +460,9 @@ export default {
   },
   computed: {
     criticalGenres() {
-      return this.genrs.length ? this.genrs : JSON.parse(window.localStorage.getItem('genres'));
+      return this.genrs.length
+        ? this.genrs
+        : JSON.parse(window.localStorage.getItem('genres'));
     },
 
     getLanguage() {
@@ -454,7 +506,11 @@ export default {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 30%;
-  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
+  background-image: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.56),
+      rgba(0, 0, 0, 0.56)
+    ),
     url('../../assets/images/library.jpeg');
 }
 
@@ -481,8 +537,8 @@ export default {
   cursor: pointer;
 }
 .gallery__item:hover {
-  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608), 2px 2px 2px rgba(135, 102, 78, 0.456),
-    2px 3px 2px rgba(244, 157, 94, 0.409);
+  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608),
+    2px 2px 2px rgba(135, 102, 78, 0.456), 2px 3px 2px rgba(244, 157, 94, 0.409);
   border-radius: 2px 2px 5px 5px;
   cursor: pointer;
   transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -604,7 +660,13 @@ export default {
 
 @keyframes load {
   50% {
-    background: linear-gradient(to right, transparent 0%, #e8e8e8 50%, transparent 100%) top right;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        #e8e8e8 50%,
+        transparent 100%
+      )
+      top right;
   }
 }
 //****

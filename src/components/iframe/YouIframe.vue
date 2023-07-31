@@ -1,9 +1,12 @@
 <template>
   <div>
-    <VueYtframe :player-vars="playerVars" :videoId="getOfficialTreiler ?? video[0].key" ref="yt" />
+    <VueYtframe
+      :player-vars="playerVars"
+      :videoId="getOfficialTreiler ?? video[0].key"
+      ref="yt"
+    />
   </div>
 </template>
-
 
 <script>
 export default {
@@ -39,5 +42,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

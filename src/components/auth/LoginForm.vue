@@ -34,7 +34,10 @@
         >
           Login
         </button>
-        <router-link :to="{ name: 'AuthSignup' }" class="login-form-btn reg" type="button"
+        <router-link
+          :to="{ name: 'AuthSignup' }"
+          class="login-form-btn reg"
+          type="button"
           >Create account</router-link
         >
         <router-link :to="{ name: 'Home' }" class="homeBtnLink">
@@ -89,10 +92,15 @@ export default {
             password: this.passLog,
           });
           this.funcRedirectAfterLogin();
-          Notify.success(`User ${window.localStorage.getItem('name')} created`);
+          Notify.success(`User ${window.localStorage.getItem('name')} signIn`, {
+            timeout: 1000,
+          });
         } catch (err) {
           if (err.response) {
-            return Report.failure(`Error ${err.response.data.code}`, err.response.data.message);
+            return Report.failure(
+              `Error ${err.response.data.code}`,
+              err.response.data.message
+            );
           }
           return Report.failure(`Error ${err.code}`, err.message);
         } finally {
@@ -107,7 +115,10 @@ export default {
         try {
           await this.$store.dispatch('googleLogin');
           this.funcRedirectAfterLogin();
-          Notify.success(`User ${window?.localStorage?.getItem('name')} created`);
+          Notify.success(
+            `User ${window?.localStorage?.getItem('name')} signIn`,
+            { timeout: 1000 }
+          );
         } catch (err) {
           this.$router.push({ path: '/auth/login' });
           Notify.info('User stop auth');
@@ -126,7 +137,9 @@ export default {
   computed: {
     noEmpty() {
       // контроль кнопки
-      return this.mailLog && this.passLog && this.passLog.length >= 6 ? false : true;
+      return this.mailLog && this.passLog && this.passLog.length >= 6
+        ? false
+        : true;
     },
     authTest() {
       return this.$store.state.token;

@@ -1,11 +1,13 @@
 @font-face {
   font-family: 'Ubuntu-Regular';
-  src: local('Ubuntu-Regular'), url('~@/assets/fonts/ubuntu/Ubuntu-Regular.ttf') format('truetype');
+  src: local('Ubuntu-Regular'),
+    url('~@/assets/fonts/ubuntu/Ubuntu-Regular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Ubuntu-Bold';
-  src: local('Ubuntu-Bold'), url('~@/assets/fonts/ubuntu/Ubuntu-Bold.ttf') format('truetype');
+  src: local('Ubuntu-Bold'),
+    url('~@/assets/fonts/ubuntu/Ubuntu-Bold.ttf') format('truetype');
 }
 
 @font-face {

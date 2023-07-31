@@ -33,10 +33,21 @@ export default {
     changeThemeMode() {
       const html = document.documentElement.classList;
       html.toggle('dark'); // міняєм клас в залежності від стану
+      html.contains('dark')
+        ? window.sessionStorage.setItem('theme', 'dark')
+        : window.sessionStorage.setItem('theme', 'light');
     },
     getUserTheme() {
-      this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches; // перевіряю тему юзера
-      this.dark && document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
+      this.dark = window.matchMedia('(prefers-color-scheme:dark)').matches; // перевіряю тему юзера
+      window.sessionStorage.getItem('theme') === 'dark'
+        ? document.documentElement.classList.add('dark')
+        : this.dark &&
+          window.sessionStorage.getItem('theme') !== 'light' &&
+          document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
+
+      this.dark =
+        window.sessionStorage.getItem('theme') === 'dark' ??
+        window.matchMedia('(prefers-color-scheme:dark)').matches;
     },
   },
 };
@@ -121,18 +132,24 @@ label {
   margin: 0px;
 }
 
-.btn-color-mode-switch input[type='checkbox']:checked + label.btn-color-mode-switch-inner {
+.btn-color-mode-switch
+  input[type='checkbox']:checked
+  + label.btn-color-mode-switch-inner {
   background: #151515;
   color: var(--text-color-light);
 }
 
-.btn-color-mode-switch input[type='checkbox']:checked + label.btn-color-mode-switch-inner:after {
+.btn-color-mode-switch
+  input[type='checkbox']:checked
+  + label.btn-color-mode-switch-inner:after {
   content: attr(data-on);
   left: 68px;
   background: #3c3c3c;
 }
 
-.btn-color-mode-switch input[type='checkbox']:checked + label.btn-color-mode-switch-inner:before {
+.btn-color-mode-switch
+  input[type='checkbox']:checked
+  + label.btn-color-mode-switch-inner:before {
   content: attr(data-off);
   right: auto;
   left: 20px;

@@ -62,4 +62,9 @@ const getButtonContent = lang => {
   return content;
 };
 
-export const getCont = { getAuthContent, getLinkContent, getInputContent, getButtonContent };
+export const getCont = {
+  getAuthContent,
+  getLinkContent,
+  getInputContent,
+  getButtonContent,
+};

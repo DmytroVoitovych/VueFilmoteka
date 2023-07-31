@@ -63,7 +63,8 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.name.toLowerCase().includes('auth') && cookie.get('token')) next({ path: '/' });
+  if (to.name.toLowerCase().includes('auth') && cookie.get('token'))
+    next({ path: '/' });
   else if (to.name.toLocaleLowerCase().includes('bibl') && !cookie.get('token'))
     next({ name: 'AuthLogin' });
   else next();

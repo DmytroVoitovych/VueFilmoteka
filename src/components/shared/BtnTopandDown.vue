@@ -56,6 +56,7 @@
 
 <script lang="js">
 import { featuresStore } from '@/store/storeForFeatures';
+import Bowser from 'bowser';
 
 
 export default {
@@ -69,22 +70,24 @@ export default {
 
   mounted() {
 
-      this.mangeDirectBtn(); 
+      this.mangeDirectBtn();
 
   },
 
     methods: {
       mangeDirectBtn() {
+
         if (this.getRef) {
           const intersectionObserver = new IntersectionObserver((entries) => {
-          
-            return !entries[0].isIntersecting && (this.locate = window.scrollY); 
+
+            entries[0].isIntersecting && (this.locate = window.scrollY);
+            return !entries[0].isIntersecting && (this.locate = window.scrollY);
 
           }, { threshold: .5 });
           // start observing
-  
+
           intersectionObserver.observe(this.getRef);
-           
+
         }
       },
       toTopOrDown() {
@@ -97,24 +100,26 @@ let scrollHeight = Math.max( // взнаємо висоту скролу (мож
 
         if (this.toTop) {
           window.scroll({ top: 0, behavior: 'smooth', });
-          this.toTop = false;
-          
+
           return;
         }
         window.scrollBy({ top: scrollHeight, behavior: "smooth" });
-        console.log(2);
-        this.toTop = true;
+
+
   }
   },
 
+
   watch: {
-    locate(n,o) {
-      console.log(1,n < document.documentElement.scrollHeight / 2);
-      n < document.documentElement.scrollHeight / 2 ? (this.toTop = n < o ?false:true) : (this.toTop = true);
-      
+    locate(n, o) {
+     const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
+
+      n < document.documentElement.scrollHeight / (platforTypeMobile?1.5: 2) ? (this.toTop = n < o ?false:true) : (this.toTop = true);
+
+
     },
-    getRef(n,o) {
-      n !== o && this.mangeDirectBtn();
+    getRef(n, o) {
+            n !== o && this.mangeDirectBtn();
    }
   },
     computed: {

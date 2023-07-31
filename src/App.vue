@@ -84,7 +84,9 @@ export default {
       path: '', //поточний роут
       show: false, // ?? під питанням чи потрібно мені це(обдумать)
       counterSign: 0, // для контроля кількості фокусів при гості
-      browser: Bowser.getParser(window.navigator.userAgent).getBrowserName().toLowerCase(),
+      browser: Bowser.getParser(window.navigator.userAgent)
+        .getBrowserName()
+        .toLowerCase(),
     };
   },
   created() {
@@ -94,6 +96,7 @@ export default {
     !window.history.state.current.includes('auth') && this.controlLogin();
     // постій контроль авторизації
     this.axiosRedirect();
+   
   },
 
   methods: {
@@ -151,11 +154,17 @@ export default {
               this.$store.dispatch('googleAuthInfo', newToken);
             })
             .then(() =>
-              this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined)
+              this.currentUser(
+                this.$store.state.token ||
+                  this.$cookies.get('token') ||
+                  undefined
+              )
             ) //записую в стейт
             .catch(err => console.log(err));
         } else {
-          this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
+          this.currentUser(
+            this.$store.state.token || this.$cookies.get('token') || undefined
+          ); // звичайний контроль  користувача
           !this.$cookies.get('token') && this.refreshToken(); // рефрещ пр  звичайному вході
         }
       });
@@ -164,7 +173,9 @@ export default {
       // вертає нову пару ключів
       try {
         await this.$store.dispatch('refreshToken', this.$store.state.refresh); // записую токен в незалежності від його наявності
-        this.currentUser(this.$store.state.token || this.$cookies.get('token') || undefined); // звичайний контроль  користувача
+        this.currentUser(
+          this.$store.state.token || this.$cookies.get('token') || undefined
+        ); // звичайний контроль  користувача
         this.show = true;
       } catch (err) {
         // !!можлива детальна обробка
@@ -195,7 +206,9 @@ export default {
         this.show = true;
         const refresh = setTimeout(
           async () => {
-            window.atob(this.$cookies.get('token').split('.')[1]).includes('firebase')
+            window
+              .atob(this.$cookies.get('token').split('.')[1])
+              .includes('firebase')
               ? await this.controlLogin()
               : await this.refreshToken(); //??
             clearTimeout(refresh); // чищу після виконання
@@ -224,7 +237,8 @@ export default {
     },
     scrollCount() {
       //прорахунок ширини
-      this.scrollWidth = window?.innerWidth - window?.document?.documentElement?.clientWidth;
+      this.scrollWidth =
+        window?.innerWidth - window?.document?.documentElement?.clientWidth;
 
       window.document.documentElement.style.setProperty(
         // динамічно міняю положеня модалки
@@ -242,7 +256,8 @@ export default {
         () => this.$route.name,
         fullPath => {
           this.path = fullPath.replace('/', '');
-          this.$route?.redirectedFrom?.fullPath?.includes('auth') && this.checkFocus();
+          this.$route?.redirectedFrom?.fullPath?.includes('auth') &&
+            this.checkFocus();
         }
       );
     },
@@ -282,7 +297,10 @@ export default {
     },
     polyHas() {
       // полифил для firefox
-      return this.browser.includes('firefox') && window?.localStorage?.getItem(this.path);
+      return (
+        this.browser.includes('firefox') &&
+        window?.localStorage?.getItem(this.path)
+      );
     },
   },
 };

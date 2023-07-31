@@ -78,14 +78,18 @@
             <p class="modal__aboutV t-js">{{ getModalContent()[4] }}</p>
             <p class="overview t-js">
               {{
-                infos.overview || 'No description will be added soon. Sorry for the inconvenience'
+                infos.overview ||
+                'No description will be added soon. Sorry for the inconvenience'
               }}
             </p>
           </div>
           <ul class="modal__button--listV">
             <li>
               <button
-                @click.prevent="() => (!doneWatched ? addFilmToWatch() : dellFilmFromDb('watched'))"
+                @click.prevent="
+                  () =>
+                    !doneWatched ? addFilmToWatch() : dellFilmFromDb('watched')
+                "
                 data-btn="${id}"
                 type="button"
                 class="modal__watchV"
@@ -97,7 +101,10 @@
             </li>
             <li>
               <button
-                @click.prevent="() => (!doneQueue ? addFilmToQueue() : dellFilmFromDb('queue'))"
+                @click.prevent="
+                  () =>
+                    !doneQueue ? addFilmToQueue() : dellFilmFromDb('queue')
+                "
                 :data-btn="infos.id"
                 type="button"
                 class="modal__queV"
@@ -239,7 +246,9 @@ export default {
           });
         }
         if (keys.includes('queue')) {
-          myDatabase.getItem('queue').then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
+          myDatabase
+            .getItem('queue')
+            .then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
         }
         return;
       });
@@ -251,7 +260,10 @@ export default {
           this.getFromServerFilmId().then(e => {
             const watched = e.data.allList.filter(e => e.type === 'watched');
             store.commit('setWatched', watched);
-            myDatabase.setItem('watched', JSON.stringify(store.state.infoWatched));
+            myDatabase.setItem(
+              'watched',
+              JSON.stringify(store.state.infoWatched)
+            );
           });
         }
         if (!keys.includes('queue')) {
@@ -271,7 +283,8 @@ export default {
         //перехоплюєм запит
         this.loading = true; //включаю блок кнопки
         this.checkParam = // поточна кнопка
-          (config.url.includes('add') && config?.data?.type.includes('watched')) ||
+          (config.url.includes('add') &&
+            config?.data?.type.includes('watched')) ||
           config.url.includes('watched');
 
         return config;

@@ -1,6 +1,11 @@
 <template>
   <div class="pagination" :proppages="proppages">
-    <button class="arrow pagination__button" v-if="page > 1" type="button" @click.stop="pageMinus">
+    <button
+      class="arrow pagination__button"
+      v-if="page > 1"
+      type="button"
+      @click.stop="pageMinus"
+    >
       &lsaquo;
     </button>
     <ul class="pagination__list">
@@ -10,7 +15,11 @@
           ref="point"
           class="pagination__button"
           :class="{ active: +p === page }"
-          v-bind="p === '...' && checkSupport() ? { popovertarget: 'pagination-popover' } : {}"
+          v-bind="
+            p === '...' && checkSupport()
+              ? { popovertarget: 'pagination-popover' }
+              : {}
+          "
         >
           {{ p }}
         </button>
@@ -24,7 +33,11 @@
     >
       &rsaquo;
     </button>
-    <ModalExperementalVue v-if="checkSupport()" @forcePage="setPage" :max="proppages" />
+    <ModalExperementalVue
+      v-if="checkSupport()"
+      @forcePage="setPage"
+      :max="proppages"
+    />
   </div>
 </template>
 
@@ -53,7 +66,9 @@ export default {
       arrPage: ['1', '2', '3', '4', '5', '6', '...', this.proppages],
       serverDate: [],
       target: 1,
-      browser: Bowser.getParser(window.navigator.userAgent).getBrowserName().toLowerCase(),
+      browser: Bowser.getParser(window.navigator.userAgent)
+        .getBrowserName()
+        .toLowerCase(),
     };
   },
   emits: {
@@ -63,12 +78,20 @@ export default {
   methods: {
     checkSupport() {
       // перевіряю користувацбкий браузер
-      return this.browser.includes('chrome') || this.browser.includes('edge');
+      const browsVers = +Bowser.getParser(window.navigator.userAgent)
+        .getBrowserVersion()
+        .split('.')[0];
+      return (
+        (this.browser.includes('chrome') || this.browser.includes('edge')) &&
+        browsVers >= 114
+      );
     },
 
     setServ() {
       //формування форми пагінації
-      const serverDate = [...Array(this.proppages + 1).keys()].filter(e => e > 0);
+      const serverDate = [...Array(this.proppages + 1).keys()].filter(
+        e => e > 0
+      );
 
       return (this.serverDate = serverDate);
     },
@@ -105,13 +128,23 @@ export default {
     },
     setPagination() {
       //базовий вид [доопрацювати не готово]
-      this.arrPage = [...this.serverDate.slice(0, 6), '...', this.serverDate.at(-1)];
+      this.arrPage = [
+        ...this.serverDate.slice(0, 6),
+        '...',
+        this.serverDate.at(-1),
+      ];
     },
     mutateArr() {
       // мутація великої кількості схов
       const fillNum = [];
 
-      fillNum.push(this.page + 1, this.page + 2, this.page - 1, this.page - 2, this.page);
+      fillNum.push(
+        this.page + 1,
+        this.page + 2,
+        this.page - 1,
+        this.page - 2,
+        this.page
+      );
 
       return (this.arrPage = [
         this.serverDate[0],
@@ -147,7 +180,9 @@ export default {
         JSON.parse(window.localStorage.getItem('numberPage')) &&
         JSON.parse(window.localStorage.getItem('filmsPage'))
       ) {
-        return this.path === 'Home' ? JSON.parse(window.localStorage.getItem('numberPage')) : 1;
+        return this.path === 'Home'
+          ? JSON.parse(window.localStorage.getItem('numberPage'))
+          : 1;
       }
 
       return 1;
@@ -232,7 +267,10 @@ export default {
 .arrow {
   width: 40px;
   height: 40px;
-  background-color: var(--pagination-transparent-bg, var(--bg-color-light-grey));
+  background-color: var(
+    --pagination-transparent-bg,
+    var(--bg-color-light-grey)
+  );
   border: var(--pagination-border, none);
   &:active {
     background-color: var(--text-color-light-orange);

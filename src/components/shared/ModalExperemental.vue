@@ -17,9 +17,15 @@
         <h3 class="form__name t-js">{{ modalContentPag()[0] }}</h3>
         <ul class="form__list">
           <li class="form__item">
-            <label for="page" class="form__label t-js" :class="max < num && 'wrong-page'">
+            <label
+              for="page"
+              class="form__label t-js"
+              :class="max < num && 'wrong-page'"
+            >
               {{
-                max < num ? modalContentPag()[1].replace(' ', ` ${max} `) : modalContentPag()[2]
+                max < num
+                  ? modalContentPag()[1].replace(' ', ` ${max} `)
+                  : modalContentPag()[2]
               }}</label
             >
             <span class="form__span">
@@ -47,7 +53,6 @@
     </form>
   </div>
 </template>
-
 
 <script>
 import { featuresStore } from '@/store/storeForFeatures';

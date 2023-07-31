@@ -16,7 +16,10 @@ export default class MovieAPiServer {
 
   getlang() {
     // метод вертаючий поточну мову
-    return window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ?? 'en';
+    return (
+      window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ??
+      'en'
+    );
   }
   //зміни запит популярні фільми за тиждень
   async fetchTopMovies(p, toBack) {
@@ -39,10 +42,15 @@ export default class MovieAPiServer {
 
   //добавив запит на жанри, можна один раз його зробити
   async getGenresList() {
-    const URL = `/3/genre/movie/list?api_key=${this.API_KEY}&language=${this.getlang()}`;
+    const URL = `/3/genre/movie/list?api_key=${
+      this.API_KEY
+    }&language=${this.getlang()}`;
     try {
       const response = await http.get(URL);
-      window.localStorage.setItem('genres', JSON.stringify(response.data.genres)); // важно для синхронизации
+      window.localStorage.setItem(
+        'genres',
+        JSON.stringify(response.data.genres)
+      ); // важно для синхронизации
       return response.data.genres;
     } catch (error) {
       return error;
@@ -65,10 +73,9 @@ export default class MovieAPiServer {
 
   async fetchMovieByQuery(n, q, toBack) {
     this.maxPages = null;
-    const URL = `/3/search/movie?api_key=${this.API_KEY}&page=${n}&query=${q.replaceAll(
-      '"',
-      ''
-    )}&language=${this.getlang()}`;
+    const URL = `/3/search/movie?api_key=${
+      this.API_KEY
+    }&page=${n}&query=${q.replaceAll('"', '')}&language=${this.getlang()}`;
 
     try {
       const response = await http.get(URL);

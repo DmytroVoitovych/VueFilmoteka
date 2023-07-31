@@ -27,8 +27,8 @@ export default {
   cursor: pointer;
 }
 .gallery__item:hover {
-  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608), 2px 2px 2px rgba(135, 102, 78, 0.456),
-    2px 3px 2px rgba(244, 157, 94, 0.409);
+  box-shadow: 1px 2px 2px 3px rgba(150, 64, 3, 0.608),
+    2px 2px 2px rgba(135, 102, 78, 0.456), 2px 3px 2px rgba(244, 157, 94, 0.409);
   border-radius: 2px 2px 5px 5px;
   cursor: pointer;
   transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -96,7 +96,13 @@ export default {
 
 @keyframes load {
   50% {
-    background: linear-gradient(to right, transparent 0%, #e8e8e8 50%, transparent 100%) top right;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        #e8e8e8 50%,
+        transparent 100%
+      )
+      top right;
   }
 }
 </style>

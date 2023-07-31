@@ -75,7 +75,12 @@ export const getModalContentPag = lang => {
       break;
     default:
       content.push(
-        ...['Go to another page', 'Available pages', 'Enter the page number to navigate', 'Submit']
+        ...[
+          'Go to another page',
+          'Available pages',
+          'Enter the page number to navigate',
+          'Submit',
+        ]
       );
       break;
   }

@@ -2,7 +2,9 @@ import { createStore } from 'vuex';
 
 export const featuresStore = createStore({
   state: {
-    language: window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ?? 'en',
+    language:
+      window.localStorage.getItem('currLang')?.slice(0, 2)?.toLowerCase() ??
+      'en',
     refItem: null,
   },
   mutations: {
