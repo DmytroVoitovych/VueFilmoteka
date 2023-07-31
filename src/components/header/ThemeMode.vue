@@ -46,8 +46,11 @@ export default {
           document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
 
       this.dark =
-        window.sessionStorage.getItem('theme') === 'dark' ??
-        window.matchMedia('(prefers-color-scheme:dark)').matches;
+        (window.sessionStorage.getItem('theme') !== 'light' &&
+          window.matchMedia('(prefers-color-scheme:dark)').matches) ||
+        window.sessionStorage.getItem('theme') === 'dark'
+          ? true
+          : false;
     },
   },
 };
