@@ -6,7 +6,7 @@
         <use href="../../assets/sprite.svg#icon-close"></use>
       </svg>
     </button>
-    <form class="feedback-form" @submit.prevent="">
+    <form class="feedback-form" @submit.prevent="sendMessage">
       <div class="form__div">
         <h3 class="form__name t-js">{{ modalContentFeed()[0] }}</h3>
         <ul class="form__list">
@@ -17,7 +17,7 @@
             </label>
             <span class="form__span">
               <textarea
-                v-model="feedback"
+                v-model.trim="feedback"
                 type="text"
                 name="feed"
                 id="feed"
@@ -48,6 +48,8 @@
 <script>
 import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed } from './feedContentLang';
+import { botSend } from '@/helpers/axios';
+import { Block, Report } from 'notiflix';
 
 export default {
   name: 'FeedbackForm',
@@ -66,7 +68,32 @@ export default {
     this.mangeDirectForm();
   },
   methods: {
+    async sendMessage() {
+      //відправка в теге
+      try {
+        Block.dots('.modal-feedback', {
+          //сам лофдер з конфігураціями
+          svgColor: 'var(--text-color-red)',
+          backgroundColor: 'var(--bg-loader-basic)',
+        });
+        await botSend.post('/feedback', { feedback: this.feedback });
+        this.$cookies.set('feedlimit', 'min', '30MIN');
+        Report.success(
+          'Feedback',
+          'Дякую за вашу увагу, ваше повідомлення буде взяте до уваги.',
+          'okay'
+        );
+      } catch (error) {
+        console.log('err', error.response.data.message);
+        Report.warning('Feedback', error.response.data.message, 'okay');
+      } finally {
+        Block.remove('.modal-feedback');
+        this.toggle();
+      }
+    },
+
     mangeDirectForm() {
+      // закритя коли не в зоні видимості
       const intersectionObserver = new IntersectionObserver(
         entries => {
           if (!this.$el.classList.contains('visually-hidden')) {
@@ -139,12 +166,6 @@ button[disabled] {
   cursor: pointer;
   -webkit-transition: border 250ms cubic-bezier(0.4, 0, 0.2, 1);
   transition: border 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  @media screen and (max-width: 479.5px) {
-    top: auto;
-    bottom: 8px;
-    min-width: 20px;
-    min-height: 20px;
-  }
 }
 .close:hover,
 .close:focus {

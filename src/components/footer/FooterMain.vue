@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer class="footer" :class="open && 'footer_index'">
     <ul class="footer-block">
       <li class="footer__items">
         <span>&#xA9;</span>
@@ -17,7 +17,7 @@
       <li class="footer__items">
         <a class="footer__items--ref">by Voitovych</a>
       </li>
-      <li>
+      <li v-if="!feedLimit">
         <abbr title="feedback">
           <button type="button" class="footer__feed" @click="toggle">
             <svg>
@@ -28,13 +28,14 @@
       </li>
     </ul>
     <FeedbackFormVue
+      v-if="open && !feedLimit"
       :class="!open && 'visually-hidden'"
       :toggle="toggle"
       v-bind="open ? { tabIndex: 1 } : {}"
     />
   </footer>
 </template>
-<!-- .visually-hidden -->
+
 <script>
 import FeedbackFormVue from './FeedbackForm.vue';
 
@@ -46,10 +47,22 @@ export default {
   data() {
     return {
       open: false,
+      feedLimit: false,
     };
   },
-
+  mounted() {
+    this.checkLimit();
+  },
+  updated() {
+    this.checkLimit();
+  },
   methods: {
+    checkLimit() {
+      // обмеження відправлень
+      this.$cookies.get('feedlimit')
+        ? (this.feedLimit = true)
+        : (this.feedLimit = false);
+    },
     toggle() {
       this.open = !this.open;
     },
@@ -65,6 +78,7 @@ footer {
   position: relative;
   bottom: 0;
 }
+
 .footer {
   display: flex;
   justify-content: center;
@@ -173,6 +187,11 @@ footer {
     stroke: var(--text-color-light-orange);
     width: 32px;
     height: 32px;
+  }
+}
+.footer_index {
+  @include mq(mobile-only) {
+    z-index: 1;
   }
 }
 </style>
