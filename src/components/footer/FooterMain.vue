@@ -17,14 +17,42 @@
       <li class="footer__items">
         <a class="footer__items--ref">by Voitovych</a>
       </li>
+      <li>
+        <abbr title="feedback">
+          <button type="button" class="footer__feed" @click="toggle">
+            <svg>
+              <use href="../../assets/sprite.svg#icon-feed"></use>
+            </svg>
+          </button>
+        </abbr>
+      </li>
     </ul>
+    <FeedbackFormVue
+      :class="!open && 'visually-hidden'"
+      :toggle="toggle"
+      v-bind="open ? { tabIndex: 1 } : {}"
+    />
   </footer>
 </template>
-
+<!-- .visually-hidden -->
 <script>
+import FeedbackFormVue from './FeedbackForm.vue';
+
 export default {
   name: 'FooterMain',
+  components: {
+    FeedbackFormVue,
+  },
+  data() {
+    return {
+      open: false,
+    };
+  },
+
   methods: {
+    toggle() {
+      this.open = !this.open;
+    },
     year() {
       return new Date().getFullYear();
     },
@@ -125,6 +153,26 @@ footer {
     30% {
       box-shadow: 0px 15px 15px rgba(255, 170, 114, 1);
     }
+  }
+}
+
+.footer__feed {
+  display: block;
+  @extend %reset-style;
+  cursor: pointer;
+
+  &:hover {
+    filter: drop-shadow(-1px 1px 5px var(--scroll-btn));
+  }
+
+  &:active {
+    scale: 90%;
+  }
+
+  svg {
+    stroke: var(--text-color-light-orange);
+    width: 32px;
+    height: 32px;
   }
 }
 </style>
