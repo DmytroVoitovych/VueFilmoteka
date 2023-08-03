@@ -65,14 +65,6 @@ export default {
     BtnTopandDownVue,
     // ModalBtnVue
   },
-  props: {
-    switcher: {
-      // проп тригер
-      type: Boolean,
-      require: true,
-      default: false,
-    },
-  },
 
   data() {
     return {
@@ -96,7 +88,6 @@ export default {
     !window.history.state.current.includes('auth') && this.controlLogin();
     // постій контроль авторизації
     this.axiosRedirect();
-   
   },
 
   methods: {

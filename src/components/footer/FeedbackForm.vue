@@ -56,7 +56,7 @@ export default {
   props: {
     toggle: {
       type: Function,
-      require: true,
+      required: true,
     },
   },
   data() {
@@ -65,9 +65,6 @@ export default {
     };
   },
   mounted() {
-    this.mangeDirectForm();
-  },
-  updated() {
     this.mangeDirectForm();
   },
   methods: {
@@ -92,19 +89,19 @@ export default {
 
     mangeDirectForm() {
       // закритя коли не в зоні видимості
-      const intersectionObserver = new IntersectionObserver(
-        entries => {
-          if (!this.$el.classList.contains('visually-hidden')) {
-            return !entries[0].isIntersecting && this.toggle();
-          } else {
-            intersectionObserver.unobserve(this.$el);
-          }
-        },
-        { threshold: 0 }
-      );
-      // start observing
+      if (this.$el) {
+        const intersectionObserver = new IntersectionObserver(
+          entries => {
+            entries[0].boundingClientRect.bottom > 0 &&
+              !entries[0].isIntersecting &&
+              this.toggle();
+          },
 
-      intersectionObserver.observe(this.$el);
+          { threshold: 0 }
+        );
+        // start observing
+        intersectionObserver.observe(this.$el);
+      }
     },
 
     modalContentFeed() {
