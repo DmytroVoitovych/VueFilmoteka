@@ -70,8 +70,8 @@ export default {
 
   mounted() {
 
-      this.mangeDirectBtn();
-
+    this.mangeDirectBtn();
+    
   },
 
     methods: {
@@ -82,6 +82,7 @@ export default {
 
             entries[0].isIntersecting && (this.locate = window.scrollY);
             return !entries[0].isIntersecting && (this.locate = window.scrollY);
+            
 
           }, { threshold: .5 });
           // start observing
@@ -112,11 +113,13 @@ let scrollHeight = Math.max( // взнаємо висоту скролу (мож
 
   watch: {
     locate(n, o) {
-     const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
-
-      n < document.documentElement.scrollHeight / (platforTypeMobile?1.5: 2) ? (this.toTop = n < o ?false:true) : (this.toTop = true);
-
-
+      const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
+     
+      n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
+        ?
+        (this.toTop = (n < Number(o)) || !o ? false : true)
+        :
+        (this.toTop = true);
     },
     getRef(n, o) {
             n !== o && this.mangeDirectBtn();

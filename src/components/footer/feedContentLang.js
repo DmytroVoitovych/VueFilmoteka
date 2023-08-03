@@ -34,3 +34,25 @@ export const getModalContentFeed = lang => {
   }
   return content;
 };
+
+export const getModalContentNotify = lang => {
+  const content = [];
+  switch (lang) {
+    case 'fi':
+      content.push(...['Kiitos huomiostanne, viestinne otetaan huomioon.']);
+      break;
+    case 'uk':
+      content.push(
+        ...['Дякую за вашу увагу, ваше повідомлення буде взяте до уваги.']
+      );
+      break;
+    default:
+      content.push(
+        ...[
+          'Thank you for your attention, your message will be taken into consideration.',
+        ]
+      );
+      break;
+  }
+  return content;
+};

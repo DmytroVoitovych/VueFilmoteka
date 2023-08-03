@@ -47,7 +47,7 @@
 
 <script>
 import { featuresStore } from '@/store/storeForFeatures';
-import { getModalContentFeed } from './feedContentLang';
+import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
 import { Block, Report } from 'notiflix';
 
@@ -78,13 +78,8 @@ export default {
         });
         await botSend.post('/feedback', { feedback: this.feedback });
         this.$cookies.set('feedlimit', 'min', '30MIN');
-        Report.success(
-          'Feedback',
-          'Дякую за вашу увагу, ваше повідомлення буде взяте до уваги.',
-          'okay'
-        );
+        Report.success('Feedback', this.modalContentNotify()[0], 'okay');
       } catch (error) {
-        console.log('err', error.response.data.message);
         Report.warning('Feedback', error.response.data.message, 'okay');
       } finally {
         Block.remove('.modal-feedback');
@@ -111,6 +106,9 @@ export default {
 
     modalContentFeed() {
       return getModalContentFeed(this.getLanguage); // отримання користувацького контену відповідно до мови
+    },
+    modalContentNotify() {
+      return getModalContentNotify(this.getLanguage);
     },
   },
 
