@@ -566,7 +566,7 @@ button[disabled] {
   line-height: 1.33;
   cursor: pointer;
   width: 100%;
-
+  transition: background 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
   @media screen and (max-width: 769.5px) {
     padding: 6px 27px;
     max-width: 161px;
@@ -574,7 +574,8 @@ button[disabled] {
   &:hover {
     color: var(--bg-color-modal-orange);
     text-transform: uppercase;
-    background: var(--text-color-light);
+    background: repeating-linear-gradient(45deg, black, transparent 100px);
+    transition: background 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
     outline: 2px solid #ff6b01;
     border-radius: 5px;
   }
@@ -594,7 +595,7 @@ button[disabled] {
   font-size: 12px;
   line-height: 1.33;
   width: inherit;
-
+  transition: background 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
   @media screen and (max-width: 769.5px) {
     //    padding: 13px 11px 13px 13px;
     max-width: 161px;
@@ -604,7 +605,8 @@ button[disabled] {
   &:hover {
     color: var(--text-color-light);
     text-transform: uppercase;
-    background: var(--bg-color-modal-orange);
+    background: repeating-linear-gradient(45deg, black, transparent 100px);
+    transition: background 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
     outline: 2px solid var(--extra-light-grey);
     border-radius: 5px;
   }
