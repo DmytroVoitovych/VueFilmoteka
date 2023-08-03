@@ -1,5 +1,5 @@
 <template>
-  <button type="button" :class="toTop && 'rotate'" v-on:click="toTopOrDown">
+  <button type="button" :class="toTop && 'rotate'" v-on:click.="toTopOrDown">
     <svg
       enable-background="new 0 0 512 512"
       id="Layer_1"
@@ -91,8 +91,8 @@ export default {
 
         }
       },
-      toTopOrDown() {
-
+      toTopOrDown(e) {
+console.log(e);
 let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
     document.body.scrollHeight, document.documentElement.scrollHeight,
     document.body.offsetHeight, document.documentElement.offsetHeight,
@@ -144,14 +144,16 @@ button {
   padding: 0;
   border: none;
   z-index: 1;
-  cursor: pointer;
 
-  &:hover {
-    filter: drop-shadow(-1px 1px 5px var(--scroll-btn));
-  }
+  svg {
+    &:hover {
+      filter: drop-shadow(-1px 1px 5px var(--scroll-btn));
+      cursor: pointer;
+    }
 
-  &:active {
-    scale: 90%;
+    &:active {
+      scale: 90%;
+    }
   }
 }
 
