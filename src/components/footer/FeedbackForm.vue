@@ -64,7 +64,7 @@ export default {
       feedback: '',
     };
   },
-  updated() {
+  mounted() {
     this.mangeDirectForm();
   },
   methods: {
