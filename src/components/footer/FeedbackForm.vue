@@ -67,6 +67,9 @@ export default {
   mounted() {
     this.mangeDirectForm();
   },
+  updated() {
+    this.mangeDirectForm();
+  },
   methods: {
     async sendMessage() {
       //відправка в теге
