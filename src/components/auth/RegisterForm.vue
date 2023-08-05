@@ -73,9 +73,7 @@ export default {
       passReg: '',
     };
   },
-  created() {
-    console.log(this.$store.state.user);
-  },
+
   methods: {
     async funcSignUpUser() {
       if ((this.nameReg, this.mailReg, this.passReg)) {
@@ -102,11 +100,7 @@ export default {
       }
     },
   },
-  watch: {
-    nameReg() {
-      console.log(this.nameReg);
-    },
-  },
+
   computed: {
     noEmpty() {
       // контроль кнопки

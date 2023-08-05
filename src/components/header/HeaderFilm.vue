@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <header class="header header__home">
+  <header class="header header__home" @mouseleave="focusOut">
     <ContainerMain>
       <template v-if="show">
         <router-link
@@ -107,7 +107,7 @@
         <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
         <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1]" /></li>
       </ul>
-      <CustomSelected v-if="!path.includes('Biblioteka')" />
+      <CustomSelected v-if="!path.includes('Biblioteka')" ref="focusOut" />
     </ContainerMain>
   </header>
 </template>
@@ -218,6 +218,9 @@ export default {
       } else {
         return getCont.getButtonContent(this.getLanguage);
       }
+    },
+    focusOut() {
+      this.$refs?.focusOut?.funcShowOption('out');
     },
   },
 

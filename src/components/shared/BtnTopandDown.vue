@@ -91,8 +91,8 @@ export default {
 
         }
       },
-      toTopOrDown(e) {
-console.log(e);
+      toTopOrDown() {
+
 let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
     document.body.scrollHeight, document.documentElement.scrollHeight,
     document.body.offsetHeight, document.documentElement.offsetHeight,

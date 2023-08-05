@@ -24,7 +24,6 @@ export default {
   },
   methods: {
     toggle() {
-      console.log(this.name);
       this.$router.push({ path: this.name.toLowerCase() });
     },
   },

@@ -30,10 +30,7 @@ export default {
       this.$refs.yt.playVideo();
     },
   },
-  mounted() {
-    console.log(this.video);
-    console.log(this.$refs.yt);
-  },
+
   computed: {
     getOfficialTreiler() {
       return this.video.toReversed().find(e => e.official)?.key;

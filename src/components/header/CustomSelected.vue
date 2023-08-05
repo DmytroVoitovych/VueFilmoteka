@@ -46,17 +46,15 @@ export default {
     };
   },
   methods: {
-    funcShowOption() {
-      this.show = !this.show;
-    },
     chooseOption(opt) {
       this.selected = opt;
       this.show = !this.show;
     },
+    funcShowOption(e) {
+      e !== 'out' ? (this.show = !this.show) : (this.show = false);
+    },
   },
-  mounted() {
-    console.log(this.selected);
-  },
+
   watch: {
     selected(vanha, uusi) {
       if (vanha !== uusi) {

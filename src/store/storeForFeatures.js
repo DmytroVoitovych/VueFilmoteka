@@ -9,7 +9,6 @@ export const featuresStore = createStore({
   },
   mutations: {
     setLanguage(state, payload) {
-      console.log(payload);
       state.language = payload.slice(0, 2).toLowerCase();
     },
     setRefItem(state, payload) {
