@@ -57,6 +57,12 @@
               </p>
             </div>
           </li>
+          <li
+            class="librys__empty--li"
+            v-if="status === 'ready' && !this.trend.length"
+          >
+            Ваш список пустий, нічого не додано
+          </li>
         </ul>
         <SkeletonTrend
           v-if="status === 'load' && !this.trend.length"
@@ -701,5 +707,12 @@ export default {
   @include mq(mobile-only) {
     background-size: cover;
   }
+}
+.librys__empty--li {
+  font-size: 5vw;
+  position: absolute;
+  text-align: center;
+  filter: drop-shadow(2px 4px 6px var(--text-color-light-orange));
+  -webkit-text-fill-color: darkred;
 }
 </style>

@@ -114,7 +114,7 @@ export default {
         Loading.dots();
         try {
           await this.$store.dispatch('googleLogin');
-          this.funcRedirectAfterLogin();
+          await this.funcRedirectAfterLogin();
           Notify.success(
             `User ${window?.localStorage?.getItem('name')} signIn`,
             { timeout: 1000 }

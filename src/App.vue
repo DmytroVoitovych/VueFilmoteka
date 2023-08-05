@@ -198,7 +198,7 @@ export default {
         const refresh = setTimeout(
           async () => {
             window
-              .atob(this.$cookies.get('token').split('.')[1])
+              ?.atob(this.$cookies.get('token')?.split('.')[1])
               .includes('firebase')
               ? await this.controlLogin()
               : await this.refreshToken(); //??
