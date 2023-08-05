@@ -126,8 +126,9 @@ import MovieAPiServer from '../../helpers/req';
 import { myDatabase, store } from '@/store/filmsStore';
 import { nodeHttp } from '@/helpers/axios';
 import { featuresStore } from '@/store/storeForFeatures';
-import { getModalContent } from './contentLang';
+import { getModalContent, getNotifyContent } from './contentLang';
 import YouIframeVue from '../iframe/YouIframe.vue';
+import { Notify } from 'notiflix';
 
 const http = new MovieAPiServer();
 
@@ -201,7 +202,11 @@ export default {
           token: this.$store.state.token, // токен для пропуску
         });
         store.commit('setWatched', this.infos);
-        myDatabase.setItem('watched', JSON.stringify(store.state.infoWatched));
+        await myDatabase.setItem(
+          'watched',
+          JSON.stringify(store.state.infoWatched)
+        );
+        this.funcNotify(true, 0);
         // додаю в локальну базу
       } catch (err) {
         console.log(err);
@@ -218,7 +223,11 @@ export default {
         });
 
         store.commit('setQueue', this.infos);
-        myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue)); // додаю в локальну базу
+        await myDatabase.setItem(
+          'queue',
+          JSON.stringify(store.state.infoQueue)
+        ); // додаю в локальну базу
+        this.funcNotify(true, 1);
       } catch (err) {
         console.log(err);
       }
@@ -233,6 +242,7 @@ export default {
           idFilm: this.infos.id, // id для резервування на беку
           token: this.$store.state.token, // токен для пропуску
         });
+        this.funcNotify(true, type.includes('w') ? 2 : 3);
       } catch (err) {
         console.log(err);
       }
@@ -298,6 +308,19 @@ export default {
 
     getModalContent() {
       return getModalContent(this.getLanguage);
+    },
+    getModalNotifyContent() {
+      return getNotifyContent(this.getLanguage);
+    },
+    funcNotify(type, num) {
+      const option = {
+        position: 'right-bottom',
+        timeout: 1000,
+      };
+
+      type
+        ? Notify.success(this.getModalNotifyContent()[num], option)
+        : Notify.failure(this.getModalNotifyContent()[num], option);
     },
   },
   watch: {

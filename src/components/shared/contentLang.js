@@ -86,3 +86,40 @@ export const getModalContentPag = lang => {
   }
   return content;
 };
+
+export const getNotifyContent = lang => {
+  const content = [];
+  switch (lang) {
+    case 'fi':
+      content.push(
+        ...[
+          'lisätty katsottuihin',
+          'lisätty jonoa',
+          'poistettu katsotuista',
+          'poistettu jonosta',
+        ]
+      );
+      break;
+    case 'uk':
+      content.push(
+        ...[
+          'додано в переглянуті',
+          'додано в чергу',
+          'видалено з переглянутих',
+          'видалено з черги',
+        ]
+      );
+      break;
+    default:
+      content.push(
+        ...[
+          'added to watched',
+          'added to queue',
+          'removed from watched',
+          'removed from queue',
+        ]
+      );
+      break;
+  }
+  return content;
+};
