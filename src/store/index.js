@@ -138,5 +138,12 @@ export const store = createStore({
         context.commit('setRefresh', res.data.data.refresh_token);
       }
     },
+    async resetPassword(_, payload) {
+      // відправка коду для зміни паролю на емейл
+      console.log(payload);
+      const res = await nodeHttp.post('user/auth/resetcode', payload);
+      console.log(res, 'res');
+      return res;
+    },
   },
 });

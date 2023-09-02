@@ -180,7 +180,7 @@ export default {
       //розбір жанрів
       return idg
         ?.map(e =>
-          this.criticalGenres.filter(({ id, name }) => id === e && name)
+          this.criticalGenres?.filter(({ id, name }) => id === e && name)
         )
         .flat(3)
         .map(({ name }) => name)

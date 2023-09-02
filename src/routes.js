@@ -4,6 +4,7 @@ import BibliotekaPage from './page/BibliotekaPage.vue';
 import AuthPage from './page/AuthPage.vue';
 import LoginForm from './components/auth/LoginForm.vue';
 import RegisterForm from './components/auth/RegisterForm.vue';
+import ChangeForm from './components/auth/ChangeForm.vue';
 import Home from './page/Home.vue';
 
 import cookie from 'vue-cookies';
@@ -46,6 +47,11 @@ const routes = [
         path: 'signup',
         name: 'AuthSignup',
         component: RegisterForm,
+      },
+      {
+        path: 'newpassword',
+        name: 'AuthChange',
+        component: ChangeForm,
       },
     ],
   },

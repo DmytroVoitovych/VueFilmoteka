@@ -24,7 +24,11 @@
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
       </div>
-
+      <div class="pass__req">
+        <button type="button" @click.prevent="funcSendEmail">
+          Забули пароль?
+        </button>
+      </div>
       <div class="container-login-form-btn">
         <button
           class="login-form-btn"
@@ -39,6 +43,12 @@
           class="login-form-btn reg"
           type="button"
           >Create account</router-link
+        >
+        <router-link
+          :to="{ name: 'AuthChange' }"
+          class="login-form-btn reg"
+          type="button"
+          >Change password</router-link
         >
         <router-link :to="{ name: 'Home' }" class="homeBtnLink">
           <svg width="46px" height="46px">
@@ -57,7 +67,7 @@
 
 <script>
 import { store } from '@/store/filmsStore';
-import { Loading, Notify, Report } from 'notiflix';
+import { Confirm, Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 
 export default {
@@ -132,6 +142,34 @@ export default {
       this.$router.push({ path: '/', replace: true });
       store.dispatch('getFromServerFilmId', this.$store.state.token);
     },
+    funcSendEmail() {
+      Confirm.prompt(
+        'Відновлення паролю',
+        'Введіть вашу поштову скриньку. Туда буде відправлено код для відновлення паролю.',
+        `${this.mailLog ?? ''}`,
+        'Відправити',
+        'Відмінити',
+        this.funcSendEmailForReset,
+        () => {
+          console.log('cancel');
+        },
+        { messageMaxLength: 2700 }
+      );
+    },
+    async funcSendEmailForReset(mail) {
+      try {
+        const res = await this.$store.dispatch('resetPassword', {
+          email: mail,
+        });
+        if (res) {
+          Notify.success('Success');
+          this.$router.push({ path: '/auth/newpassword' });
+        }
+      } catch (error) {
+        console.log(error);
+        Notify.failure(error?.response?.data?.message ?? error);
+      }
+    },
   },
 
   computed: {
@@ -179,5 +217,23 @@ export default {
   fill: transparent;
   position: relative;
   stroke: azure;
+}
+
+.pass__req {
+  opacity: 0.7;
+  text-align: center;
+  margin-top: 4px;
+  button {
+    @extend %reset-style;
+    font-family: Ubuntu-Regular, sans-serif;
+    font-size: 16px;
+    color: #555555;
+    line-height: 1.2;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      text-decoration-color: #fa4299;
+    }
+  }
 }
 </style>
