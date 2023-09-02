@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div class="wrap-box">
-    <span class="login-form-title"> Account Login </span>
+    <span class="login-form-title"> {{ funcFormContent()[0] }} </span>
     <form class="login-form" data-form v-on:submit.prevent="funcSignInUser">
       <div class="wrap-input" data-validate="Enter username">
         <CustomInput
@@ -9,7 +9,7 @@
           class="input"
           type="email"
           name="email"
-          placeholder="User email"
+          :placeholder="funcFormContent()[1]"
         />
         <span class="focus-input" data-placeholder="&#xe82a;"></span>
       </div>
@@ -20,7 +20,7 @@
           class="input"
           :type="hide ? 'password' : 'text'"
           name="passReg"
-          placeholder="Password"
+          :placeholder="funcFormContent()[2]"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
         <span
@@ -33,7 +33,7 @@
       </div>
       <div class="pass__req">
         <button type="button" @click.prevent="funcSendEmail">
-          Забули пароль?
+          {{ funcFormContent()[3] }}
         </button>
       </div>
       <div class="container-login-form-btn">
@@ -43,19 +43,19 @@
           :disabled="noEmpty"
           type="submit"
         >
-          Login
+          {{ funcFormContent()[4] }}
         </button>
         <router-link
           :to="{ name: 'AuthSignup' }"
           class="login-form-btn reg"
           type="button"
-          >Create account</router-link
+          >{{ funcFormContent()[5] }}</router-link
         >
         <router-link
           :to="{ name: 'AuthChange' }"
           class="login-form-btn reg"
           type="button"
-          >Change password</router-link
+          >{{ funcFormContent()[6] }}</router-link
         >
         <router-link :to="{ name: 'Home' }" class="homeBtnLink">
           <svg width="46px" height="46px">
@@ -76,6 +76,8 @@
 import { store } from '@/store/filmsStore';
 import { Confirm, Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
+import { featuresStore } from '@/store/storeForFeatures';
+import { getAuthLoginContent, getAuthLoginConfirmContent } from './contentAuth';
 
 export default {
   data() {
@@ -152,11 +154,11 @@ export default {
     },
     funcSendEmail() {
       Confirm.prompt(
-        'Відновлення паролю',
-        'Введіть вашу поштову скриньку. Туда буде відправлено код для відновлення паролю.',
+        this.funcConfirmContent()[0],
+        this.funcConfirmContent()[1],
         `${this.mailLog ?? ''}`,
-        'Відправити',
-        'Відмінити',
+        this.funcConfirmContent()[2],
+        this.funcConfirmContent()[3],
         this.funcSendEmailForReset,
         () => {
           console.log('cancel');
@@ -181,6 +183,12 @@ export default {
     funcHide() {
       this.hide = !this.hide;
     },
+    funcFormContent() {
+      return getAuthLoginContent(this.getLanguage);
+    },
+    funcConfirmContent() {
+      return getAuthLoginConfirmContent(this.getLanguage);
+    },
   },
 
   computed: {
@@ -192,6 +200,9 @@ export default {
     },
     authTest() {
       return this.$store.state.token;
+    },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
     },
   },
 };

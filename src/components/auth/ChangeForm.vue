@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <span class="login-form-title"> Change password </span>
+    <span class="login-form-title"> {{ funcFormContent()[0] }} </span>
     <form
       v-on:submit.prevent="funcChangeUserPass"
       class="login-form"
@@ -13,7 +13,7 @@
           class="input"
           type="mail"
           name="email"
-          placeholder="User email"
+          :placeholder="funcFormContent()[1]"
         />
         <span class="focus-input" data-placeholder="&#xe82a;"></span>
       </div>
@@ -23,7 +23,7 @@
           class="input"
           :type="hide ? 'password' : 'text'"
           name="code"
-          placeholder="Old password or access code"
+          :placeholder="funcFormContent()[2]"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
         <span
@@ -40,7 +40,7 @@
           class="input"
           :type="hide ? 'password' : 'text'"
           name="passChange"
-          placeholder="New Password"
+          :placeholder="funcFormContent()[3]"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
         <span
@@ -59,7 +59,7 @@
           :disabled="noEmpty"
           type="submit"
         >
-          Change
+          {{ funcFormContent()[4] }}
         </button>
       </div>
       <router-link
@@ -78,6 +78,8 @@
 <script>
 import { Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
+import { featuresStore } from '@/store/storeForFeatures';
+import { getAuthChangeContent } from './contentAuth';
 export default {
   components: {
     CustomInput,
@@ -119,6 +121,9 @@ export default {
     funcHide() {
       this.hide = !this.hide;
     },
+    funcFormContent() {
+      return getAuthChangeContent(this.getLanguage);
+    },
   },
   computed: {
     noEmpty() {
@@ -126,6 +131,9 @@ export default {
       return this.mailChange && this.passChange && this.passChange.length >= 6
         ? false
         : true;
+    },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
     },
   },
 };

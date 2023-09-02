@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <span class="login-form-title"> Registration </span>
+    <span class="login-form-title"> {{ funcFormContent()[0] }} </span>
     <form v-on:submit.prevent="funcSignUpUser" class="login-form" data-registr>
       <div class="wrap-input" data-validate="Enter username">
         <CustomInput
@@ -9,7 +9,7 @@
           class="input"
           type="text"
           name="username"
-          placeholder="User name"
+          :placeholder="funcFormContent()[1]"
         />
         <span class="focus-input" data-placeholder="&#xe82a;"></span>
       </div>
@@ -20,7 +20,7 @@
           class="input"
           type="email"
           name="email"
-          placeholder="User email"
+          :placeholder="funcFormContent()[2]"
         />
         <span class="focus-input" data-placeholder="&#xe82a;"></span>
       </div>
@@ -31,7 +31,7 @@
           class="input"
           :type="hide ? 'password' : 'text'"
           name="passReg"
-          placeholder="Password"
+          :placeholder="funcFormContent()[3]"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
         <span
@@ -50,7 +50,7 @@
           :disabled="noEmpty"
           type="submit"
         >
-          Registration
+          {{ funcFormContent()[4] }}
         </button>
       </div>
       <router-link
@@ -69,6 +69,9 @@
 <script>
 import { Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
+import { getAuthRegistrationContent } from './contentAuth';
+import { featuresStore } from '@/store/storeForFeatures';
+
 export default {
   components: {
     CustomInput,
@@ -110,6 +113,9 @@ export default {
     funcHide() {
       this.hide = !this.hide;
     },
+    funcFormContent() {
+      return getAuthRegistrationContent(this.getLanguage);
+    },
   },
 
   computed: {
@@ -121,6 +127,9 @@ export default {
         this.passReg.length >= 6
         ? false
         : true;
+    },
+    getLanguage() {
+      return featuresStore.getters.getLanguage;
     },
   },
 };
@@ -139,7 +148,7 @@ export default {
 }
 
 .form-btn-center {
-  display: block;
+  display: inline-block;
   margin-top: 12px;
   text-align: center;
 }
