@@ -19,23 +19,37 @@
       </div>
       <div class="wrap-input" data-validate="Enter code">
         <CustomInput
-          v-model:find.trim="nameChange"
+          v-model:find.trim="oldPass"
           class="input"
-          type="text"
+          :type="hide ? 'password' : 'text'"
           name="code"
           placeholder="Old password or access code"
         />
-        <span class="focus-input" data-placeholder="&#xe82a;"></span>
+        <span class="focus-input" data-placeholder="&#xe80f;"></span>
+        <span
+          v-show="oldPass"
+          class="pass-eye"
+          @click.prevent="funcHide"
+          @mousedown="e => e.preventDefault()"
+          >{{ hide ? '🙈' : '🙉' }}</span
+        >
       </div>
       <div class="wrap-input" data-validate="Enter password">
         <CustomInput
           v-model:find.trim="passChange"
           class="input"
-          type="text"
+          :type="hide ? 'password' : 'text'"
           name="passChange"
           placeholder="New Password"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
+        <span
+          v-show="passChange"
+          class="pass-eye"
+          @click.prevent="funcHide"
+          @mousedown="e => e.preventDefault()"
+          >{{ hide ? '🙈' : '🙉' }}</span
+        >
       </div>
 
       <div class="container-login-form-btn">
@@ -70,24 +84,25 @@ export default {
   },
   data() {
     return {
-      nameChange: '',
+      oldPass: '', // чи код
       mailChange: '',
       passChange: '',
+      hide: true,
     };
   },
 
   methods: {
     async funcChangeUserPass() {
-      if ((this.nameReg, this.mailReg, this.passReg)) {
+      if ((this.oldPass, this.mailChange, this.passChange)) {
         Loading.dots();
         try {
-          await this.$store.dispatch('signUp', {
-            name: this.nameReg,
-            email: this.mailReg,
-            password: this.passReg,
+          await this.$store.dispatch('setNewPassword', {
+            email: this.mailChange,
+            password: this.oldPass,
+            newPassword: this.passChange,
           });
           this.$router.push({ path: '/auth/login' });
-          Notify.success(`User ${this.nameReg} created`);
+          Notify.success(`Success`);
         } catch (err) {
           if (err.response) {
             return Report.failure(
@@ -100,6 +115,9 @@ export default {
           Loading.remove();
         }
       }
+    },
+    funcHide() {
+      this.hide = !this.hide;
     },
   },
   computed: {
@@ -115,6 +133,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/auth';
+
+.pass-eye {
+  position: absolute;
+}
 
 @media screen and (max-width: 400px) {
   [data-validate='Enter code'] {
@@ -139,16 +161,17 @@ export default {
     }
   }
 }
-
+.pass-eye {
+  cursor: pointer;
+}
 .disabled {
   background: var(--disabled);
   pointer-events: none;
 }
 
 .form-btn-center {
-  display: block;
+  display: inline-block;
   margin-top: 12px;
-  text-align: center;
 }
 
 .formArrow {

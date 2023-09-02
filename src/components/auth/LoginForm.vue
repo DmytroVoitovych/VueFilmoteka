@@ -18,11 +18,18 @@
         <CustomInput
           v-model:find.trim="passLog"
           class="input"
-          type="password"
+          :type="hide ? 'password' : 'text'"
           name="passReg"
           placeholder="Password"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
+        <span
+          v-show="passLog"
+          class="pass-eye"
+          @click.prevent="funcHide"
+          @mousedown="e => e.preventDefault()"
+          >{{ hide ? '🙈' : '🙉' }}</span
+        >
       </div>
       <div class="pass__req">
         <button type="button" @click.prevent="funcSendEmail">
@@ -75,6 +82,7 @@ export default {
     return {
       mailLog: '',
       passLog: '',
+      hide: true,
     };
   },
   components: {
@@ -170,6 +178,9 @@ export default {
         Notify.failure(error?.response?.data?.message ?? error);
       }
     },
+    funcHide() {
+      this.hide = !this.hide;
+    },
   },
 
   computed: {
@@ -188,7 +199,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/auth';
-
+.pass-eye {
+  position: absolute;
+  cursor: pointer;
+}
 .disabled {
   background: var(--disabled);
   pointer-events: none;

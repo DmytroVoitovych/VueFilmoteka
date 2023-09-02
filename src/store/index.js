@@ -140,8 +140,13 @@ export const store = createStore({
     },
     async resetPassword(_, payload) {
       // відправка коду для зміни паролю на емейл
-      console.log(payload);
       const res = await nodeHttp.post('user/auth/resetcode', payload);
+      return res;
+    },
+    async setNewPassword(_, payload) {
+      // зміна паролю
+      console.log(payload);
+      const res = await nodeHttp.patch('user/auth/newpassword', payload);
       console.log(res, 'res');
       return res;
     },

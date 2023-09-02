@@ -29,11 +29,18 @@
         <CustomInput
           v-model:find.trim="passReg"
           class="input"
-          type="password"
+          :type="hide ? 'password' : 'text'"
           name="passReg"
           placeholder="Password"
         />
         <span class="focus-input" data-placeholder="&#xe80f;"></span>
+        <span
+          v-show="passReg"
+          class="pass-eye"
+          @click.prevent="funcHide"
+          @mousedown="e => e.preventDefault()"
+          >{{ hide ? '🙈' : '🙉' }}</span
+        >
       </div>
 
       <div class="container-login-form-btn">
@@ -71,6 +78,7 @@ export default {
       nameReg: '',
       mailReg: '',
       passReg: '',
+      hide: true,
     };
   },
 
@@ -99,6 +107,9 @@ export default {
         }
       }
     },
+    funcHide() {
+      this.hide = !this.hide;
+    },
   },
 
   computed: {
@@ -118,6 +129,10 @@ export default {
 <style lang="scss" scoped>
 @import '../../assets/scss/auth';
 
+.pass-eye {
+  position: absolute;
+  cursor: pointer;
+}
 .disabled {
   background: var(--disabled);
   pointer-events: none;
