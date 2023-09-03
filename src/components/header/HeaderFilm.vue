@@ -11,6 +11,7 @@
         >
         <button
           class="btn__logout"
+          aria-label="logeout"
           :data-name="getName()"
           v-if="!path.includes('Biblioteka') && !checkExpired"
           v-on:click.prevent="funcLogOut"
