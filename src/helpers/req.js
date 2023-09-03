@@ -92,10 +92,6 @@ export default class MovieAPiServer {
     return this.movieId;
   }
 
-  //   set id(newMovieId) {
-  //     return (this.movieId = newMovieId);
-  //   }
-
   get page() {
     return this.pageCounter;
   }
@@ -106,8 +102,4 @@ export default class MovieAPiServer {
   get query() {
     return this.searchQuery;
   }
-
-  //   set query(newQuery) {
-  //     return (this.searchQuery = newQuery);
-  //   }
 }

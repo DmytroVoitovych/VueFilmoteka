@@ -1,6 +1,5 @@
 <template>
   <TrendMain />
-  <!-- <div ref="height" :class="checkItem && 'noFilms'"></div> -->
 </template>
 
 <script>

@@ -145,9 +145,7 @@ export const store = createStore({
     },
     async setNewPassword(_, payload) {
       // зміна паролю
-      console.log(payload);
       const res = await nodeHttp.patch('user/auth/newpassword', payload);
-      console.log(res, 'res');
       return res;
     },
   },

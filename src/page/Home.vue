@@ -1,14 +1,14 @@
 <template>
-  <div><slot></slot></div>
+  <TrendMain />
 </template>
 
 <script>
-// import TrendMain from "@/components/trend/TrendMain.vue";
+import TrendMain from '@/components/trend/TrendMain.vue';
 export default {
   name: 'HomePage',
 
   components: {
-    // TrendMain,
+    TrendMain,
   },
 };
 </script>
