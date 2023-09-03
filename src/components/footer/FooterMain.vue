@@ -15,11 +15,22 @@
         </svg>
       </li>
       <li class="footer__items">
-        <a class="footer__items--ref">by Voitovych</a>
+        <a
+          class="footer__items--ref"
+          href="https://portfolio-dmytrovoitovych.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >by Voitovych</a
+        >
       </li>
       <li v-if="!feedLimit">
         <abbr title="feedback">
-          <button type="button" class="footer__feed" @click="toggle">
+          <button
+            type="button"
+            class="footer__feed"
+            @click="toggle"
+            aria-label="Feedback"
+          >
             <svg>
               <use href="../../assets/sprite.svg#icon-feed"></use>
             </svg>
@@ -152,6 +163,7 @@ footer {
 }
 
 .footer__items--ref {
+  color: inherit;
   text-decoration: underline;
   cursor: pointer;
 

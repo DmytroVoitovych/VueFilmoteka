@@ -1,6 +1,6 @@
 <template>
   <div class="btn-container">
-    <label class="switch btn-color-mode-switch">
+    <div class="switch btn-color-mode-switch">
       <input
         type="checkbox"
         name="color_mode"
@@ -15,7 +15,7 @@
         data-off="&#127774;"
         class="btn-color-mode-switch-inner"
       ></label>
-    </label>
+    </div>
   </div>
 </template>
 

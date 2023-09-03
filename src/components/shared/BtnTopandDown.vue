@@ -1,5 +1,10 @@
 <template>
-  <button type="button" :class="toTop && 'rotate'" v-on:click.="toTopOrDown">
+  <button
+    type="button"
+    :class="toTop && 'rotate'"
+    v-on:click.="toTopOrDown"
+    :aria-label="toTop ? 'move up' : 'move down'"
+  >
     <svg
       enable-background="new 0 0 512 512"
       id="Layer_1"
