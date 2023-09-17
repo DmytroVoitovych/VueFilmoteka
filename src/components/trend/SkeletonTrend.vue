@@ -52,7 +52,7 @@ export default {
   background-size: 130px;
   animation: load 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media screen and (min-width: 768px) and(max-width: 1279.5px) {
+  @media screen and (min-width: 768px) and (max-width: 1279.5px) {
     height: 455px;
   }
   @media screen and (max-width: 767.5px) {
