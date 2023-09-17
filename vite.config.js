@@ -12,6 +12,9 @@ export default defineConfig({
     // for axios-extensions
     'process.env': {},
   },
+  build: {
+    sourcemap: true,
+  },
   plugins: [
     vue({
       reactivityTransform: true,
