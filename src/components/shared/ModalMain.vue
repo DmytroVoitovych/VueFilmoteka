@@ -10,7 +10,7 @@
     <div class="modalV container">
       <button class="closeV" type="button" @click.stop="onClose">
         <svg width="30" height="30" class="icoV">
-          <use href="../../assets/sprite.svg#icon-close"></use>
+          <use :href="sprite + '#icon-close'"></use>
         </svg>
       </button>
       <img
@@ -29,7 +29,7 @@
         @click="() => (play = !play)"
       >
         <svg width="50" height="50">
-          <use :href="'./src/assets/sprite.svg' + switcher"></use>
+          <use :href="sprite + switcher"></use>
         </svg>
       </button>
       <YouIframeVue
@@ -130,6 +130,7 @@ import { getModalContent, getNotifyContent } from './contentLang';
 import YouIframeVue from '../iframe/YouIframe.vue';
 import { Notify } from 'notiflix';
 import imageUrl from '@/assets/images/ded.jpg';
+import sprite from '@/assets/sprite.svg';
 
 const http = new MovieAPiServer();
 
@@ -159,6 +160,7 @@ export default {
       checkParam: false,
       loading: false,
       img: imageUrl,
+      sprite,
     };
   },
   emits: {
