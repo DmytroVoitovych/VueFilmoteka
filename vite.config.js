@@ -24,20 +24,20 @@ export default defineConfig({
     },
   },
 
-  build: {
-    rollupOptions: {
-      input: './src/main.js', // Здесь должен быть путь к вашему JavaScript-файлу
-      output: {
-        manualChunks: {
-          'group-main': [
-            './src/page/AuthPage.vue',
-            './src/page/BibliotekaPage.vue',
-            './src/page/Home.vue',
-          ],
-        },
-      },
-    },
-  },
+  // build: {
+  //   rollupOptions: {
+  //     input: './src/main.js', // Здесь должен быть путь к вашему JavaScript-файлу
+  //     output: {
+  //       manualChunks: {
+  //         'group-main': [
+  //           './src/page/AuthPage.vue',
+  //           './src/page/BibliotekaPage.vue',
+  //           './src/page/Home.vue',
+  //         ],
+  //       },
+  //     },
+  //   },
+  // },
   css: {
     preprocessorOptions: {
       scss: {
