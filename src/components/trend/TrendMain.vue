@@ -90,7 +90,7 @@ import intersectionWith from 'lodash.intersectionwith';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import { ready } from 'localforage';
-import imageUrl from '@assets/images/ded.jpg';
+import imageUrl from '@/assets/images/ded.jpg';
 
 const http = new MovieAPiServer();
 let checkParam = false;
