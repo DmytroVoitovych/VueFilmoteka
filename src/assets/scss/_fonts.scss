@@ -1,17 +1,17 @@
 @font-face {
   font-family: 'Ubuntu-Regular';
   src: local('Ubuntu-Regular'),
-    url('~@/assets/fonts/ubuntu/Ubuntu-Regular.ttf') format('truetype');
+    url('@/assets/fonts/ubuntu/Ubuntu-Regular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Ubuntu-Bold';
   src: local('Ubuntu-Bold'),
-    url('~@/assets/fonts/ubuntu/Ubuntu-Bold.ttf') format('truetype');
+    url('@/assets/fonts/ubuntu/Ubuntu-Bold.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Linearicons-Free';
   src: local('Linearicons-Free'),
-    url('~@/assets/fonts/WebFont/Linearicons-Free.ttf') format('truetype');
+    url('@/assets/fonts/WebFont/Linearicons-Free.ttf') format('truetype');
 }

@@ -24,14 +24,14 @@ export const axio = {
 export default http;
 
 // nodehttp
-const { VUE_APP_FILMOTEKA, VUE_APP_TELEGRAM } = process.env;
+const { VITE_FILMOTEKA, VITE_TELEGRAM } = import.meta.env;
 
 export const nodeHttp = axios.create({
-  baseURL: VUE_APP_FILMOTEKA,
+  baseURL: VITE_FILMOTEKA,
   headers: { 'Cache-Control': 'no-cache' },
 });
 
 export const botSend = axios.create({
-  baseURL: VUE_APP_TELEGRAM,
+  baseURL: VITE_TELEGRAM,
   headers: { 'Cache-Control': 'no-cache' },
 });

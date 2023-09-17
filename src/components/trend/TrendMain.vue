@@ -31,11 +31,7 @@
             <img
               class="gallery__img"
               loading="lazy"
-              :src="
-                poster_path
-                  ? getPoster(poster_path)
-                  : require('./../../assets/images/ded.jpg')
-              "
+              :src="poster_path ? getPoster(poster_path) : img"
               :alt="title"
             />
             <div class="gallery__info">
@@ -94,6 +90,7 @@ import intersectionWith from 'lodash.intersectionwith';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import { ready } from 'localforage';
+import imageUrl from '@/assets/images/ded.jpg';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -137,6 +134,7 @@ export default {
       max: 0,
       locate: 0,
       check: false,
+      img: imageUrl,
     };
   },
   beforeCreate() {

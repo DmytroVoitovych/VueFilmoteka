@@ -18,7 +18,7 @@
         :src="
           infos.poster_path
             ? `https://image.tmdb.org/t/p/w500/${infos.poster_path}`
-            : require('./../../assets/images/ded.jpg')
+            : img
         "
       />
       <button
@@ -29,7 +29,7 @@
         @click="() => (play = !play)"
       >
         <svg width="50" height="50">
-          <use :href="require('./../../assets/sprite.svg') + switcher"></use>
+          <use :href="'./src/assets/sprite.svg' + switcher"></use>
         </svg>
       </button>
       <YouIframeVue
@@ -129,6 +129,7 @@ import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContent, getNotifyContent } from './contentLang';
 import YouIframeVue from '../iframe/YouIframe.vue';
 import { Notify } from 'notiflix';
+import imageUrl from '@/assets/images/ded.jpg';
 
 const http = new MovieAPiServer();
 
@@ -157,6 +158,7 @@ export default {
       infos: [],
       checkParam: false,
       loading: false,
+      img: imageUrl,
     };
   },
   emits: {
