@@ -90,7 +90,7 @@ import intersectionWith from 'lodash.intersectionwith';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import { ready } from 'localforage';
-import imageUrl from '@/assets/images/ded.jpg';
+import imageUrl from '@assets/images/ded.jpg';
 
 const http = new MovieAPiServer();
 let checkParam = false;
@@ -526,7 +526,7 @@ export default {
     grid-template-columns: repeat(3, 1fr);
     gap: 32px 16px;
   }
-  @media screen and (min-width: 768px) and(max-width: 1279.5px) {
+  @media screen and (min-width: 768px) and (max-width: 1279.5px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 32px;
   }
@@ -566,7 +566,7 @@ export default {
   background-size: 130px;
   animation: load 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
 
-  @media screen and (min-width: 768px) and(max-width: 1279.5px) {
+  @media screen and (min-width: 768px) and (max-width: 1279.5px) {
     height: 455px;
   }
   @media screen and (max-width: 767.5px) {
