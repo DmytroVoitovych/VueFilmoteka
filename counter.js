@@ -1,49 +1,43 @@
-function whatIsInAName(collection, source) {
-  const r = [];
-  const a = [];
-  collection.filter((e, i) => {
-    for (let key in source) {
-      if (e[key] === source[key] && JSON.stringify(e)) {
-        r.push(i);
-      }
-    }
-  });
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
-  r.filter((e, i, arr) =>
-    Object.keys(source).length > 1 ? e % arr[i + 1] === 0 : e
-  ).forEach(e => a.push(collection[e]));
-
-  return JSON.stringify(collection[0]) === JSON.stringify(source)
-    ? [
-        collection[0],
-        ...a.filter(
-          (e, i) => e[Object.keys(source).at(-1)] && e !== collection[0]
-        ),
-      ]
-    : a.filter((e, i) => e[Object.keys(source).at(-1)]);
-}
-
-whatIsInAName(
-  [
-    { first: 'Romeo', last: 'Montague' },
-    { first: 'Mercutio', last: null },
-    { first: 'Tybalt', last: 'Capulet' },
+// https://vitejs.dev/config/
+export default defineConfig({
+  define: {
+    // for axios-extensions
+    'process.env': {},
+  },
+  build: {
+    // карта потрібна для браузера
+    sourcemap: true,
+  },
+  plugins: [
+    vue({
+      reactivityTransform: true, // для оптимізації і зменшення бандла
+    }),
   ],
-  { last: 'Capulet' }
-);
-
-whatIsInAName(
-  [
-    { apple: 1, bat: 2 },
-    { apple: 1 },
-    { apple: 1, bat: 2, cookie: 2 },
-    { bat: 2 },
-  ],
-  { apple: 1, bat: 2 }
-);
-
-whatIsInAName(
-  [{ apple: 1, bat: 2 }, { apple: 1 }, { apple: 1, bat: 2, cookie: 2 }],
-  { apple: 1, cookie: 2 }
-);
-whatIsInAName([{ apple: 1 }, { apple: 1 }, { apple: 1, bat: 2 }], { apple: 1 });
+  resolve: {
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'], // роширення
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)), // щоб працювали вебпаковські аліаси
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // підключення scss файлів для коректної роботи у компонентах що обмежені в scope
+        additionalData: `
+              @import "/src/assets/scss/_auth.scss";
+              @import "/src/assets/scss/_base.scss";
+              @import "/src/assets/scss/_currentMode.scss";
+              @import "/src/assets/scss/_fonts.scss";
+              @import "/src/assets/scss/_mixin.scss";
+              @import "/src/assets/scss/_placholder.scss";
+              @import "/src/assets/scss/_scrollbar.scss";
+              @import "/src/assets/scss/_varibales.scss";
+              `,
+      },
+    },
+  },
+});

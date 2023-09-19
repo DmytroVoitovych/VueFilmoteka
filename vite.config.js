@@ -13,6 +13,7 @@ export default defineConfig({
     'process.env': {},
   },
   build: {
+    // карта потрібна для браузера
     sourcemap: true,
   },
   plugins: [
@@ -44,6 +45,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
+        // підключення scss файлів для коректної роботи у компонентах що обмежені в scope
         additionalData: `
               @import "/src/assets/scss/_auth.scss";
               @import "/src/assets/scss/_base.scss";

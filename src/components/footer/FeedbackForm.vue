@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script>
+<script >
 import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
