@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <div class="modal-feedback" @keydown.esc="toggle">
-    <button class="close closeV'" type="button" @click="toggle">
+  <div ref="el" class="modal-feedback" @keydown.esc="props.toggle">
+    <button class="close closeV'" type="button" @click="props.toggle">
       <svg width="20" height="20" aria-hidden="true">
         <use href="../../assets/sprite.svg#icon-close"></use>
       </svg>
@@ -45,30 +45,25 @@
   </div>
 </template>
 
-<script >
-import { featuresStore } from '@/store/storeForFeatures';
+<script setup lang="ts" >
+
+import  { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
 import { Block, Report } from 'notiflix';
+import { computed, inject, onMounted, ref} from 'vue';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
+ 
+const props = defineProps<{
+  toggle: Function // обовязково
+}>();
 
-export default {
-  name: 'FeedbackForm',
-  props: {
-    toggle: {
-      type: Function,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      feedback: '',
-    };
-  },
-  mounted() {
-    this.mangeDirectForm();
-  },
-  methods: {
-    async sendMessage() {
+const el = ref<HTMLDivElement | null>(null);
+const feedback = ref('');
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
+
+    const sendMessage = async () => {
       //відправка в теге
       try {
         Block.dots('.modal-feedback', {
@@ -76,48 +71,43 @@ export default {
           svgColor: 'var(--text-color-red)',
           backgroundColor: 'var(--bg-loader-basic)',
         });
-        await botSend.post('/feedback', { feedback: this.feedback });
-        this.$cookies.set('feedlimit', 'min', '30MIN');
-        Report.success('Feedback', this.modalContentNotify()[0], 'okay');
-      } catch (error) {
-        Report.warning('Feedback', error.response.data.message, 'okay');
+        await botSend.post('/feedback', { feedback: feedback.value });
+        $cookies?.set('feedlimit', 'min', '30MIN');
+        Report.success('Feedback', modalContentNotify()[0], 'okay');
+      } catch (error: any ) {
+        Report.warning('Feedback', error.response?.data.message, 'okay');
       } finally {
         Block.remove('.modal-feedback');
-        this.toggle();
+        props.toggle();
       }
-    },
+    }
 
-    mangeDirectForm() {
+    const mangeDirectForm = ()=> {
       // закритя коли не в зоні видимості
-      if (this.$el) {
+      if (el) {
         const intersectionObserver = new IntersectionObserver(
           entries => {
             entries[0].boundingClientRect.bottom > 0 &&
               !entries[0].isIntersecting &&
-              this.toggle();
+              props.toggle();
           },
 
           { threshold: 0 }
         );
         // start observing
-        intersectionObserver.observe(this.$el);
+        intersectionObserver.observe(el.value as HTMLElement);
       }
-    },
-
-    modalContentFeed() {
-      return getModalContentFeed(this.getLanguage); // отримання користувацького контену відповідно до мови
-    },
-    modalContentNotify() {
-      return getModalContentNotify(this.getLanguage);
-    },
-  },
-
-  computed: {
-    getLanguage() {
-      return featuresStore.getters.getLanguage; // вибрана мова
-    },
-  },
+    }
+   
+const modalContentFeed = () => {
+  return getModalContentFeed(lang); // отримання користувацького контену відповідно до мови
 };
+const modalContentNotify = () => {
+  return getModalContentNotify(lang);
+};
+
+  onMounted(mangeDirectForm);
+    
 </script>
 
 <style lang="scss" scoped>

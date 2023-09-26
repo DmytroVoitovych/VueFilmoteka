@@ -1,0 +1,29 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.vitest.json"
+    }
+  ],
+ 
+  "compilerOptions": {
+ "allowJs": true,
+ "isolatedModules": false,
+ "skipLibCheck": true,
+ "verbatimModuleSyntax": true,
+ "noImplicitAny": true,
+ "plugins": [{ "name": "sample-ts-plugin" }],
+  "baseUrl": ".",
+  "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+  
+
+}

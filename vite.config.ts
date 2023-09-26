@@ -1,7 +1,8 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-
+import checker from 'vite-plugin-checker';
+import AutoImport from 'unplugin-auto-import/vite';
 import path from 'node:path';
 
 path;
@@ -20,6 +21,8 @@ export default defineConfig({
     vue({
       reactivityTransform: true,
     }),
+    checker({ typescript: true, vueTsc: true }),
+    AutoImport({ imports: ['vue'] }),
   ],
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
