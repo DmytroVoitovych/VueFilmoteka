@@ -47,44 +47,31 @@
   </footer>
 </template>
 
-<script>
+<script setup lang="ts">
+import { inject, onMounted, onUpdated, ref } from 'vue';
 import FeedbackFormVue from './FeedbackForm.vue';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
+  
+const open = ref(false);
+const feedLimit = ref(false);
 
-export default {
-  name: 'FooterMain',
-  components: {
-    FeedbackFormVue,
-  },
-  data() {
-    return {
-      open: false,
-      feedLimit: false,
-    };
-  },
-  mounted() {
-    this.checkLimit();
-  },
-  updated() {
-    this.checkLimit();
-  },
-  methods: {
-    checkLimit() {
-      // обмеження відправлень
-      this.$cookies.get('feedlimit')
-        ? (this.feedLimit = true)
-        : (this.feedLimit = false);
-    },
-    toggle() {
-      this.open = !this.open;
-    },
-    year() {
-      return new Date().getFullYear();
-    },
-  },
-  watch: {
-    open() {},
-  },
+const checkLimit = ():void => {
+  // обмеження відправлень
+  $cookies?.get('feedlimit')
+    ? (feedLimit.value = true)
+    : (feedLimit.value = false);
 };
+
+const year = ():number => new Date().getFullYear();
+
+const toggle = ():void => {
+  open.value = !open.value;
+};
+
+onUpdated(checkLimit);    
+onMounted(checkLimit);
+ 
 </script>
 
 <style lang="scss" scoped>
