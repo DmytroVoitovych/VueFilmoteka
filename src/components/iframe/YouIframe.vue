@@ -8,35 +8,28 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    video: {
-      type: Array,
-    },
-    playerVars: {
-      type: Object,
-      require: true,
-      default() {
-        return { autoplay: 0, listType: 'user_uploads' };
-      },
-    },
-  },
-  methods: {
-    exitFrame() {
-      this.$refs.yt.stopVideo();
-    },
-    runFrame() {
-      this.$refs.yt.playVideo();
-    },
-  },
+<script setup lang="ts">
+import { ref } from 'vue';
 
-  computed: {
-    getOfficialTreiler() {
-      return this.video.toReversed().find(e => e.official)?.key;
-    },
-  },
-};
+
+interface Props { video: [] | string[], playerVars: { autoplay: number, listType: string }  };
+const props = withDefaults(defineProps<Props>(), { video:()=> [], playerVars: () => ({ autoplay: 0, listType: 'user_uploads' }) });
+const yt = ref<any>(null);
+
+// console.log(yt?._value ,'yt');
+const exitFrame = ()=>yt?.value?.stopVideo();
+const runFrame =  ()=>yt?.value?.playVideo();
+
+defineExpose({
+  runFrame,
+  exitFrame
+});
+  // computed: {
+  //   getOfficialTreiler() {
+  //     return this.video.toReversed().find(e => e.official)?.key;
+  //   },
+  // },
+
 </script>
 
 <style lang="scss" scoped></style>

@@ -50,8 +50,7 @@
 <script setup lang="ts">
 import { inject, onMounted, onUpdated, ref } from 'vue';
 import FeedbackFormVue from './FeedbackForm.vue';
-import type { VueCookies } from 'vue-cookies';
-const $cookies = inject<VueCookies>('$cookies'); 
+import { $cookies } from '@/types/types';
   
 const open = ref(false);
 const feedLimit = ref(false);

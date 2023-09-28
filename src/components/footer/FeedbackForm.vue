@@ -51,9 +51,8 @@ import  { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
 import { Block, Report } from 'notiflix';
-import { computed, inject, onMounted, ref} from 'vue';
-import type { VueCookies } from 'vue-cookies';
-const $cookies = inject<VueCookies>('$cookies'); 
+import { computed,onMounted, ref} from 'vue';
+import { $cookies } from '@/types/types';
  
 const props = defineProps<{
   toggle: Function // обовязково
