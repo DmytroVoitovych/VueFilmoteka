@@ -1,4 +1,6 @@
-export const getNotfoundContent = lang => {
+import type { langT } from '@/types/types';
+
+export const getNotfoundContent = (lang: langT): string[] => {
   const content = [];
   switch (lang) {
     case 'fi':

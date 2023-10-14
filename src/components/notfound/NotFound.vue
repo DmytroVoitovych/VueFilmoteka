@@ -7,22 +7,14 @@
   </div>
 </template>
 
-<script>
+<script  setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import { getNotfoundContent } from './contentLang';
-export default {
-  methods: {
-    notfoundContent() {
-      return getNotfoundContent(this.getLanguage);
-    },
-  },
+import { computed } from 'vue';
 
-  computed: {
-    getLanguage() {
-      return featuresStore.getters.getLanguage; // вибрана мова
-    },
-  },
-};
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
+const notfoundContent = ()=>getNotfoundContent(lang.value);
+
 </script>
 
 <style lang="scss" scoped>

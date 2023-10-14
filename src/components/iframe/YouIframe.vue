@@ -13,7 +13,7 @@ import { computed, ref } from 'vue';
 
 interface Props { video: [] | {[key:string]:string}[], playerVars: { autoplay: number, listType: string }  };
 const props = withDefaults(defineProps<Props>(), { video:()=> [], playerVars: () => ({ autoplay: 0, listType: 'user_uploads' }) });
-const yt = ref<any>(null);
+const yt = ref<HTMLDivElement | any>(null); // звернути увагу на вимушену міру так як не можу зробити експоз
 
 const exitFrame = ()=>yt?.value?.stopVideo();
 const runFrame =  ()=>yt?.value?.playVideo();

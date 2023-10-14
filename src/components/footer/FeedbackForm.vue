@@ -51,8 +51,9 @@ import  { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
 import { Block, Report } from 'notiflix';
-import { computed,onMounted, ref} from 'vue';
-import { $cookies } from '@/types/types';
+import { computed,inject,onMounted, ref} from 'vue';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
  
 const props = defineProps<{
   toggle: Function // обовязково
@@ -60,7 +61,7 @@ const props = defineProps<{
 
 const el = ref<HTMLDivElement | null>(null);
 const feedback = ref('');
-const lang = computed<string>(() => featuresStore.getters.getLanguage);
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
     const sendMessage = async () => {
       //відправка в теге
