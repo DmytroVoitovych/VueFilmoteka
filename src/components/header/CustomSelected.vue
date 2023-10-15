@@ -30,40 +30,36 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { reactive, ref, watch } from 'vue';
 import { featuresStore } from '../../store/storeForFeatures';
 
-export default {
-  data() {
-    return {
-      selected: window.localStorage.getItem('currLang') ?? 'English',
-      options: [
-        { text: 'en', value: 'English' },
-        { text: 'ua', value: 'Ukrainian' },
-        { text: 'fi', value: 'Finish' },
-      ],
-      show: false,
-    };
-  },
-  methods: {
-    chooseOption(opt) {
-      this.selected = opt;
-      this.show = !this.show;
-    },
-    funcShowOption(e) {
-      e !== 'out' ? (this.show = !this.show) : (this.show = false);
-    },
-  },
 
-  watch: {
-    selected(vanha, uusi) {
-      if (vanha !== uusi) {
+const selected = ref(window.localStorage.getItem('currLang') ?? 'English');
+const show = ref(false);
+const options = reactive([
+  { text: 'en', value: 'English' },
+  { text: 'ua', value: 'Ukrainian' },
+  { text: 'fi', value: 'Finish' },
+]);
+ 
+const chooseOption = (opt:string) => {
+  selected.value = opt;
+  show.value = !show.value;
+};
+
+const funcShowOption = (e: string | Event) => { // управління йде з батьківського компоненту через реф
+  e !== 'out' ? (show.value = !show.value) : (show.value = false);
+};
+
+defineExpose({ funcShowOption }); // передаю в керування
+
+watch(selected,(vanha, uusi) => {
+      if (vanha !== uusi) { // при змінні мови перепис стору
         window.localStorage.setItem('currLang', vanha);
         featuresStore.commit('setLanguage', vanha);
       }
-    },
-  },
-};
+    });
 </script>
 
 <style lang="scss" scoped>

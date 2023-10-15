@@ -1,4 +1,6 @@
-const getAuthContent = lang => {
+import { type langT } from '@/types/types';
+
+const getAuthContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -14,7 +16,7 @@ const getAuthContent = lang => {
   return content.join('');
 };
 
-const getLinkContent = lang => {
+const getLinkContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -30,7 +32,7 @@ const getLinkContent = lang => {
   return content;
 };
 
-const getInputContent = lang => {
+const getInputContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -46,7 +48,7 @@ const getInputContent = lang => {
   return content.join('');
 };
 
-const getButtonContent = lang => {
+const getButtonContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
