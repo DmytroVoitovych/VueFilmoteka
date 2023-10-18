@@ -1,10 +1,10 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <header class="header header__home" @mouseleave="focusOut">
+  <header class="header header__home" @mouseleave="focusEvent">
     <ContainerMain>
-      <template v-if="show">
+      <template v-if="props.show">
         <router-link
-          v-if="!path.includes('Biblioteka') && checkExpired"
+          v-if="!props.path.includes('Biblioteka') && checkExpired"
           :to="{ path: 'auth/login' }"
           class="custom-btn btn-A"
           ><span>{{ getHeaderContent('authcontent') }}</span></router-link
@@ -13,7 +13,7 @@
           class="btn__logout"
           aria-label="logeout"
           :data-name="getName()"
-          v-if="!path.includes('Biblioteka') && !checkExpired"
+          v-if="!props.path.includes('Biblioteka') && !checkExpired"
           v-on:click.prevent="funcLogOut"
         >
           <svg
@@ -59,7 +59,7 @@
 
             <li class="nav-item" data-auth="false">
               <router-link
-                :class="{ active__page: path.includes('Biblioteka') }"
+                :class="{ active__page: props.path.includes('Biblioteka') }"
                 :to="{
                   name: !checkExpired ? 'BibliotekaWatched' : 'AuthLogin',
                 }"
@@ -80,7 +80,7 @@
         <ThemeMode />
       </div>
       <form
-        v-if="!path.includes('Biblioteka')"
+        v-if="!props.path.includes('Biblioteka')"
         action=""
         class="search-form js-form"
       >
@@ -108,13 +108,13 @@
         <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
         <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1]" /></li>
       </ul>
-      <CustomSelected v-if="!path.includes('Biblioteka')" ref="focusOut" />
+      <CustomSelected v-if="!props.path.includes('Biblioteka')" ref="focusOut" />
     </ContainerMain>
   </header>
 </template>
 ;
 
-<script>
+<script setup lang="ts" >
 import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
 import CustomSelected from './CustomSelected.vue';
@@ -123,125 +123,111 @@ import ThemeMode from './ThemeMode.vue';
 import { Report, Notify } from 'notiflix';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getCont } from './contentLang';
+import { computed, inject, ref, type ComponentPublicInstance } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { store as auth } from '@/store/index';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
 
-export default {
-  name: 'HeaderMain',
+const router = useRouter();
+const route = useRoute();
 
-  components: {
-    ContainerMain,
-    CustomInput,
-    ModalBtn,
-    CustomSelected,
-    ThemeMode,
-  },
-  props: {
-    path: {
-      type: String,
-      required: true,
-    },
-    show: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  emits: {
-    onChekfind: v => typeof v === 'boolean', //передача тригера
-  },
-  data() {
-    return {
-      switcher: false, //тригер пошуку
-      nameFilms: '',
-      // show: false,
-    };
-  },
+const props = defineProps<{
+  path: string,
+  show: boolean
+}>();
 
-  methods: {
-    searchFilms() {
-      const specifick =
-        this.nameFilms ===
-        JSON.parse(window.localStorage.getItem('findedFilms'));
+const switcher = ref(false); //тригер пошуку
+const nameFilms = ref('');
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
-      if (this.nameFilms && !specifick) {
-        // cacheOptions.clear();  // видаляю кеш для коректного пошуку
-        this.changeStorage();
-        this.switcher = !this.switcher; //або або // логіка тогл
-        this.$emit('onChekfind', this.switcher);
-      } else if (specifick) {
-        return Notify.failure(
-          `You already have movies on request: ${this.nameFilms}`
-        );
-      } else {
-        return Notify.failure('Search string must have at least one character');
-      }
-    },
-    toMainPage() {
-      window.localStorage.removeItem('numberPage');
-      window.localStorage.removeItem('findedFilms');
-      this.$route.fullPath !== '/'
-        ? this.$router.push({ path: '/' })
-        : this.$router.go(0);
-    },
-    changeStorage() {
+const emit = defineEmits<{onChekfind: [switcher: boolean]}>(); //передача тригера
+
+ const changeStorage = ()=> {
       window.localStorage.removeItem('numberPage'); //обнуляю сторінку
       window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
       window.localStorage.setItem(
         'findedFilms',
-        JSON.stringify(this.nameFilms)
+        JSON.stringify(nameFilms.value)
       ); //передаю в основу
-      this.nameFilms = '';
-    },
+      nameFilms.value = '';
+};
 
-    async funcLogOut() {
-      try {
-        await this.$store.dispatch('LogOut', this.$store.state.token);
-        this.$cookies.remove('token');
-      } catch (err) {
-        console.log(err);
-        if (err.response) {
-          return Report.failure(
-            `Error ${err.response.data.code}`,
-            err.response.data.message
-          );
-        }
-        return Report.failure(`Error ${err.code}`, err.message);
-      }
-    },
-    getName() {
-      return window.localStorage.getItem('name');
-    },
-    getHeaderContent(type) {
-      if (type === 'authcontent') {
-        return getCont.getAuthContent(this.getLanguage);
-      } else if (type === 'navcontent') {
-        return getCont.getLinkContent(this.getLanguage);
-      } else if (type === 'holdercontent') {
-        return getCont.getInputContent(this.getLanguage);
-      } else {
-        return getCont.getButtonContent(this.getLanguage);
-      }
-    },
-    focusOut() {
-      this.$refs?.focusOut?.funcShowOption('out');
-    },
-  },
+const searchFilms = () => {
 
-  computed: {
-    checkExpired() {
-      const token = this.$store.state.token;
+  const specifick = nameFilms.value === window.localStorage.getItem('findedFilms');
+
+  if (nameFilms.value && !specifick) {
+    // cacheOptions.clear();  // видаляю кеш для коректного пошуку
+    changeStorage();
+    switcher.value = !switcher.value; //або або // логіка тогл
+    emit('onChekfind', switcher.value);
+  } else if (specifick) {
+    return Notify.failure(
+      `You already have movies on request: ${nameFilms.value}`
+    );
+  } else {
+    return Notify.failure('Search string must have at least one character');
+  }
+};
+
+const toMainPage = () => { // повернення на основну сторінку
+  window.localStorage.removeItem('numberPage');
+  window.localStorage.removeItem('findedFilms');
+  route.fullPath !== '/'
+    ? router.push({ path: '/' })
+    : router.go(0);
+};
+  
+
+const funcLogOut = async () => {
+  try {
+    await auth.dispatch('LogOut', auth.state.token);
+    $cookies?.remove('token');
+  } catch (err:any) {
+     if ('response' in err  && err?.response) {
+      return Report.failure(
+        `Error ${err.response.data.code}`,
+        err.response.data.message,'ok'
+      );
+    }
+    return Report.failure(`Error ${err.code}`, err.message,'ok');
+  }
+};
+
+const getName = () => {
+  return window.localStorage.getItem('name');
+};
+
+type headerContentT = 'authcontent' | 'navcontent' | 'holdercontent';
+
+const getHeaderContent = (type?:headerContentT) => {
+  if (type === 'authcontent') {
+    return getCont.getAuthContent(lang);
+  } else if (type === 'navcontent') {
+    return getCont.getLinkContent(lang);
+  } else if (type === 'holdercontent') {
+    return getCont.getInputContent(lang);
+  } else {
+    return getCont.getButtonContent(lang);
+  }
+};
+
+const focusOut = ref<ComponentPublicInstance<typeof CustomSelected> | null>(null); // реф для керування функцієй на child
+const focusEvent = () => focusOut.value?.funcShowOption('out');
+
+const checkExpired = computed(()=>{
+      const token = auth.state.token ?? $cookies?.get('token');
 
       if (!token) {
         return true;
       }
 
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
-      return Math.floor(new Date() / 1000) > exp;
-    },
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-  },
-};
-</script>
+      return Math.floor(+new Date() / 1000) > exp;
+});
+console.log(checkExpired,'checkExpired');
+ </script>
 
 <style lang="scss" scoped>
 [v-cloak] {

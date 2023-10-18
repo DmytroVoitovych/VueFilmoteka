@@ -19,41 +19,35 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      dark: false,
-    };
-  },
-  created() {
-    this.getUserTheme();
-  },
-  methods: {
-    changeThemeMode() {
-      const html = document.documentElement.classList;
-      html.toggle('dark'); // міняєм клас в залежності від стану
-      html.contains('dark')
-        ? window.sessionStorage.setItem('theme', 'dark')
-        : window.sessionStorage.setItem('theme', 'light');
-    },
-    getUserTheme() {
-      this.dark = window.matchMedia('(prefers-color-scheme:dark)').matches; // перевіряю тему юзера
-      window.sessionStorage.getItem('theme') === 'dark'
-        ? document.documentElement.classList.add('dark')
-        : this.dark &&
-          window.sessionStorage.getItem('theme') !== 'light' &&
-          document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
+<script setup lang="ts">
+import {ref } from 'vue';
 
-      this.dark =
-        (window.sessionStorage.getItem('theme') !== 'light' &&
-          window.matchMedia('(prefers-color-scheme:dark)').matches) ||
-        window.sessionStorage.getItem('theme') === 'dark'
-          ? true
-          : false;
-    },
-  },
+const dark = ref(false);
+
+const changeThemeMode = () => {
+  const html = document.documentElement.classList;
+  html.toggle('dark'); // міняєм клас в залежності від стану
+  html.contains('dark')
+    ? window.sessionStorage.setItem('theme', 'dark')
+    : window.sessionStorage.setItem('theme', 'light');
 };
+const getUserTheme = () => {
+  dark.value = window.matchMedia('(prefers-color-scheme:dark)').matches; // перевіряю тему юзера
+  window.sessionStorage.getItem('theme') === 'dark'
+    ? document.documentElement.classList.add('dark')
+    : dark.value &&
+    window.sessionStorage.getItem('theme') !== 'light' &&
+    document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
+
+  dark.value =
+    (window.sessionStorage.getItem('theme') !== 'light' &&
+      window.matchMedia('(prefers-color-scheme:dark)').matches) ||
+      window.sessionStorage.getItem('theme') === 'dark'
+      ? true
+      : false;
+};
+
+getUserTheme();
 </script>
 
 <style lang="scss">

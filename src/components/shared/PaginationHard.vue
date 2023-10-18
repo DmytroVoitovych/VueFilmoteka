@@ -81,9 +81,12 @@ export default {
       const browsVers = +Bowser.getParser(window.navigator.userAgent)
         .getBrowserVersion()
         .split('.')[0];
+      if (this.browser.includes('opera') && browsVers >= 100) {
+        return true;
+      };
       return (
         (this.browser.includes('chrome') || this.browser.includes('edge')) &&
-        browsVers >= 114
+        browsVers >= 114 
       );
     },
 
