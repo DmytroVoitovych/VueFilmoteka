@@ -226,7 +226,7 @@ const checkExpired = computed(()=>{
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(+new Date() / 1000) > exp;
 });
-console.log(checkExpired,'checkExpired');
+
  </script>
 
 <style lang="scss" scoped>

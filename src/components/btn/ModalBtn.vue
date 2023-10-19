@@ -1,33 +1,27 @@
 <template>
   <router-link
-    :to="{ path: name }"
-    :textcontent="name"
+    :to="{ path: props.name }"
+    :textcontent="props.name"
     class="library__header--btn"
     @click="toggle"
   >
-    {{ content }}
+    {{ props.content }}
   </router-link>
 </template>
 
-<script>
-export default {
-  name: 'ModalBtn',
-  props: {
-    name: {
-      type: String,
-      requried: true,
-    },
-    content: {
-      type: String,
-      requried: true,
-    },
-  },
-  methods: {
-    toggle() {
-      this.$router.push({ path: this.name.toLowerCase() });
-    },
-  },
-};
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+
+
+const props = defineProps<{
+  name: string,
+  content: string
+}>();
+
+const router = useRouter();
+
+const toggle = ()=> router.push({ path: props.name.toLowerCase() });
+
 </script>
 
 <style lang="scss" scoped>
