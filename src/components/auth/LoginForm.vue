@@ -72,140 +72,130 @@
   </div>
 </template>
 
-<script>
-import { store } from '@/store/filmsStore';
+<script setup lang="ts">
+import { store as auth} from '@/store/index';
 import { Confirm, Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getAuthLoginContent, getAuthLoginConfirmContent } from './contentAuth';
+import { computed, inject, ref } from 'vue';
+import type { VueCookies } from 'vue-cookies';
+import { useRouter } from 'vue-router';
+const $cookies = inject<VueCookies>('$cookies');
 
-export default {
-  data() {
-    return {
-      mailLog: '',
-      passLog: '',
-      hide: true,
-    };
-  },
-  components: {
-    CustomInput,
-  },
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+const router = useRouter();
 
-  methods: {
-    redirectFromHideRoute() {
-      window.history.state.current.toLowerCase().includes('bibl') &&
-        !this.$cookies.get('token') &&
-        this.$router.push({ name: 'AuthLogin' });
+const mailLog = ref('');
+const passLog = ref('');
+const hide = ref(true);
+   
+const redirectFromHideRoute = () => {
+  window.history.state.current.toLowerCase().includes('bibl') &&
+    !$cookies?.get('token') &&
+    router.push({ name: 'AuthLogin' });
 
-      window.history.state.current.toLowerCase().includes('auth') &&
-        this.$cookies.get('token') &&
-        this.$router.push({ path: '/' });
-    },
-    async funcSignInUser() {
-      this.redirectFromHideRoute();
+  window.history.state.current.toLowerCase().includes('auth') &&
+    $cookies?.get('token') &&
+    router.push({ path: '/' });
+};
 
-      if ((this.mailLog, this.passLog, !this.$cookies.get('token'))) {
-        Loading.dots();
-        try {
-          await this.$store.dispatch('signIn', {
-            email: this.mailLog,
-            password: this.passLog,
-          });
-          this.funcRedirectAfterLogin();
-          Notify.success(`User ${window.localStorage.getItem('name')} signIn`, {
-            timeout: 1000,
-          });
-        } catch (err) {
-          if (err.response) {
-            return Report.failure(
-              `Error ${err.response.data.code}`,
-              err.response.data.message
-            );
-          }
-          return Report.failure(`Error ${err.code}`, err.message);
-        } finally {
-          Loading.remove();
-        }
+const funcRedirectAfterLogin = () => {
+  $cookies?.set('token', auth.state.token, '60MIN'); // d кукіс
+  router.push({ path: '/', replace: true });
+  auth.dispatch('getFromServerFilmId', auth.state.token);
+};
+
+const funcSignInUser = async () => {
+  redirectFromHideRoute();
+
+  if ((mailLog.value, passLog.value, !$cookies?.get('token'))) {
+    Loading.dots();
+    try {
+      await auth.dispatch('signIn', {
+        email: mailLog.value,
+        password: passLog.value,
+      });
+      funcRedirectAfterLogin();
+      Notify.success(`User ${window.localStorage.getItem('name')} signIn`, {
+        timeout: 1000,
+      });
+    } catch (err: any) {
+      if ('response' in err && err.response) {
+        return Report.failure(
+          `Error ${err.response.data.code}`,
+          err.response.data.message, 'ok'
+        );
       }
-    },
-    async googleLogin() {
-      this.redirectFromHideRoute();
-      if (!this.$cookies.get('token')) {
-        Loading.dots();
-        try {
-          await this.$store.dispatch('googleLogin');
-          await this.funcRedirectAfterLogin();
-          Notify.success(
-            `User ${window?.localStorage?.getItem('name')} signIn`,
-            { timeout: 1000 }
-          );
-        } catch (err) {
-          this.$router.push({ path: '/auth/login' });
-          Notify.info('User stop auth');
-        } finally {
-          Loading.remove();
-        }
-      }
-    },
-    funcRedirectAfterLogin() {
-      this.$cookies.set('token', this.$store.state.token, '60MIN'); // d кукіс
-      this.$router.push({ path: '/', replace: true });
-      store.dispatch('getFromServerFilmId', this.$store.state.token);
-    },
-    funcSendEmail() {
+      return Report.failure(`Error ${err.code}`, err.message, 'ok');
+    } finally {
+      Loading.remove();
+    }
+  }
+};
+
+const googleLogin = async () => {
+  redirectFromHideRoute();
+  if (!$cookies?.get('token')) {
+    Loading.dots();
+    try {
+      await auth.dispatch('googleLogin');
+      await funcRedirectAfterLogin();
+      Notify.success(
+        `User ${window?.localStorage?.getItem('name')} signIn`,
+        { timeout: 1000 }
+      );
+    } catch (err) {
+      router.push({ path: '/auth/login' });
+      Notify.info('User stop auth');
+    } finally {
+      Loading.remove();
+    }
+  }
+};
+
+const funcConfirmContent= ()=> getAuthLoginConfirmContent(lang);
+  
+const funcSendEmail = ()=> 
       Confirm.prompt(
-        this.funcConfirmContent()[0],
-        this.funcConfirmContent()[1],
-        `${this.mailLog ?? ''}`,
-        this.funcConfirmContent()[2],
-        this.funcConfirmContent()[3],
-        this.funcSendEmailForReset,
+        funcConfirmContent()[0],
+        funcConfirmContent()[1],
+        `${mailLog.value ?? ''}`,
+        funcConfirmContent()[2],
+        funcConfirmContent()[3],
+        funcSendEmailForReset,
         () => {
           console.log('cancel');
         },
         { messageMaxLength: 2700 }
       );
-    },
-    async funcSendEmailForReset(mail) {
-      try {
-        const res = await this.$store.dispatch('resetPassword', {
-          email: mail,
-        });
-        if (res) {
-          Notify.success('Success');
-          this.$router.push({ path: '/auth/newpassword' });
-        }
-      } catch (error) {
-        console.log(error);
-        Notify.failure(error?.response?.data?.message ?? error);
-      }
-    },
-    funcHide() {
-      this.hide = !this.hide;
-    },
-    funcFormContent() {
-      return getAuthLoginContent(this.getLanguage);
-    },
-    funcConfirmContent() {
-      return getAuthLoginConfirmContent(this.getLanguage);
-    },
-  },
-
-  computed: {
-    noEmpty() {
-      // контроль кнопки
-      return this.mailLog && this.passLog && this.passLog.length >= 6
-        ? false
-        : true;
-    },
-    authTest() {
-      return this.$store.state.token;
-    },
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-  },
+    
+const  funcSendEmailForReset = async (mail: string) => {
+  try {
+    const res = await auth.dispatch('resetPassword', {
+      email: mail,
+    });
+    if (res) {
+      Notify.success('Success');
+      router.push({ path: '/auth/newpassword' });
+    }
+  } catch (error: any) {
+    console.log(error);
+    Notify.failure(error?.response?.data?.message ?? error);
+  }
 };
+
+const funcHide = () => {
+  hide.value = !hide.value;
+};
+
+const funcFormContent = () => getAuthLoginContent(lang);
+const noEmpty = computed(() =>
+      // контроль кнопки
+       mailLog.value && passLog.value && passLog.value.length >= 6
+        ? false
+        : true)
+
 </script>
 
 <style lang="scss" scoped>
