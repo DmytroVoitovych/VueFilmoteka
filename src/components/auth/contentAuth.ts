@@ -1,4 +1,6 @@
-export const getAuthLoginContent = lang => {
+import { type langT } from '@/types/types';
+
+export const getAuthLoginContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -44,7 +46,7 @@ export const getAuthLoginContent = lang => {
   return content;
 };
 
-export const getAuthRegistrationContent = lang => {
+export const getAuthRegistrationContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -78,7 +80,7 @@ export const getAuthRegistrationContent = lang => {
   return content;
 };
 
-export const getAuthChangeContent = lang => {
+export const getAuthChangeContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -118,7 +120,7 @@ export const getAuthChangeContent = lang => {
   return content;
 };
 
-export const getAuthLoginConfirmContent = lang => {
+export const getAuthLoginConfirmContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':

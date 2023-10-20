@@ -66,73 +66,64 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 import { getAuthRegistrationContent } from './contentAuth';
 import { featuresStore } from '@/store/storeForFeatures';
+import { computed, ref } from 'vue';
+import { store as auth } from '@/store';
+import { useRouter } from 'vue-router';
 
-export default {
-  components: {
-    CustomInput,
-  },
-  data() {
-    return {
-      nameReg: '',
-      mailReg: '',
-      passReg: '',
-      hide: true,
-    };
-  },
+const nameReg =ref('');
+const mailReg =ref('');
+const passReg =ref('');
+const hide = ref(true);
 
-  methods: {
-    async funcSignUpUser() {
-      if ((this.nameReg, this.mailReg, this.passReg)) {
-        Loading.dots();
-        try {
-          await this.$store.dispatch('signUp', {
-            name: this.nameReg,
-            email: this.mailReg,
-            password: this.passReg,
-          });
-          this.$router.push({ path: '/auth/login' });
-          Notify.success(`User ${this.nameReg} created`);
-        } catch (err) {
-          if (err.response) {
-            return Report.failure(
-              `Error ${err.response.data.code}`,
-              err.response.data.message
-            );
-          }
-          return Report.failure(`Error ${err.code}`, err.message);
-        } finally {
-          Loading.remove();
-        }
+const router = useRouter();
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+
+const funcSignUpUser = async () => {
+  if ((nameReg.value, mailReg.value, passReg.value)) {
+    Loading.dots();
+    try {
+      await auth.dispatch('signUp', {
+        name: nameReg.value,
+        email: mailReg.value,
+        password: passReg.value,
+      });
+      router.push({ path: '/auth/login' });
+      Notify.success(`User ${nameReg.value} created`);
+    } catch (err: any) {
+      if ('response' in err && err?.response) {
+        return Report.failure(
+          `Error ${err.response.data.code}`,
+          err.response.data.message,
+          'ok'
+        );
       }
-    },
-    funcHide() {
-      this.hide = !this.hide;
-    },
-    funcFormContent() {
-      return getAuthRegistrationContent(this.getLanguage);
-    },
-  },
-
-  computed: {
-    noEmpty() {
-      // контроль кнопки
-      return this.nameReg &&
-        this.mailReg &&
-        this.passReg &&
-        this.passReg.length >= 6
-        ? false
-        : true;
-    },
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-  },
+      return Report.failure(`Error ${err.code}`, err.message, 'ok');
+    } finally {
+      Loading.remove();
+    }
+  }
 };
+
+const funcHide = () => {
+  hide.value = !hide.value;
+};
+
+const funcFormContent = () => getAuthRegistrationContent(lang);
+  
+const noEmpty = computed(() =>
+  // контроль кнопки
+  nameReg.value &&
+    mailReg.value &&
+    passReg.value &&
+    passReg.value.length >= 6
+    ? false
+    : true);
+
 </script>
 
 <style lang="scss" scoped>
