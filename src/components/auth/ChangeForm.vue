@@ -75,68 +75,60 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getAuthChangeContent } from './contentAuth';
-export default {
-  components: {
-    CustomInput,
-  },
-  data() {
-    return {
-      oldPass: '', // чи код
-      mailChange: '',
-      passChange: '',
-      hide: true,
-    };
-  },
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { store as auth } from '@/store/index';
 
-  methods: {
-    async funcChangeUserPass() {
-      if ((this.oldPass, this.mailChange, this.passChange)) {
-        Loading.dots();
-        try {
-          await this.$store.dispatch('setNewPassword', {
-            email: this.mailChange,
-            password: this.oldPass,
-            newPassword: this.passChange,
-          });
-          this.$router.push({ path: '/auth/login' });
-          Notify.success(`Success`);
-        } catch (err) {
-          if (err.response) {
-            return Report.failure(
-              `Error ${err.response.data.code}`,
-              err.response.data.message
-            );
-          }
-          return Report.failure(`Error ${err.code}`, err.message);
-        } finally {
-          Loading.remove();
-        }
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+const router = useRouter();
+
+const oldPass = ref(''); // чи код
+const mailChange = ref('');
+const passChange = ref('');
+const hide = ref(true);
+    
+const funcChangeUserPass = async () => {
+  if ((oldPass.value, mailChange.value, passChange.value)) {
+    Loading.dots();
+    try {
+      await auth.dispatch('setNewPassword', {
+        email: mailChange.value,
+        password: oldPass.value,
+        newPassword: passChange.value,
+      });
+      router.push({ path: '/auth/login' });
+      Notify.success(`Success`);
+    } catch (err:any) {
+      if ('response' in err && err.response) {
+        return Report.failure(
+          `Error ${err.response.data.code}`,
+          err.response.data.message,'ok'
+        );
       }
-    },
-    funcHide() {
-      this.hide = !this.hide;
-    },
-    funcFormContent() {
-      return getAuthChangeContent(this.getLanguage);
-    },
-  },
-  computed: {
-    noEmpty() {
-      // контроль кнопки
-      return this.mailChange && this.passChange && this.passChange.length >= 6
-        ? false
-        : true;
-    },
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-  },
+      return Report.failure(`Error ${err.code}`, err.message,'ok');
+    } finally {
+      Loading.remove();
+    }
+  }
 };
+
+const funcHide = () => {
+  hide.value = !hide.value;
+};
+
+const funcFormContent = ()=> getAuthChangeContent(lang);
+  
+const noEmpty = computed(()=> 
+      // контроль кнопки
+       mailChange.value && passChange.value && passChange.value.length >= 6
+        ? false
+        : true
+);
 </script>
 
 <style lang="scss" scoped>

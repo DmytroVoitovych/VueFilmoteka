@@ -28,6 +28,7 @@
           class="pass-eye"
           @click.prevent="funcHide"
           @mousedown="e => e.preventDefault()"
+          tabindex="-1"
           >{{ hide ? '🙈' : '🙉' }}</span
         >
       </div>
