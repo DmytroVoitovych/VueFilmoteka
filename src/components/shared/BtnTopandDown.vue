@@ -59,85 +59,66 @@
   </button>
 </template>
 
-<script lang="js">
+<script setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import Bowser from 'bowser';
+import { computed, onMounted, ref, watch } from 'vue';
 
+const toTop = ref(false);
+const locate = ref(0);
 
-export default {
-    data() {
-        return {
-          toTop: false,
-          locate: 0,
+const getRef = computed<HTMLElement | null>(()=>featuresStore?.getters?.getRefItem);
+        
 
-    }
-    },
+const mangeDirectBtn = ()=> {
 
-  mounted() {
-
-    this.mangeDirectBtn();
-    
-  },
-
-    methods: {
-      mangeDirectBtn() {
-
-        if (this.getRef) {
+        if (getRef.value) {
           const intersectionObserver = new IntersectionObserver((entries) => {
 
-            entries[0].isIntersecting && (this.locate = window.scrollY);
-            return !entries[0].isIntersecting && (this.locate = window.scrollY);
+            entries[0].isIntersecting && (locate.value = window.scrollY);
+            return !entries[0].isIntersecting && (locate.value = window.scrollY);
             
 
           }, { threshold: .5 });
           // start observing
 
-          intersectionObserver.observe(this.getRef);
+          intersectionObserver.observe(getRef.value);
 
         }
-      },
-      toTopOrDown() {
+};
 
-let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
+onMounted(() => mangeDirectBtn());
+      
+const toTopOrDown = () => {
+
+  let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
     document.body.scrollHeight, document.documentElement.scrollHeight,
     document.body.offsetHeight, document.documentElement.offsetHeight,
     document.body.clientHeight, document.documentElement.clientHeight
   );
 
-        if (this.toTop) {
-          window.scroll({ top: 0, behavior: 'smooth', });
+  if (toTop.value) {
+    window.scroll({ top: 0, behavior: 'smooth', });
 
-          return;
-        }
-        window.scrollBy({ top: scrollHeight, behavior: "smooth" });
-
-
+    return;
   }
-  },
+  window.scrollBy({ top: scrollHeight, behavior: "smooth" });
+};
+  
 
 
-  watch: {
-    locate(n, o) {
-      const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
-     
-      n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
-        ?
-        (this.toTop = (n < Number(o)) || !o ? false : true)
-        :
-        (this.toTop = true);
-    },
-    getRef(n, o) {
-            n !== o && this.mangeDirectBtn();
-   }
-  },
-    computed: {
-        getRef() {
+watch(locate, (n, o) => {
+  const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
 
-            return featuresStore?.getters?.getRefItem;
-        }
-    }
+  n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
+    ?
+    (toTop.value = (n < Number(o)) || !o ? false : true)
+    :
+    (toTop.value = true);
+});
 
-}
+watch(getRef, (n, o) => n !== o && mangeDirectBtn());
+
 </script>
 
 <style lang="scss" scoped>
