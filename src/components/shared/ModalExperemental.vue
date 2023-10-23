@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <div id="pagination-popover" popover class="modal-pagination">
+  <div id="pagination-popover" popover class="modal-pagination" ref="el">
     <button
       class="close closeV'"
       modal-pagination-close
@@ -20,11 +20,11 @@
             <label
               for="page"
               class="form__label t-js"
-              :class="max < num && 'wrong-page'"
+              :class="props.max < +num && 'wrong-page'"
             >
               {{
-                max < num
-                  ? modalContentPag()[1].replace(' ', ` ${max} `)
+                props.max < +num
+                  ? modalContentPag()[1].replace(' ', ` ${props.max} `)
                   : modalContentPag()[2]
               }}</label
             >
@@ -46,7 +46,7 @@
         type="submit"
         @click.prevent="forcePage"
         class="button-pagination button_ok"
-        :disabled="max < num"
+        :disabled="props.max < +num"
       >
         {{ modalContentPag()[3] }}
       </button>
@@ -54,67 +54,44 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import InputComponent from '../header/InputComponent.vue';
 import { getModalContentPag } from './contentLang';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-export default {
-  name: 'ModalExperemental',
-  components: {
-    InputComponent,
-  },
-  data() {
-    return {
-      num: 1,
-    };
-  },
-  props: {
-    max: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-  },
-  emits: {
-    forcePage: e => typeof e === 'number',
-  },
+const num = ref(1);
+const el = ref<HTMLDivElement | null>(null);
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
-  mounted() {
-    this.$el.addEventListener('beforetoggle', this.stateOfModalPag); // reg event
-  },
-  unmounted() {
-    this.$el.removeEventListener('beforetoggle', this.stateOfModalPag); //clean event
-  },
-  methods: {
-    togglePointer(value) {
-      window.document.documentElement.style.setProperty('--pointer', value);
-    },
-    stateOfModalPag(e) {
-      // функція перевірку стану попавера
-      if (e.newState === 'closed') {
-        // якщо закрита
-        this.togglePointer(''); // відновлюю перехоплювач івентів
-        return;
-      }
-      if (e.newState === 'open') {
-        this.togglePointer('none'); // відключаю перехоплювач
-        return;
-      }
-    },
-    forcePage() {
-      this.$emit('forcePage', +this.num); // передай номер для пагінації
-    },
-    modalContentPag() {
-      return getModalContentPag(this.getLanguage); // отримання користувацького контену відповідно до мови
-    },
-  },
-  computed: {
-    getLanguage() {
-      return featuresStore.getters.getLanguage; // вибрана мова
-    },
-  },
+const props = withDefaults(defineProps<{max:number}>(), {
+  max: () => 0
+});
+const emit = defineEmits<{forcePage:[num:number]}>();
+
+const togglePointer = (value: 'none' | '') => window.document.documentElement.style.setProperty('--pointer', value);
+
+const stateOfModalPag = (e: Event) => {
+  // функція перевірку стану попавера
+  if ('newState' in e && e.newState === 'closed') {
+    // якщо закрита
+    togglePointer(''); // відновлюю перехоплювач івентів
+    return;
+  }
+  if ('newState' in e && e.newState === 'open') {
+    togglePointer('none'); // відключаю перехоплювач
+    return;
+  }
 };
+
+watch(num,(n,o)=>console.log(n,o));
+const forcePage = (e:Event) => {console.log(e,+num.value); emit('forcePage', +num.value) }; // передай номер для пагінації
+    
+const modalContentPag = () => getModalContentPag(lang);// отримання користувацького контену відповідно до мови
+   
+onMounted(() =>  el.value?.addEventListener('beforetoggle', stateOfModalPag) ); // reg event
+onUnmounted(()=>el.value?.removeEventListener('beforetoggle',stateOfModalPag)); //clean event
+ 
 </script>
 
 <style lang="scss" scoped>

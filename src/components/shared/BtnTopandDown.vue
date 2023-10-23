@@ -68,7 +68,7 @@ const toTop = ref(false);
 const locate = ref(0);
 
 const getRef = computed<HTMLElement | null>(()=>featuresStore?.getters?.getRefItem);
-        
+
 
 const mangeDirectBtn = ()=> {
 
@@ -104,7 +104,6 @@ const toTopOrDown = () => {
   }
   window.scrollBy({ top: scrollHeight, behavior: "smooth" });
 };
-  
 
 
 watch(locate, (n, o) => {

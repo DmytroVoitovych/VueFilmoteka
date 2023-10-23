@@ -1,4 +1,6 @@
-export const getModalContent = lang => {
+import type { langT } from '@/types/types';
+
+export const getModalContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -50,7 +52,7 @@ export const getModalContent = lang => {
   return content;
 };
 
-export const getModalContentPag = lang => {
+export const getModalContentPag = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
@@ -87,7 +89,7 @@ export const getModalContentPag = lang => {
   return content;
 };
 
-export const getNotifyContent = lang => {
+export const getNotifyContent = (lang: langT) => {
   const content = [];
   switch (lang) {
     case 'fi':
