@@ -1,5 +1,7 @@
+import type { AxiosPromise } from 'axios';
+import type { AxiosAdapter } from 'axios';
 import axios from 'axios';
-import { cacheAdapterEnhancer } from 'axios-extensions';
+import { cacheAdapterEnhancer, type ICacheLike } from 'axios-extensions';
 import LRUCache from 'lru-cache';
 
 export const cacheOptions = new LRUCache({
@@ -11,8 +13,8 @@ export const cacheOptions = new LRUCache({
 const http = axios.create({
   baseURL: 'https://api.themoviedb.org',
   headers: { 'Cache-Control': 'no-cache' },
-  adapter: cacheAdapterEnhancer(axios.defaults.adapter, {
-    defaultCache: cacheOptions,
+  adapter: cacheAdapterEnhancer(axios.defaults.adapter as AxiosAdapter, {
+    defaultCache: cacheOptions as ICacheLike<AxiosPromise<any>>,
   }), //кешування
 });
 

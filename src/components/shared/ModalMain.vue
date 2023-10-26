@@ -4,7 +4,7 @@
     :class="{ visibleV: openModal }"
     :filmsid="filmsid"
     tabindex="-1"
-    v-if="infos.title"
+    v-if="info.infos.title"
     @click.stop="funcClickBackdrop"
   >
     <div class="modalV container">
@@ -14,18 +14,18 @@
         </svg>
       </button>
       <img
-        :alt="infos.title"
+        :alt="info.infos.title"
         :src="
-          infos.poster_path
-            ? `https://image.tmdb.org/t/p/w500/${infos.poster_path}`
+          info.infos.poster_path
+            ? `https://image.tmdb.org/t/p/w500/${info.infos.poster_path}`
             : img
         "
       />
       <button
-        v-if="infos?.videos?.results?.length"
+        v-if="info.infos?.videos?.results?.length"
         type="button"
         class="btnyou"
-        :style="play && { stroke: 'var(--yt-modal-btn)' }"
+        :style="play ?{ stroke: 'var(--yt-modal-btn)' }:undefined"
         @click="() => (play = !play)"
       >
         <svg width="50" height="50">
@@ -33,52 +33,47 @@
         </svg>
       </button>
       <YouIframeVue
-        v-if="infos?.videos?.results?.length"
+        v-if="info.infos?.videos?.results?.length"
         v-show="play"
-        :video="infos.videos.results"
+        :video="info.infos.videos.results"
         :class="play && 'iframe__main'"
         :player-vars="{ autoplay: 0, listType: 'user_uploads' }"
         ref="yt"
       />
       <div>
-        <h3 class="modal__titleV t-js">{{ infos.title ?? 'No date' }}</h3>
+        <h3 class="modal__titleV t-js">{{ info.infos.title ?? 'No date' }}</h3>
         <div class="flexboxV">
           <ul class="modal__listV">
             <li class="modal__descV">
-              <p class="modal__pV">{{ getModalContent()[0] }}</p>
+              <p class="modal__pV">{{ getContent()[0] }}</p>
               <p class="modal__rV">
-                <span class="reitV">{{ infos.vote_average?.toFixed(1) }}</span>
+                <span class="reitV">{{ info.infos.vote_average?.toFixed(1) }}</span>
                 /
-                <span class="countV">{{ infos.vote_count }}</span>
+                <span class="countV">{{ info.infos.vote_count }}</span>
               </p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{ getModalContent()[1] }}</p>
-              <p class="modal__valV t-js">{{ infos.popularity?.toFixed(1) }}</p>
+              <p class="modal__pV">{{ getContent()[1] }}</p>
+              <p class="modal__valV t-js">{{'popularity' in info.infos && info.infos.popularity?.toFixed(1) }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{ getModalContent()[2] }}</p>
-              <p class="modal__valV uperV t-js">{{ infos.original_title }}</p>
+              <p class="modal__pV">{{ getContent()[2] }}</p>
+              <p class="modal__valV uperV t-js">{{ 'original_title' in info.infos && info.infos.original_title }}</p>
             </li>
             <li class="modal__descV">
-              <p class="modal__pV">{{ getModalContent()[3] }}</p>
+              <p class="modal__pV">{{ getContent()[3] }}</p>
               <p class="modal__valV t-js">
                 {{
-                  infos.genres?.length > 0
-                    ? infos.genres
-                        .map(g => g.name + ', ')
-                        .join('')
-                        .slice(0, -2)
-                    : 'No date'
+                 genres
                 }}
               </p>
             </li>
           </ul>
           <div>
-            <p class="modal__aboutV t-js">{{ getModalContent()[4] }}</p>
+            <p class="modal__aboutV t-js">{{ getContent()[4] }}</p>
             <p class="overview t-js">
               {{
-                infos.overview ||
+              ('overview' in info.infos && info.infos.overview) ||
                 'No description will be added soon. Sorry for the inconvenience'
               }}
             </p>
@@ -96,7 +91,7 @@
                 :class="doneWatched && 'remove'"
                 :disabled="!getAuth || (checkParam && loading)"
               >
-                {{ !doneWatched ? getModalContent()[5] : getModalContent()[6] }}
+                {{ !doneWatched ? getContent()[5] : getContent()[6] }}
               </button>
             </li>
             <li>
@@ -105,13 +100,13 @@
                   () =>
                     !doneQueue ? addFilmToQueue() : dellFilmFromDb('queue')
                 "
-                :data-btn="infos.id"
+                :data-btn="'id' in info.infos && info.infos.id"
                 type="button"
                 class="modal__queV"
                 :class="doneQueue && 'remove'"
                 :disabled="!getAuth || (!checkParam && loading)"
               >
-                {{ !doneQueue ? getModalContent()[7] : getModalContent()[8] }}
+                {{ !doneQueue ? getContent()[7] : getContent()[8] }}
               </button>
             </li>
           </ul>
@@ -121,250 +116,221 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import MovieAPiServer from '../../helpers/req';
 import { myDatabase, store } from '@/store/filmsStore';
+import { store as auth } from '@/store/index';
 import { nodeHttp } from '@/helpers/axios';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContent, getNotifyContent } from './contentLang';
 import YouIframeVue from '../iframe/YouIframe.vue';
-import { Notify } from 'notiflix';
+import { Notify, type INotifyOptions } from 'notiflix';
 import imageUrl from '@/assets/images/ded.jpg';
-import sprite from '@/assets/sprite.svg';
+import sprite  from '../../assets/sprite.svg';
+import { computed, inject, reactive, ref, watch } from 'vue';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
 
 const http = new MovieAPiServer();
 
-export default {
-  components: {
-    YouIframeVue,
-  },
-  props: {
-    filmsid: {
-      //проп з id
-      type: Number,
-      require: true,
-      default: -1,
-    },
-    scrollWidth: {
-      //проп з id
-      type: Number,
-      require: true,
-      default: -1,
-    },
-  },
-  data() {
-    return {
-      play: false,
-      openModal: false, //стан модалки
-      infos: [],
-      checkParam: false,
-      loading: false,
-      img: imageUrl,
-      sprite,
-    };
-  },
-  emits: {
-    //передача стана наверх
-    modalstate: e => typeof e === 'boolean',
-  },
-  created() {
-    this.syncIndexDBandStore(); // синхрон стора і бази
-  },
-  methods: {
-    async getInfoOfFilms() {
-      //отримання деталей по фільму
-      const data = await http.fetchMovieById(this.filmsid);
-      this.infos = data;
-    },
-    onClose() {
-      //закриття модалки
-      this.openModal = false;
-      this.infos = [];
-      this.$emit('modalstate', false);
-    },
-    funcKeyDown(e) {
-      // закриття по ескейпу
-      if (this.openModal && e.code === 'Escape') {
-        this.onClose();
-      }
-      return;
-    },
-    funcClickBackdrop(e) {
-      //закриття по бекдропу
-      if (e.target === e.currentTarget) {
-        this.onClose();
-      }
-      return;
-    },
-    async addFilmToWatch() {
-      // додавання в переглянуті
-      this.loaderBasic();
-      try {
-        await store.dispatch('addFilmToWatched', {
-          type: 'watched', // тип для беку
-          idFilm: this.infos.id, // id для резервування на беку
-          token: this.$store.state.token, // токен для пропуску
-        });
-        store.commit('setWatched', this.infos);
-        await myDatabase.setItem(
-          'watched',
-          JSON.stringify(store.state.infoWatched)
-        );
-        this.funcNotify(true, 0);
-        // додаю в локальну базу
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    async addFilmToQueue() {
-      // додавання в переглянуті
-      this.loaderBasic();
-      try {
-        await store.dispatch('addFilmToQueue', {
-          type: 'queue', // тип для беку
-          idFilm: this.infos.id, // id для резервування на беку
-          token: this.$store.state.token, // токен для пропуску
-        });
+type category = 'watched' | 'queue';
 
-        store.commit('setQueue', this.infos);
-        await myDatabase.setItem(
-          'queue',
-          JSON.stringify(store.state.infoQueue)
-        ); // додаю в локальну базу
-        this.funcNotify(true, 1);
-      } catch (err) {
-        console.log(err);
-      }
-    },
+const props = withDefaults(defineProps<{ filmsid: number }>(), {
+  filmsid: () => -1
+});
 
-    async dellFilmFromDb(type) {
-      // видалення
-      this.loaderBasic();
-      try {
-        await store.dispatch('dellFilmFromDb', {
-          type, // тип для беку
-          idFilm: this.infos.id, // id для резервування на беку
-          token: this.$store.state.token, // токен для пропуску
-        });
-        this.funcNotify(true, type.includes('w') ? 2 : 3);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    syncIndexDBandStore() {
+const yt = ref<typeof YouIframeVue | null>(null); 
+const play = ref(false);
+const openModal = ref(false); //стан модалки
+const info = reactive<{infos:{[key:string]:any}}>({infos: {}});
+const checkParam = ref(false);
+const loading = ref(false);
+const img = ref(imageUrl);
+
+const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+
+const doneWatched = computed<boolean>(()=> 
+      // звірка з наявністю в базі і зміна класів від результату
+      store.getters.doneWatcheds('id' in info.infos && info.infos.id));
+    
+const doneQueue = computed<boolean>(()=> 
+      // звірка з наявністю в базі і зміна класів від результату
+    store.getters.doneQueues('id' in info.infos && info.infos.id));
+
+const getAuth = computed(() => auth.state.token);
+
+const switcher = computed(() => !play.value ? '#icon-btnyou' : '#icon-close');
+
+const genres = computed<string>(()=>info.infos.genres?.length > 0
+  ? info.infos.genres
+    .map((g:{[key:string]:any}) => g.name + ', ')
+    .join('')
+    .slice(0, -2)
+  : 'No date');
+    
+  
+const emit = defineEmits<{    //передача стана наверх
+  modalstate:[openModal:boolean]
+}>();
+
+  const syncIndexDBandStore = () => 
       myDatabase.keys().then(keys => {
         if (keys.includes('watched')) {
           // перевірка ключа
-          myDatabase.getItem('watched').then(e => {
-            store.commit('setWatched', JSON.parse(e)); // якщо гуд коміт в стор
+          myDatabase.getItem('watched').then((e) => {
+            store.commit('setWatched', JSON.parse(e as string)); // якщо гуд коміт в стор
           });
         }
         if (keys.includes('queue')) {
           myDatabase
             .getItem('queue')
-            .then(e => store.commit('setQueue', JSON.parse(e))); // якщо гуд коміт в стор
+            .then(e => store.commit('setQueue', JSON.parse(e as string))); // якщо гуд коміт в стор
         }
         return;
       });
-    },
-    syncServerDBandStore() {
-      myDatabase.keys().then(keys => {
-        if (!keys.includes('watched')) {
-          // перевірка ключа
-          this.getFromServerFilmId().then(e => {
-            const watched = e.data.allList.filter(e => e.type === 'watched');
-            store.commit('setWatched', watched);
-            myDatabase.setItem(
-              'watched',
-              JSON.stringify(store.state.infoWatched)
-            );
-          });
-        }
-        if (!keys.includes('queue')) {
-          this.getFromServerFilmId().then(e => {
-            const watched = e.data.allList.filter(e => e.type === 'queue');
-            store.commit('setQueue', watched);
-            myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue));
-          });
-        }
-        return;
-      });
-    },
+    
+syncIndexDBandStore(); // синхрон стора і бази
 
-    loaderBasic() {
-      // функція відповідальна за основний лоадер на сайті
-      nodeHttp.interceptors.request.use(config => {
-        //перехоплюєм запит
-        this.loading = true; //включаю блок кнопки
-        this.checkParam = // поточна кнопка
-          (config.url.includes('add') &&
-            config?.data?.type.includes('watched')) ||
-          config.url.includes('watched');
+const checkKey = (key:string, obj:{}) => key in obj; 
+  
+const getInfoOfFilms = async () => {
+  //отримання деталей по фільму
+  const data: {} = await http.fetchMovieById(props.filmsid);
+  info.infos = data;
+};
 
-        return config;
-      });
+const onClose = () => {
+  //закриття модалки
+  openModal.value = false;
+  info.infos = {};
+  emit('modalstate', false);
+};
 
-      nodeHttp.interceptors.response.use(res => {
-        this.loading = false; // вимикаю лоудер
+const funcKeyDown = (e: Event) => {
+  // закриття по ескейпу
+  if (openModal.value && 'code' in e && e.code === 'Escape') {
+    onClose();
+  }
+  return;
+};
+
+const funcClickBackdrop = (e: Event) => {
+  //закриття по бекдропу
+  if (e.target === e.currentTarget) {
+    onClose();
+  }
+  return;
+};
+
+const loaderBasic = () => {
+  // функція відповідальна за основний лоадер на сайті
+  nodeHttp.interceptors.request.use(config => {
+    //перехоплюєм запит
+    loading.value = true; //включаю блок кнопки
+    checkParam.value = // поточна кнопка
+      (config?.url?.includes('add') &&
+        config?.data?.type.includes('watched')) ||
+      config?.url?.includes('watched');
+
+    return config;
+  });
+
+  nodeHttp.interceptors.response.use(res => {
+        loading.value = false; // вимикаю лоудер
         return res;
       });
-    },
-
-    getModalContent() {
-      return getModalContent(this.getLanguage);
-    },
-    getModalNotifyContent() {
-      return getNotifyContent(this.getLanguage);
-    },
-    funcNotify(type, num) {
-      const option = {
-        position: 'right-bottom',
-        timeout: 1000,
-      };
-
-      type
-        ? Notify.success(this.getModalNotifyContent()[num], option)
-        : Notify.failure(this.getModalNotifyContent()[num], option);
-    },
-  },
-  watch: {
-    filmsid() {
-      if (this.filmsid >= 0) {
-        this.getInfoOfFilms();
-        this.openModal = true;
-        this.$emit('modalstate', this.openModal);
-      }
-    },
-    openModal() {
-      window.addEventListener('keydown', this.funcKeyDown);
-      !this.openModal && //вимикаєм слухач
-        window.removeEventListener('keydown', this.funcKeyDown);
-      !this.openModal && (this.play = false);
-    },
-    play() {
-      !this.play ? this?.$refs.yt.exitFrame() : this?.$refs?.yt?.runFrame();
-    },
-  },
-  computed: {
-    doneWatched() {
-      // звірка з наявністю в базі і зміна класів від результату
-      return store.getters.doneWatcheds(this.infos.id);
-    },
-    doneQueue() {
-      // звірка з наявністю в базі і зміна класів від результату
-      return store.getters.doneQueues(this.infos.id);
-    },
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-    getAuth() {
-      return this.$store.state.token;
-    },
-    switcher() {
-      return !this.play ? '#icon-btnyou' : '#icon-close';
-    },
-  },
 };
+
+const getModalNotifyContent = () => getNotifyContent(lang);
+
+const funcNotify = (type: boolean, num: number) => {
+  const option = {
+    position: 'right-bottom',
+    timeout: 1000,
+  };
+
+  type
+    ? Notify.success(getModalNotifyContent()[num], option as INotifyOptions)
+    : Notify.failure(getModalNotifyContent()[num], option as INotifyOptions);
+};
+
+const addFilmToWatch = async () => {
+  // додавання в переглянуті
+  loaderBasic();
+  try {
+    await store.dispatch('addFilmToWatched', {
+      type: 'watched', // тип для беку
+      idFilm: 'id' in info.infos && info.infos.id, // id для резервування на беку
+      token: auth.state.token, // токен для пропуску
+    });
+    store.commit('setWatched', info.infos);
+    await myDatabase.setItem(
+      'watched',
+      JSON.stringify(store.state.infoWatched)
+    );
+    funcNotify(true, 0);
+    // додаю в локальну базу
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const addFilmToQueue = async () => {
+  // додавання в переглянуті
+  loaderBasic();
+  try {
+    await store.dispatch('addFilmToQueue', {
+      type: 'queue', // тип для беку
+      idFilm: 'id' in info.infos && info.infos.id, // id для резервування на беку
+      token: auth.state.token, // токен для пропуску
+    });
+
+    store.commit('setQueue', info.infos);
+    await myDatabase.setItem(
+      'queue',
+      JSON.stringify(store.state.infoQueue)
+    ); // додаю в локальну базу
+    funcNotify(true, 1);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const dellFilmFromDb = async (type: category) => {
+  // видалення
+  loaderBasic();
+  try {
+    await store.dispatch('dellFilmFromDb', {
+      type, // тип для беку
+      idFilm: 'id' in info.infos && info.infos.id, // id для резервування на беку
+      token: auth.state.token, // токен для пропуску
+    });
+    funcNotify(true, type.includes('w') ? 2 : 3);
+  } catch (err) {
+    console.log(err);
+  }
+};
+     
+const getContent = () => getModalContent(lang);
+  
+watch(() => props.filmsid, () => {
+  
+  if (props.filmsid >= 0) {
+    getInfoOfFilms();
+    openModal.value = true;
+    emit('modalstate', openModal.value);
+  }
+});
+
+watch(openModal, () => {
+  window.addEventListener('keydown', funcKeyDown);
+  !openModal.value && //вимикаєм слухач
+    window.removeEventListener('keydown', funcKeyDown);
+  !openModal.value && (play.value = false);
+});
+
+watch(play,()=> !play.value ? yt.value?.exitFrame(): yt.value?.runFrame());
+
 </script>
 
 <style lang="scss" scoped>

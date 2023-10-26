@@ -41,7 +41,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import Bowser from 'bowser';
 import ModalExperementalVue from './ModalExperemental.vue'; // popover api on this moment 23.07.2023 only chrome ande edge
 
