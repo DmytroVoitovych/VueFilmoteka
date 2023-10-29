@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="e of fakeArrs" :key="e" class="gallery__item">
+    <li v-for="e of fakeArrs.template" :key="e" class="gallery__item">
       <img class="gallery__img" />
       <div class="gallery__info">
         <p class="gallery__title them"></p>
@@ -10,14 +10,11 @@
   </ul>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      fakeArrs: [...Array(20).keys()],
-    };
-  },
-};
+<script lang="ts"  setup>
+import { reactive } from 'vue';
+
+const fakeArrs = reactive({ template: [...Array(20).keys()] });
+    
 </script>
 
 <style lang="scss" scoped>
