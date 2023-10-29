@@ -215,7 +215,7 @@ watch(page, () => {
    
     return maxArr();
   }
-});
+},{immediate:true});
 
 </script>
 

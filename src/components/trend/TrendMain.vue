@@ -3,7 +3,7 @@
     <div class="gallery__item" style="display: none"></div>
     <ContainerMain>
       <section class="container gallery section">
-        <div v-if="trend?.length && max > 1" class="pagination-wrap">
+        <div v-if="templateArr.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
             @numPage="setPage"
             :proppages="max"
@@ -21,7 +21,7 @@
               genre_ids,
               vote_average,
               genres,
-            } in trend"
+            } in templateArr.trend"
             ref="observer"
             :key="id"
             :id="id"
@@ -40,10 +40,10 @@
                 <span
                   :class="{
                     space:
-                      getGenre(genre_ids ?? genres.map(e => e.id))?.length > 27,
+                      getGenre(genre_ids ?? genres.map((e:obj) => e.id))?.length > 27,
                   }"
                   >{{
-                    getGenre(genre_ids ?? genres.map(e => e.id))
+                    getGenre(genre_ids ?? genres.map((e:obj) => e.id))
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -55,17 +55,17 @@
           </li>
           <li
             class="librys__empty--li"
-            v-if="status === 'ready' && !this.trend.length"
+            v-if="status === 'ready' && !templateArr?.trend?.length"
           >
             Ваш список пустий, нічого не додано
           </li>
         </ul>
         <SkeletonTrend
-          v-if="status === 'load' && !this.trend.length"
+          v-if="status === 'load' && !templateArr?.trend?.length"
           class="gallery__list"
         />
 
-        <div v-if="trend?.length && max > 1" class="pagination-wrap">
+        <div v-if="templateArr?.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
             @numPage="setPage"
             :proppages="max"
@@ -78,7 +78,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import ContainerMain from '../shared/ContainerMain.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
@@ -86,392 +86,397 @@ import SkeletonTrend from './SkeletonTrend.vue';
 import { axio, nodeHttp } from '../../helpers/axios';
 import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
-import intersectionWith from 'lodash.intersectionwith';
+import {intersectionWith} from 'lodash';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import { ready } from 'localforage';
-import imageUrl from '@/assets/images/ded.jpg';
+import img from '@/assets/images/ded.jpg';
+import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { store as auth } from '@/store/index';
+import type { VueCookies } from 'vue-cookies';
+const $cookies = inject<VueCookies>('$cookies'); 
 
 const http = new MovieAPiServer();
 let checkParam = false;
+const router = useRouter();
 
-export default {
-  name: 'TrendMain',
-  components: {
-    ContainerMain,
-    // Home,
-    PaginationHardVue,
-    SkeletonTrend,
-  },
-  props: {
-    proppages: {
-      type: Number,
-      default: 0,
-    },
-    switcher: {
-      type: Boolean,
-      default: false,
-    },
-    modalstate: {
-      type: Boolean,
-      default: false,
-    },
-    path: {
-      type: String,
-      default: '',
-    },
-  },
-  emits: {
-    'get-find-id': v => typeof v === 'number',
-  },
-  data() {
-    //стейт
-    return {
-      status: 'load',
-      trend: [],
-      genrs: [],
-      page: 1,
-      max: 0,
-      locate: 0,
-      check: false,
-      img: imageUrl,
-    };
-  },
-  beforeCreate() {
-    !JSON.parse(window.localStorage.getItem('genres')) && http.getGenresList();
-  },
-  async created() {
-    window.localStorage.getItem(this.path)
-      ? (this.status = 'ready')
-      : window.localStorage.removeItem(this.path);
-    this.path === 'Home'
-      ? this.startRenderPage()
-      : this.funcUpdateBibliotekaPage();
-    this.loaderBasic(); // важливо дочекатись змонтування дерева
-  },
-  methods: {
-    // функції
-    async startRenderPage() {
-      const data = this.checkFind()
-        ? await http.fetchMovieByQuery(
-            window.localStorage.getItem('numberPage') ?? 1,
-            window.localStorage.getItem('findedFilms'),
-            this.toMainPage
-          )
-        : await http.fetchTopMovies(this.page, this.toMainPage);
+type obj = {
+  id: any,
+  title: any,
+  release_date: any,
+  poster_path: any,
+  genre_ids: any,
+  vote_average: any,
+  genres: any,
+};
+type anyArrT = {
+  trend?: obj[]
+  genrs?: object[],
+};
 
-      data?.length === 0 && this.toMainPage();
-      this.trend = this.controlStorage() || data;
-      this.max = http.maxPages > 500 ? 500 : http.maxPages;
+const props = withDefaults(defineProps<{
+  switcher: boolean, // false
+  modalstate: boolean, // false,
+  path: string // '',
+}>(), {
+  switcher: () => false,
+  modalstate: () => false,
+  path: ()=> ''
+});
+  
+const emit = defineEmits<{ 'get-find-id':[id: number] }>();
 
-      this.getStaticGenres();
-    },
-    year(num) {
-      // рік
-      return num ? num.slice(0, 4) : 'no date';
-    },
-    getPoster(poster) {
-      //постери
-      return `https://image.tmdb.org/t/p/w500/${poster}`;
-    },
-    getGenre(idg) {
-      //розбір жанрів
-      return idg
-        ?.map(e =>
-          this.criticalGenres?.filter(({ id, name }) => id === e && name)
-        )
-        .flat(3)
-        .map(({ name }) => name)
-        .slice(0, 2)
-        .join(', ');
-    },
-    async setPage(num) {
-      this.page = num;
-      if (this.path === 'Home') {
-        window.localStorage.setItem('numberPage', num); // добавляю сторінку
+const templateArr = reactive<anyArrT>({trend:[],genrs:[]});
+const status = ref<'load' | 'ready'>('load');
+const page = ref(1);
+const max = ref(0);
+const locate = ref(0);
+const check = ref(false);
+const observer = ref<HTMLLIElement[] | null>(null);
+const upBtn = ref<typeof PaginationHardVue | null>(null);
+const downBtn = ref<typeof PaginationHardVue | null>(null);
 
-        const data = this.checkFind()
-          ? await http.fetchMovieByQuery(
-              this.page,
-              window.localStorage.getItem('findedFilms')
-            )
-          : await http.fetchTopMovies(num);
+const criticalGenres = computed<object[]>(()=>
+      templateArr?.genrs?.length
+        ? templateArr.genrs
+        : JSON.parse(window.localStorage.getItem('genres') as string));
+    
 
-        this.trend = data;
-        this.max = http.maxPages > 500 ? 500 : http.maxPages;
-        window.localStorage.setItem('filmsPage', JSON.stringify(data));
-        this.getStaticGenres();
-      } else if (this.path.includes('Biblioteka')) {
-        await this.setPageBiblioteka(num); // контроль пагинації в бібліотеці
-        this.controlScroll();
-      }
-      this.controlScroll();
-    },
-    async setPageBiblioteka(num) {
-      try {
-        const res = await nodeHttp.get('/films/', {
-          headers: { Authorization: 'Bearer ' + this.$store.state.token },
-          params: { page: num ?? this.page, limit: 20 }, // пока на тесті
-        }); // забираю з беку списки юзера
+const beforeCreate = ()=> !window.localStorage.getItem('genres') && http.getGenresList();
+beforeCreate();
 
-        const watchedFilter = intersectionWith(
-          //звіряю з локальною базою і беру тіки ті які приніс бекенд
-          store.state.infoWatched, // локальна база
-          res.data.watchedFilms.map(e => e.idFilm), // бекенд
-          (a, b) => a.id === b // фідвільтровую по id фільмів
-        );
-        const queueFilter = intersectionWith(
-          store.state.infoQueue,
-          res.data.queueFilms.map(e => e.idFilm),
-          (a, b) => a.id === b
-        );
-        this.funcUpdateIfChangePath(watchedFilter, queueFilter); // передаю аргументи в функію зміни стану
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    controlStorage() {
-      //перевіка локльного стора
-      if (
-        JSON.parse(window.localStorage.getItem('numberPage')) &&
-        JSON.parse(window.localStorage.getItem('filmsPage'))
-      ) {
-        return JSON.parse(window.localStorage.getItem('filmsPage'));
-      }
+const checkFind = () => {
+  //перевірка наявності пошуку
+  const exist = window.localStorage.getItem('findedFilms')
+    ? true
+    : false;
+  check.value = exist;
+  return check;
+};
 
-      return false;
-    },
-    controlScroll() {
-      this.locate = window.scrollY; //запис положення
-      this.$nextTick().then(() => {
-        //прибиваю скролл
-        this.locate > window.document.documentElement.clientHeight / 2 &&
-          window.scrollBy(0, this.locate * 20);
-      });
-    },
-    checkFind() {
-      //перевірка наявності пошуку
-      const check = JSON.parse(window.localStorage.getItem('findedFilms'))
-        ? true
-        : false;
-      this.check = check;
-      return check;
-    },
-    toMainPage() {
+const toMainPage = ()=> 
       // добавити вспливаючу підказку (що нічого нема)
       Report.info(
         'Sorry',
         'On your request we found nothing , we return you to the main.',
         'Okay',
         () => {
-          this.$router.go(0);
+          router.go(0);
           window.localStorage.removeItem('numberPage');
           window.localStorage.removeItem('findedFilms');
         }
       );
-    },
-    checkForStupid() {
-      return this.trend.length > 0;
-    },
-    loaderBasic() {
-      // функція відповідальна за основний лоадер на сайті
 
-      axio.loader.interceptors.request.use(config => {
-        //перехоплюєм запит
-
-        checkParam = config.url.includes('/3/movie/');
-        if (!checkParam) {
-          //якщо потрібний запит
-          this.checkForStupid() && //перевірка на дурня
-            Block?.dots('.gallery__item', {
-              //сам лофдер з конфігураціями
-              svgColor: 'var(--text-color-red)',
-              svgSize: '100px',
-              backgroundColor: 'var(--bg-loader-basic)',
-            });
-        }
-
-        return config;
-      });
-
-      axio.loader.interceptors.response.use(res => {
-        // коли дані нам надійшли  вимикаєм лоадер
-        if (!checkParam) {
-          //якщо потрібний запит
-          this.checkForStupid() && Block?.remove('.gallery__item');
-        }
-
-        return res;
-      });
-    },
-
-    getIdForModal(id) {
-      // отримання данних для модалки
-      this.$emit('get-find-id', id);
-    },
-    async getStaticGenres() {
-      const genr =
-        JSON.parse(window.localStorage.getItem('genres')) ??
-        (await http.getGenresList());
-      this.genrs = genr;
-    },
-    funcUpdateIfChangePath(watched, queue) {
-      if (!store.state.infoWatched.length && !store.state.infoQueue.length) {
-        this.syncIndexDBandStore();
-      }
-
-      switch (
-        this.path // звіряю по положеню
+const controlStorage = ():obj[] | false=> {
+      //перевіка локльного стора
+      if (
+        window.localStorage.getItem('numberPage') &&
+        window.localStorage.getItem('filmsPage')
       ) {
-        case 'BibliotekaWatched':
-          this.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
-          !this.trend &&
-            window.localStorage.setItem('BibliotekaWatched', 'empty');
-          this.max = store.state.max.numWatch; // всі сторінки
-          break;
-        case 'BibliotekaQueue':
-          this.trend = queue ?? store.state.infoQueue.slice(0, 20);
-          this.max = store.state.max.numQue;
-          !this.trend &&
-            window.localStorage.setItem('BibliotekaQueue', 'empty');
-          break;
-        default:
-          this.max = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
-          break;
+        return JSON.parse(window.localStorage.getItem('filmsPage') as string);
       }
-    },
-    funcUpdateBibliotekaPage() {
-      store.state.max['numWatch' || 'numQue'] && this.funcUpdateIfChangePath(); // оптимізація швидкості
-      store
-        .dispatch(
-          'getFromServerFilmId',
-          this.$cookies.get('token') ?? this.$store.state.token
-        )
-        .then(() => {
-          this.funcUpdateIfChangePath();
-        });
-    },
-    funcSubscribeForDelAction() {
-      this.modalstate && // якщо модалка відкрита підписуюсь на зміни
-        store.subscribe(mutation => {
-          // слідкую за мутаціями стору
-          const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
 
-          folowIdDel && // якщо є
-            // і модалка виключена
-            !this.modalstate &&
-            this.trend.splice(
-              //  видаляю з масиву
-              this.trend.findIndex(e => e === folowIdDel),
-              0
-            );
-          !this.trend.length && (this.status = 'ready');
-        });
-    },
-    funcSubscribeChangeLanguage() {
-      featuresStore.subscribe(mutation => {
-        if (mutation.type.includes('setLanguage')) {
-          window.localStorage.removeItem('genres');
-          this.path === 'Home'
-            ? this.setPage(this.page)
-            : this.funcUpdateBibliotekaPage();
-        }
-      });
-    },
-    syncIndexDBandStore() {
+      return false;
+};
+
+const getStaticGenres = async () => {
+  const genr =
+    JSON.parse(window.localStorage.getItem('genres') as string) ??
+    (await http.getGenresList());
+  templateArr.genrs = genr;
+};
+      
+const startRenderPage = async ()=> {
+      const data:obj[] = checkFind().value
+        ? await http.fetchMovieByQuery(
+            window.localStorage.getItem('numberPage') ?? 1,
+            window.localStorage.getItem('findedFilms'),
+            toMainPage
+          )
+        : await http.fetchTopMovies(page.value, toMainPage);
+
+  data?.length === 0 && toMainPage();
+  templateArr.trend = controlStorage() || data;
+  max.value = http.maxPages > 500 ? 500 : http.maxPages;
+
+      getStaticGenres();
+};
+
+const syncIndexDBandStore = ()=> 
       myDatabase.keys().then(keys => {
-        if (keys.includes('watched') && this.path === 'BibliotekaWatched') {
+        if (keys.includes('watched') && props.path === 'BibliotekaWatched') {
           // перевірка ключа
-          myDatabase.getItem('watched').then(e => {
-            this.trend = JSON.parse(e).slice(0, 20); // якщо гуд коміт в стор
-            this.max = Math.ceil(JSON.parse(e).length / 20);
-            !JSON.parse(e).length &&
+          myDatabase.getItem('watched').then((e) => {
+            templateArr.trend = JSON.parse(e as string).slice(0, 20); // якщо гуд коміт в стор
+            max.value = Math.ceil(JSON.parse(e as string).length / 20);
+            !JSON.parse(e as string).length &&
               window.localStorage.setItem('BibliotekaWatched', 'empty');
           });
         }
-        if (keys.includes('queue') && this.path === 'BibliotekaQueue') {
+        if (keys.includes('queue') && props.path === 'BibliotekaQueue') {
           myDatabase.getItem('queue').then(e => {
-            this.trend = JSON.parse(e).slice(0, 20);
-            this.max = Math.ceil(JSON.parse(e).length / 20);
-            !JSON.parse(e).length &&
+            templateArr.trend = JSON.parse(e as string).slice(0, 20);
+            max.value = Math.ceil(JSON.parse(e as string).length / 20);
+            !JSON.parse(e as string).length &&
               window.localStorage.setItem('BibliotekaQueue', 'empty');
           }); // якщо гуд коміт в стор
         }
         return;
       });
-    },
-    sendRef() {
-      //передаю реф
-      const time = setTimeout(() => {
-        featuresStore.commit(
-          'setRefItem',
-          this.trend.length > 8
-            ? this.$refs.observer[8]
-            : this.$refs.observer.reverse()[2]
-        );
-        this.status = 'ready';
-        clearTimeout(time);
-      }, 200);
-    },
-  },
+    
 
-  watch: {
-    page() {
-      this.$refs?.upBtn?.forcePage(this.page); //форс зверху
-      this.$refs?.downBtn?.forcePage(this.page); //форс знизу
-      },
+const funcUpdateIfChangePath = (watched?: obj[] | undefined, queue?: obj[] | undefined) => {
+  if (!store.state.infoWatched.length && !store.state.infoQueue.length) {
+    syncIndexDBandStore();
+  }
 
-    switcher() {
-      // тригер пошуку // завязано за імпут в хедері
-      this.max = 0;
-      this.startRenderPage();
-    },
-    path() {
-      window.localStorage.getItem(this.path)
-        ? (this.status = 'ready')
-        : window.localStorage.removeItem(this.path) && (this.status = ready);
-      this.page = 1;
-      this.funcUpdateBibliotekaPage();
-    },
-    modalstate() {
-      this.funcSubscribeForDelAction();
-    },
-    trend() {
-      !this.trend.length
-        ? window.localStorage.setItem(this.path, 'empty') &&
-          (this.status = 'ready')
-        : window.localStorage.getItem(this.path) &&
-          window.localStorage.removeItem(this.path);
-
-      this.trend.length > 2
-        ? this.sendRef()
-        : featuresStore.commit('setRefItem', null);
-    },
-  },
-
-  mounted() {
-    this.funcSubscribeChangeLanguage();
-    this.loaderBasic(); // важливо дочекатись змонтування дерева
-  },
-
-  updated() {
-    (!this.path || this.path === 'Home') && this.startRenderPage();
-    this.page === 1 && !this.modalstate // контроль пагінації
-      ? this.funcUpdateBibliotekaPage()
-      : this.setPageBiblioteka();
-  },
-  computed: {
-    criticalGenres() {
-      return this.genrs.length
-        ? this.genrs
-        : JSON.parse(window.localStorage.getItem('genres'));
-    },
-
-    getLanguage() {
-      return featuresStore.getters.getLanguage;
-    },
-  },
+  switch (
+  props.path // звіряю по положеню
+  ) {
+    case 'BibliotekaWatched':
+      templateArr.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
+      !templateArr.trend &&
+        window.localStorage.setItem('BibliotekaWatched', 'empty');
+      max.value = store.state.max.numWatch; // всі сторінки
+      break;
+    case 'BibliotekaQueue':
+      templateArr.trend = queue ?? store.state.infoQueue.slice(0, 20);
+      max.value = store.state.max.numQue;
+      !templateArr.trend &&
+        window.localStorage.setItem('BibliotekaQueue', 'empty');
+      break;
+    default:
+      max.value = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
+      break;
+  }
 };
+
+const funcUpdateBibliotekaPage = () => {
+  store.state.max['numWatch' || 'numQue'] && funcUpdateIfChangePath(); // оптимізація швидкості
+  store
+    .dispatch(
+      'getFromServerFilmId',
+      $cookies?.get('token') ?? auth.state.token
+    )
+    .then(() => {
+      funcUpdateIfChangePath();
+    });
+};
+
+const checkForStupid = ()=> templateArr.trend && templateArr.trend.length > 0;
+
+const loaderBasic = () => {
+  // функція відповідальна за основний лоадер на сайті
+
+  axio.loader.interceptors.request.use(config => {
+    //перехоплюєм запит
+
+    checkParam = !!config?.url?.includes('/3/movie/');
+    if (!checkParam) {
+      //якщо потрібний запит
+      checkForStupid() && //перевірка на дурня
+        Block?.dots('.gallery__item', {
+          //сам лофдер з конфігураціями
+          svgColor: 'var(--text-color-red)',
+          svgSize: '100px',
+          backgroundColor: 'var(--bg-loader-basic)',
+        });
+    }
+
+    return config;
+  });
+
+  axio.loader.interceptors.response.use(res => {
+    // коли дані нам надійшли  вимикаєм лоадер
+    if (!checkParam) {
+      //якщо потрібний запит
+      checkForStupid() && Block?.remove('.gallery__item');
+    }
+
+    return res;
+  });
+};
+
+const created = async () => {
+  window.localStorage.getItem(props.path)
+    ? (status.value = 'ready')
+    : window.localStorage.removeItem(props.path);
+  props.path === 'Home'
+    ? startRenderPage()
+    : funcUpdateBibliotekaPage();
+  loaderBasic(); 
+};
+created();
+    
+const year = (num: string) =>// рік
+  num ? num.slice(0, 4) : 'no date';
+    
+const getPoster = (poster: string) =>
+  //постери
+  `https://image.tmdb.org/t/p/w500/${poster}`;
+    
+const getGenre = (idg: object[]) => {
+  //розбір жанрів
+  return idg
+    ?.map(e =>
+      criticalGenres.value.filter((cr) => ('id' in cr && 'name' in cr) && cr.id === e && cr.name)
+    )
+    .flat(3)
+    .map((n) => 'name' in n && n.name)
+    .slice(0, 2)
+    .join(', ');
+};
+
+const setPageBiblioteka = async (num?:number) => {
+  try {
+    const res = await nodeHttp.get('/films/', {
+      headers: { Authorization: 'Bearer ' + auth.state.token },
+      params: { page: num ?? page.value, limit: 20 }, // пока на тесті
+    }); // забираю з беку списки юзера
+
+    const watchedFilter = intersectionWith(
+      //звіряю з локальною базою і беру тіки ті які приніс бекенд
+      store.state.infoWatched, // локальна база
+      res.data.watchedFilms.map((e:{}) => 'idFilm' in e && e.idFilm), // бекенд
+      (a:obj, b) =>'id' in a && a.id === b // фідвільтровую по id фільмів
+    );
+    const queueFilter = intersectionWith(
+      store.state.infoQueue,
+      res.data.queueFilms.map((e:{}) => 'idFilm' in e && e.idFilm),
+      (a:obj, b) => 'id' in a && a.id === b
+    );
+    funcUpdateIfChangePath(watchedFilter, queueFilter); // передаю аргументи в функію зміни стану
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const controlScroll = () => {
+  locate.value = window.scrollY; //запис положення
+  nextTick().then(() => {
+    //прибиваю скролл
+    locate.value > window.document.documentElement.clientHeight / 2 &&
+      window.scrollBy(0, locate.value * 20);
+  });
+};
+
+const setPage = async (num: number) => {
+  page.value = num;
+  if (props.path === 'Home') {
+    window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
+
+    const data: obj[] = checkFind().value
+      ? await http.fetchMovieByQuery(
+        page.value,
+        window.localStorage.getItem('findedFilms')
+      )
+      : await http.fetchTopMovies(num);
+
+    templateArr.trend = data;
+    max.value = http.maxPages > 500 ? 500 : http.maxPages;
+    window.localStorage.setItem('filmsPage', JSON.stringify(data));
+    getStaticGenres();
+  } else if (props.path.includes('Biblioteka')) {
+    await setPageBiblioteka(num); // контроль пагинації в бібліотеці
+    controlScroll();
+  }
+  controlScroll();
+};
+    
+ const getIdForModal = (id:number) =>
+      // отримання данних для модалки
+      emit('get-find-id', id);
+        
+const funcSubscribeForDelAction = () =>
+  props.modalstate && // якщо модалка відкрита підписуюсь на зміни
+  store.subscribe(mutation => {
+    // слідкую за мутаціями стору
+    const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
+
+    folowIdDel && // якщо є
+      // і модалка виключена
+      !props.modalstate &&
+      templateArr?.trend?.splice(
+        //  видаляю з масиву
+        templateArr.trend.findIndex(e => e === folowIdDel),
+        0
+      );
+    !templateArr?.trend?.length && (status.value = 'ready');
+  });
+    
+  const funcSubscribeChangeLanguage = ()=> 
+      featuresStore.subscribe(mutation => {
+        if (mutation.type.includes('setLanguage')) {
+          window.localStorage.removeItem('genres');
+          props.path === 'Home'
+            ? setPage(page.value)
+            : funcUpdateBibliotekaPage();
+        }
+      });
+        
+const sendRef = () => {
+  //передаю реф
+  const time = setTimeout(() => {
+    featuresStore.commit(
+      'setRefItem',
+    templateArr?.trend &&  templateArr?.trend?.length > 8
+        ?observer.value?.length && observer.value[8]  
+        :observer.value?.length && observer.value.reverse()[2]
+    );
+    status.value = 'ready';
+    clearTimeout(time);
+  }, 200);
+};
+
+watch(page, () => {
+ upBtn?.value && upBtn?.value.forcePage(page.value); //форс зверху
+ downBtn?.value && downBtn?.value.forcePage(page.value); //форс знизу
+});
+
+watch(()=>props.switcher, () => {
+  // тригер пошуку // завязано за імпут в хедері
+  max.value = 0;
+  startRenderPage();
+});
+
+watch(()=>props.path, () => {
+  window.localStorage.getItem(props.path)
+    ? (status.value = 'ready')
+    : () => { window.localStorage.removeItem(props.path); (status.value = 'ready'); };
+  page.value = 1;
+  funcUpdateBibliotekaPage();
+});
+
+watch(()=> props.modalstate,funcSubscribeForDelAction);
+    
+watch(()=>templateArr.trend, () => {
+  !templateArr?.trend?.length
+    ? () => {
+      window.localStorage.setItem(props.path, 'empty');
+      (status.value = 'ready')
+    }
+    : window.localStorage.getItem(props.path) &&
+    window.localStorage.removeItem(props.path);
+
+  templateArr?.trend && templateArr?.trend?.length > 2
+    ? sendRef()
+    : featuresStore.commit('setRefItem', null);
+});
+  
+
+onMounted(() => {
+  funcSubscribeChangeLanguage();
+  loaderBasic(); // важливо дочекатись змонтування дерева  
+});
+
+onUpdated(() => {
+  (!props.path || props.path === 'Home') && startRenderPage();
+  page.value === 1 && !props.modalstate // контроль пагінації
+    ? funcUpdateBibliotekaPage()
+    : setPageBiblioteka();
+});
+  
 </script>
 
 <style lang="scss" scoped>

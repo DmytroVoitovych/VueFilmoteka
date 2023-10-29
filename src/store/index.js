@@ -38,7 +38,7 @@ export const store = createStore({
           headers: { Authorization: 'Bearer ' + payload ?? '' },
         }); // пошук по базі
 
-        window.localStorage.setItem('name', res.data.data.name);
+        window.localStorage.setItem('name', res?.data?.data?.name);
         console.log('пішов вхід');
         state.commit('setLogin', res.data.data.token);
         cookie.set('token', res.data.data.token, '60MIN');
