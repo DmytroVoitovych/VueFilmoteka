@@ -418,10 +418,8 @@ export default {
   watch: {
     page() {
       this.$refs?.upBtn?.forcePage(this.page); //форс зверху
-      this.page = this.$refs?.upBtn?.page; //зміна
       this.$refs?.downBtn?.forcePage(this.page); //форс знизу
-      this.page = this.$refs?.downBtn?.page; //зміна
-    },
+      },
 
     switcher() {
       // тригер пошуку // завязано за імпут в хедері

@@ -127,9 +127,8 @@ import YouIframeVue from '../iframe/YouIframe.vue';
 import { Notify, type INotifyOptions } from 'notiflix';
 import imageUrl from '@/assets/images/ded.jpg';
 import sprite  from '../../assets/sprite.svg';
-import { computed, inject, reactive, ref, watch } from 'vue';
-import type { VueCookies } from 'vue-cookies';
-const $cookies = inject<VueCookies>('$cookies'); 
+import { computed, reactive, ref, watch } from 'vue';
+
 
 const http = new MovieAPiServer();
 
@@ -191,8 +190,6 @@ const emit = defineEmits<{    //передача стана наверх
     
 syncIndexDBandStore(); // синхрон стора і бази
 
-const checkKey = (key:string, obj:{}) => key in obj; 
-  
 const getInfoOfFilms = async () => {
   //отримання деталей по фільму
   const data: {} = await http.fetchMovieById(props.filmsid);

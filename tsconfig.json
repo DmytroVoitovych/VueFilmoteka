@@ -18,7 +18,7 @@
  "skipLibCheck": true,
  "verbatimModuleSyntax": true,
  "noImplicitAny": true,
- "plugins": [{ "name": "sample-ts-plugin" }],
+  "plugins": [{ "name": "sample-ts-plugin" }],
   "baseUrl": ".",
   "paths": {
       "@/*": ["./src/*"]
