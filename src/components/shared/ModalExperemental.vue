@@ -84,8 +84,7 @@ const stateOfModalPag = (e: Event) => {
   }
 };
 
-watch(num,(n,o)=>console.log(n,o));
-const forcePage = (e:Event) => {console.log(e,+num.value); emit('forcePage', +num.value) }; // передай номер для пагінації
+const forcePage = (e:Event) =>  emit('forcePage', +num.value); // передай номер для пагінації
     
 const modalContentPag = () => getModalContentPag(lang);// отримання користувацького контену відповідно до мови
    

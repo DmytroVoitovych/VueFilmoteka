@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="gallery__item" style="display: none"></div>
+    <div  class="gallery__item" style="display: none"></div>
     <ContainerMain>
       <section class="container gallery section">
         <div v-if="templateArr.trend?.length && max > 1" class="pagination-wrap">
@@ -63,7 +63,7 @@
         <SkeletonTrend
           v-if="status === 'load' && !templateArr?.trend?.length"
           class="gallery__list"
-        />
+         />
 
         <div v-if="templateArr?.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
@@ -89,7 +89,6 @@ import { store } from '@/store/filmsStore';
 import {intersectionWith} from 'lodash';
 import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
-import { ready } from 'localforage';
 import img from '@/assets/images/ded.jpg';
 import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -291,7 +290,7 @@ const loaderBasic = () => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!checkParam) {
       //якщо потрібний запит
-      checkForStupid() && Block?.remove('.gallery__item');
+      checkForStupid() && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
     }
 
     return res;
