@@ -75,6 +75,7 @@ export const store = createStore<State>({
         const { name, email } = JSON.parse(window.atob(token.split('.')[1]));
         window.localStorage.setItem('name', name);
         context.commit('setLogin', token);
+        Cookies.set('token', token, { expires: 1 / 24 });
 
         await nodeHttp.post('user/auth/googleauth', {
           // відправляю у власну базу
