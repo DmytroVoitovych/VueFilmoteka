@@ -13,6 +13,8 @@
   ],
  
   "compilerOptions": {
+  "target": "esNext",   
+ "lib": ["es2021"],   
  "allowJs": true,
  "isolatedModules": false,
  "skipLibCheck": true,
@@ -24,6 +26,5 @@
       "@/*": ["./src/*"]
     }
   }
-  
-
+ 
 }

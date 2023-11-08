@@ -161,6 +161,7 @@ const checkFocus = async () => {
       .includes('firebase');
     if (checkOwnerOfToken) {
       // чи є юзер
+      console.log("тест");
       auth.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
     } else {
       // рефрещ пр  звичайному вході

@@ -10,7 +10,23 @@ export const myDatabase = localForage.createInstance({
   name: 'myDatabase',
 });
 
-export const store = createStore({
+type obj = {
+  id: any;
+  title: any;
+  release_date: any;
+  poster_path: any;
+  genre_ids: any;
+  vote_average: any;
+  genres: any;
+};
+
+interface State {
+  infoWatched: obj[] | []; // переглянуті
+  infoQueue: obj[] | [];
+  max: { numWatch: number; numQue: number };
+}
+
+export const store = createStore<State>({
   state() {
     return {
       infoWatched: [], // переглянуті
@@ -19,7 +35,7 @@ export const store = createStore({
     };
   },
   mutations: {
-    setWatched(state, payload) {
+    setWatched(state, payload: any[]) {
       // плюс в переглянуті
       if (Array.isArray(payload)) {
         // перевірка на массив
@@ -29,7 +45,7 @@ export const store = createStore({
       // якщо ні значить приходить обьєкт пуш в массив
       state.infoWatched.push(payload);
     },
-    setQueue(state, payload) {
+    setQueue(state, payload: any[]) {
       // плюс в чергу
       if (Array.isArray(payload)) {
         state.infoQueue = payload;
@@ -37,13 +53,16 @@ export const store = createStore({
       }
       state.infoQueue.push(payload);
     },
-    delWatched(state, payload) {
+    delWatched(state, payload: obj[]) {
       state.infoWatched = payload;
     },
-    delQueue(state, payload) {
+    delQueue(state, payload: obj[]) {
       state.infoQueue = payload;
     },
-    setMaxPageForBiblioteka(state, { type, num }) {
+    setMaxPageForBiblioteka(
+      state,
+      { type, num }: { type: string; num: number }
+    ) {
       if (type && type === 'watched') {
         state.max.numWatch = num ?? 1;
         return;
@@ -53,15 +72,24 @@ export const store = createStore({
   },
 
   getters: {
-    doneWatcheds: state => id => {
-      return state.infoWatched.some(todo => (todo.id || todo.idFilm) === id);
+    doneWatcheds: state => (id: number | string) => {
+      return state.infoWatched.some(
+        (todo: { id?: number | string; idFilm?: number | string }) =>
+          (todo.id || todo.idFilm) === id
+      );
     },
-    doneQueues: state => id => {
-      return state.infoQueue.some(todo => (todo.id || todo.idFilm) === id);
+    doneQueues: state => (id: number | string) => {
+      return state.infoQueue.some(
+        (todo: { id?: number | string; idFilm?: number | string }) =>
+          (todo.id || todo.idFilm) === id
+      );
     },
   },
   actions: {
-    async addFilmToWatched(_, payload) {
+    async addFilmToWatched(
+      _,
+      payload: { type: string; token: string; idFilm: string | number }
+    ) {
       await nodeHttp.post(
         '/films/add',
         { type: payload.type, idFilm: payload.idFilm },
@@ -70,7 +98,10 @@ export const store = createStore({
         }
       );
     },
-    async addFilmToQueue(_, payload) {
+    async addFilmToQueue(
+      _,
+      payload: { type: string; token: string; idFilm: string | number }
+    ) {
       await nodeHttp.post(
         '/films/add',
         { type: payload.type, idFilm: payload.idFilm },
@@ -79,26 +110,38 @@ export const store = createStore({
         }
       );
     },
-    async dellFilmFromDb(context, { type, idFilm, token }) {
+    async dellFilmFromDb(
+      context,
+      {
+        type,
+        idFilm,
+        token,
+      }: {
+        type: string;
+        token: string;
+        idFilm?: string | number;
+        id?: string | number;
+      }
+    ) {
       await nodeHttp.delete(`/films/remove/${type}/${idFilm}`, {
         headers: { Authorization: 'Bearer ' + token },
       });
 
       if (type === 'watched') {
         const removeItemFromArr = context.state.infoWatched.filter(
-          e => e.id !== idFilm
+          e => 'id' in e && e.id !== idFilm
         );
         context.commit('delWatched', removeItemFromArr);
         myDatabase.setItem('watched', JSON.stringify(removeItemFromArr));
       } else {
         const removeItemFromArr = context.state.infoQueue.filter(
-          e => e.id !== idFilm
+          e => 'id' in e && e.id !== idFilm
         );
         context.commit('delQueue', removeItemFromArr);
         myDatabase.setItem('queue', JSON.stringify(removeItemFromArr)); // додаю в локальну базу
       }
     },
-    async getFromServerFilmId({ state }, token) {
+    async getFromServerFilmId({ state }, token: string) {
       try {
         const res = await nodeHttp.get('/films/', {
           headers: { Authorization: 'Bearer ' + token },

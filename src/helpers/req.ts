@@ -1,6 +1,16 @@
 import http from './axios';
+import 'ts-replace-all';
 
 export default class MovieAPiServer {
+  searchQuery: string;
+  pageCounter: number | string;
+
+  API_KEY: string;
+  movieId: number | string | null;
+
+  maxPages: null | number | string;
+  isLoadGenres: boolean;
+
   constructor() {
     this.searchQuery = '';
     this.pageCounter = 1;
@@ -22,7 +32,7 @@ export default class MovieAPiServer {
     );
   }
   //зміни запит популярні фільми за тиждень
-  async fetchTopMovies(p, toBack) {
+  async fetchTopMovies(p: string, toBack: Function) {
     const URL = `/3/trending/movie/week?api_key=${
       this.API_KEY
     }&page=${p}&language=${this.getlang()}`;
@@ -57,7 +67,7 @@ export default class MovieAPiServer {
     }
   }
   // ----
-  async fetchMovieById(id) {
+  async fetchMovieById(id: string) {
     const URL = `/3/movie/${id}?api_key=${
       this.API_KEY
     }&language=${this.getlang()}&append_to_response=videos`;
@@ -71,8 +81,7 @@ export default class MovieAPiServer {
     }
   }
 
-  async fetchMovieByQuery(n, q, toBack) {
-    console.log(q, 'q');
+  async fetchMovieByQuery(n: string, q: string, toBack: Function) {
     this.maxPages = null;
     const URL = `/3/search/movie?api_key=${
       this.API_KEY

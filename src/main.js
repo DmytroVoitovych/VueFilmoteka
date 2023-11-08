@@ -6,9 +6,9 @@ import router from './routes';
 import { store } from './store';
 import VueYtframe from 'vue3-ytframe';
 
-const app = createApp(App);
+export const app = createApp(App);
 app.use(router);
-app.use(store);
 app.use(VueCookies);
+app.use(store);
 app.use(VueYtframe);
 app.mount('#app');

@@ -63,7 +63,7 @@
         <SkeletonTrend
           v-if="status === 'load' && !templateArr?.trend?.length"
           class="gallery__list"
-         />
+           />
 
         <div v-if="templateArr?.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
@@ -290,7 +290,7 @@ const loaderBasic = () => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!checkParam) {
       //якщо потрібний запит
-      checkForStupid() && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
+    checkForStupid() && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
     }
 
     return res;

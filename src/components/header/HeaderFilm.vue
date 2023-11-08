@@ -218,7 +218,7 @@ const focusEvent = () => focusOut.value?.funcShowOption('out');
 
 const checkExpired = computed(()=>{
       const token = auth.state.token ?? $cookies?.get('token');
-
+       console.log('token',token);
       if (!token) {
         return true;
       }
