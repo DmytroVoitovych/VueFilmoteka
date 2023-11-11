@@ -62,32 +62,33 @@
 <script setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import Bowser from 'bowser';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted,ref, watch } from 'vue';
 
 const toTop = ref(false);
 const locate = ref(0);
 
 const getRef = computed<HTMLElement | null>(()=>featuresStore?.getters?.getRefItem);
+const prop = defineProps<{path:string}>();
 
-
-const mangeDirectBtn = ()=> {
-
-        if (getRef.value) {
+const mangeDirectBtn = (ref?:HTMLElement | null)=> {
+console.log('mount');
+  if (getRef.value) {
+          console.log(featuresStore?.getters?.getRefItem);
           const intersectionObserver = new IntersectionObserver((entries) => {
-
-            entries[0].isIntersecting && (locate.value = window.scrollY);
-            return !entries[0].isIntersecting && (locate.value = window.scrollY);
             
+            entries[0].isIntersecting && (locate.value = window.scrollY);
+            !entries[0].isIntersecting && (locate.value = window.scrollY);
+            console.log('работает');
 
-          }, { threshold: .5 });
+          }, { threshold: .1 });
           // start observing
 
-          intersectionObserver.observe(getRef.value);
+          intersectionObserver.observe(ref as HTMLElement);
 
         }
 };
 
-onMounted(() => mangeDirectBtn());
+onMounted(()=>mangeDirectBtn(getRef.value));
       
 const toTopOrDown = () => {
 
@@ -99,10 +100,11 @@ const toTopOrDown = () => {
 
   if (toTop.value) {
     window.scroll({ top: 0, behavior: 'smooth', });
-
+    
     return;
   }
   window.scrollBy({ top: scrollHeight, behavior: "smooth" });
+  
 };
 
 
@@ -111,13 +113,13 @@ watch(locate, (n, o) => {
 
   n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
     ?
-    (toTop.value = (n < Number(o)) || !o ? false : true)
+    (toTop.value = (n < Number(o))? false : true)
     :
     (toTop.value = true);
-});
+},{flush:'post'});
 
-watch(getRef, (n, o) => n !== o && mangeDirectBtn());
-
+watch(getRef, (n, o) => { n !== o && mangeDirectBtn(getRef.value); locate.value = 0; },{immediate:true,deep:true});
+watch(() => prop.path, () =>  (locate.value = 0))
 </script>
 
 <style lang="scss" scoped>

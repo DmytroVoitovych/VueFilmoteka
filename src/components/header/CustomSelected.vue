@@ -5,6 +5,7 @@
       :class="show && '--border__change'"
       v-model="selected"
       @mousedown.prevent="funcShowOption"
+      
     >
       <option
         :data-lang="option.text"

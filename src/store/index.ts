@@ -60,6 +60,7 @@ export const store = createStore<State>({
           console.log('бекенд не знайшов такого користувача');
           state.commit('setLogin', '');
           Cookies.remove('token');
+          return;
         }
         state.commit('setLogin', '');
         Cookies.remove('token');

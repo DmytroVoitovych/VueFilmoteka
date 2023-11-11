@@ -192,7 +192,7 @@ syncIndexDBandStore(); // синхрон стора і бази
 
 const getInfoOfFilms = async () => {
   //отримання деталей по фільму
-  const data: {} = await http.fetchMovieById(props.filmsid);
+  const data: {} = await http.fetchMovieById(props.filmsid.toString());
   info.infos = data;
 };
 

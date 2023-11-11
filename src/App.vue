@@ -16,7 +16,7 @@
       :path="path"
       :show="show"
     />
-    <BtnTopandDownVue v-if="getRef" />
+    <BtnTopandDownVue v-if="getRef" :path="path" />
     <main :class="polyHas && 'has--poly'">
       <router-view
         :modalstate="path !== 'Home' && stateModal"

@@ -40,10 +40,10 @@
                 <span
                   :class="{
                     space:
-                      getGenre(genre_ids ?? genres.map((e:obj) => e.id))?.length > 27,
+                      getGenre(genre_ids ?? genres?.map((e:obj) => e.id))?.length > 27,
                   }"
                   >{{
-                    getGenre(genre_ids ?? genres.map((e:obj) => e.id))
+                    getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -189,15 +189,15 @@ const getStaticGenres = async () => {
 const startRenderPage = async ()=> {
       const data:obj[] = checkFind().value
         ? await http.fetchMovieByQuery(
-            window.localStorage.getItem('numberPage') ?? 1,
-            window.localStorage.getItem('findedFilms'),
+            window.localStorage.getItem('numberPage') ?? '1',
+            window.localStorage.getItem('findedFilms') as string,
             toMainPage
           )
-        : await http.fetchTopMovies(page.value, toMainPage);
+        : await http.fetchTopMovies(page.value.toString(), toMainPage);
 
   data?.length === 0 && toMainPage();
   templateArr.trend = controlStorage() || data;
-  max.value = http.maxPages > 500 ? 500 : http.maxPages;
+  max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
 
       getStaticGenres();
 };
@@ -246,7 +246,7 @@ const funcUpdateIfChangePath = (watched?: obj[] | undefined, queue?: obj[] | und
         window.localStorage.setItem('BibliotekaQueue', 'empty');
       break;
     default:
-      max.value = http.maxPages > 500 ? 500 : http.maxPages; // всі сторінки
+      max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages); // всі сторінки
       break;
   }
 };
@@ -367,13 +367,13 @@ const setPage = async (num: number) => {
 
     const data: obj[] = checkFind().value
       ? await http.fetchMovieByQuery(
-        page.value,
-        window.localStorage.getItem('findedFilms')
+        page.value.toString(),
+        window.localStorage.getItem('findedFilms') as string
       )
-      : await http.fetchTopMovies(num);
+      : await http.fetchTopMovies(num.toString());
 
     templateArr.trend = data;
-    max.value = http.maxPages > 500 ? 500 : http.maxPages;
+    max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
     window.localStorage.setItem('filmsPage', JSON.stringify(data));
     getStaticGenres();
   } else if (props.path.includes('Biblioteka')) {

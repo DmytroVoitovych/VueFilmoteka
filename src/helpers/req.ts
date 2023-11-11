@@ -32,7 +32,7 @@ export default class MovieAPiServer {
     );
   }
   //зміни запит популярні фільми за тиждень
-  async fetchTopMovies(p: string, toBack: Function) {
+  async fetchTopMovies(p: string, toBack?: Function) {
     const URL = `/3/trending/movie/week?api_key=${
       this.API_KEY
     }&page=${p}&language=${this.getlang()}`;
@@ -45,7 +45,7 @@ export default class MovieAPiServer {
       // ---
       return response.data.results;
     } catch (error) {
-      toBack();
+      toBack && toBack();
       return console.log(error);
     }
   }
@@ -81,7 +81,7 @@ export default class MovieAPiServer {
     }
   }
 
-  async fetchMovieByQuery(n: string, q: string, toBack: Function) {
+  async fetchMovieByQuery(n: string, q: string, toBack?: Function) {
     this.maxPages = null;
     const URL = `/3/search/movie?api_key=${
       this.API_KEY
@@ -93,7 +93,7 @@ export default class MovieAPiServer {
 
       return response.data.results;
     } catch (error) {
-      toBack();
+      toBack && toBack();
       return error;
     }
   }
