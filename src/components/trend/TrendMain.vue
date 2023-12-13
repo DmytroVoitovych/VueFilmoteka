@@ -83,7 +83,7 @@ import ContainerMain from '../shared/ContainerMain.vue';
 import MovieAPiServer from '@/helpers/req';
 import PaginationHardVue from '../shared/PaginationHard.vue';
 import SkeletonTrend from './SkeletonTrend.vue';
-import { axio, nodeHttp } from '../../helpers/axios';
+import { axio, cacheOptions, nodeHttp } from '../../helpers/axios';
 import { Report, Block } from 'notiflix';
 import { store } from '@/store/filmsStore';
 import {intersectionWith} from 'lodash';
@@ -91,14 +91,16 @@ import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import img from '@/assets/images/ded.jpg';
 import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
+
 const $cookies = inject<VueCookies>('$cookies'); 
 
 const http = new MovieAPiServer();
 let checkParam = false;
 const router = useRouter();
+const rout = useRoute();
 
 type obj = {
   id: any,
@@ -135,6 +137,9 @@ const check = ref(false);
 const observer = ref<HTMLLIElement[] | null>(null);
 const upBtn = ref<typeof PaginationHardVue | null>(null);
 const downBtn = ref<typeof PaginationHardVue | null>(null);
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
+
+
 
 const criticalGenres = computed<object[]>(()=>
       templateArr?.genrs?.length
@@ -147,7 +152,7 @@ beforeCreate();
 
 const checkFind = () => {
   //перевірка наявності пошуку
-  const exist = window.localStorage.getItem('findedFilms')
+  const exist = window.localStorage.getItem('findedFilms') || rout.query["film"]
     ? true
     : false;
   check.value = exist;
@@ -186,19 +191,22 @@ const getStaticGenres = async () => {
   templateArr.genrs = genr;
 };
       
-const startRenderPage = async ()=> {
-      const data:obj[] = checkFind().value
+const startRenderPage = async () => {
+      
+      const data:obj[] = checkFind().value 
         ? await http.fetchMovieByQuery(
-            window.localStorage.getItem('numberPage') ?? '1',
-            window.localStorage.getItem('findedFilms') as string,
+            page.value.toString(),
+            rout.query?.film as string || window.localStorage.getItem('findedFilms') as string,
             toMainPage
           )
-        : await http.fetchTopMovies(page.value.toString(), toMainPage);
+        : await http.fetchTopMovies( page.value.toString(), toMainPage);
 
   data?.length === 0 && toMainPage();
   templateArr.trend = controlStorage() || data;
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
-
+  
+  const standartQuery = { page: page.value, max: max.value, lang: lang.value }; // url control
+  props.switcher && rout.fullPath.includes('?') && router.push({query:{...standartQuery, film:window.localStorage.getItem('findedFilms')}});
       getStaticGenres();
 };
 
@@ -282,7 +290,8 @@ const loaderBasic = () => {
           backgroundColor: 'var(--bg-loader-basic)',
         });
     }
-
+    
+    
     return config;
   });
 
@@ -297,7 +306,40 @@ const loaderBasic = () => {
   });
 };
 
-const created = async () => {
+const setStateFromUrl = (query: { 
+  page?: string | number, lang?: 'en' | 'uk' | 'fi', max?:string | number, film?:string
+},num?:number) => {
+  if (rout.fullPath.includes('?')) {
+
+    if (query["page"]) {
+      window.localStorage.removeItem('filmsPage');
+      window.localStorage.removeItem('numberPage');
+      console.log(query?.film, window.localStorage.getItem('findedFilms'), 'query?');
+      query?.film !== window.localStorage.getItem('findedFilms') && window.localStorage.removeItem('findedFilms');
+      page.value = num ?? +query.page;
+      console.log(query["page"], 'templ', rout);
+
+      // window.localStorage.setItem('numberPage', query["page"].toString()); 
+    }
+    else if (query["max"]) {
+      max.value = +query.max;
+    }
+    else if (query["lang"]) {
+      window.localStorage.setItem('lang', query["lang"]);
+    }
+    else if (query["film"]) {
+      cacheOptions.clear();  // видаляю кеш для коректного пошуку
+      window.localStorage.setItem('findedFilms', query["film"]);
+    }
+    else {
+      return (page.value = 1);
+    }
+  }
+};
+
+const created = async (num?:number) => {
+   setStateFromUrl(rout.query,num);
+   console.log(props.path === 'Home');
   window.localStorage.getItem(props.path)
     ? (status.value = 'ready')
     : window.localStorage.removeItem(props.path);
@@ -307,6 +349,11 @@ const created = async () => {
   loaderBasic(); 
 };
 created();
+;
+
+router.options.history.listen((to) => { // слідкування за коректним отриманням номера сторінки
+created(Number(router.resolve(to)?.query?.page));
+});
     
 const year = (num: string) =>// рік
   num ? num.slice(0, 4) : 'no date';
@@ -333,7 +380,7 @@ const setPageBiblioteka = async (num?:number) => {
       headers: { Authorization: 'Bearer ' + auth.state.token },
       params: { page: num ?? page.value, limit: 20 }, // пока на тесті
     }); // забираю з беку списки юзера
-
+    
     const watchedFilter = intersectionWith(
       //звіряю з локальною базою і беру тіки ті які приніс бекенд
       store.state.infoWatched, // локальна база
@@ -362,6 +409,11 @@ const controlScroll = () => {
 
 const setPage = async (num: number) => {
   page.value = num;
+  const standartQuery = { page: num, max: max.value, lang: lang.value }; // url control
+  router.push({ query: standartQuery });
+  
+  (props.switcher || window.localStorage.getItem('findedFilms')) && router.push({query:{...standartQuery,film: window.localStorage.getItem('findedFilms')}});
+  
   if (props.path === 'Home') {
     window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
 
@@ -371,15 +423,17 @@ const setPage = async (num: number) => {
         window.localStorage.getItem('findedFilms') as string
       )
       : await http.fetchTopMovies(num.toString());
-
+       
     templateArr.trend = data;
     max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
     window.localStorage.setItem('filmsPage', JSON.stringify(data));
     getStaticGenres();
+
   } else if (props.path.includes('Biblioteka')) {
     await setPageBiblioteka(num); // контроль пагинації в бібліотеці
     controlScroll();
   }
+  
   controlScroll();
 };
     
@@ -389,9 +443,9 @@ const setPage = async (num: number) => {
         
 const funcSubscribeForDelAction = () =>
   props.modalstate && // якщо модалка відкрита підписуюсь на зміни
-  store.subscribe(mutation => {
+  store.subscribe((mutation:{type:any,payload:any}) => {
     // слідкую за мутаціями стору
-    const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
+    const folowIdDel =  mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
 
     folowIdDel && // якщо є
       // і модалка виключена
@@ -405,7 +459,7 @@ const funcSubscribeForDelAction = () =>
   });
     
   const funcSubscribeChangeLanguage = ()=> 
-      featuresStore.subscribe(mutation => {
+      featuresStore.subscribe((mutation:{type:any,payload:any}) => {
         if (mutation.type.includes('setLanguage')) {
           window.localStorage.removeItem('genres');
           props.path === 'Home'
@@ -435,6 +489,9 @@ watch(page, () => {
 
 watch(()=>props.switcher, () => {
   // тригер пошуку // завязано за імпут в хедері
+  page.value = 1;
+  const standartQuery = { page: 1, max: max.value, lang: lang.value }; // url control
+  props.switcher && router.push({query:{...standartQuery, film:window.localStorage.getItem('findedFilms')}});
   max.value = 0;
   startRenderPage();
 });
@@ -462,14 +519,15 @@ watch(()=>templateArr.trend, () => {
     ? sendRef()
     : featuresStore.commit('setRefItem', null);
 });
-  
+// watch(()=>rout.query,created,{deep:true});
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
   loaderBasic(); // важливо дочекатись змонтування дерева  
-});
+  });
 
 onUpdated(() => {
+  
   (!props.path || props.path === 'Home') && startRenderPage();
   page.value === 1 && !props.modalstate // контроль пагінації
     ? funcUpdateBibliotekaPage()

@@ -123,10 +123,11 @@ import ThemeMode from './ThemeMode.vue';
 import { Report, Notify } from 'notiflix';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getCont } from './contentLang';
-import { computed, inject, ref, type ComponentPublicInstance } from 'vue';
+import { computed, inject, ref, type ComponentPublicInstance, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
+import { cacheOptions } from '@/helpers/axios';
 const $cookies = inject<VueCookies>('$cookies'); 
 
 const router = useRouter();
@@ -143,22 +144,24 @@ const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
 const emit = defineEmits<{onChekfind: [switcher: boolean]}>(); //передача тригера
 
- const changeStorage = ()=> {
+const changeStorage = () => {
       window.localStorage.removeItem('numberPage'); //обнуляю сторінку
-      window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
-      window.localStorage.setItem(
+  window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
+  window.localStorage.setItem(
         'findedFilms',
         JSON.stringify(nameFilms.value)
-      ); //передаю в основу
-      nameFilms.value = '';
+  ); //передаю в основу
+  nameFilms.value = '';
+ 
 };
 
 const searchFilms = () => {
 
   const specifick = nameFilms.value === window.localStorage.getItem('findedFilms');
 
+  // cacheOptions.clear();  // видаляю кеш для коректного пошуку
+  
   if (nameFilms.value && !specifick) {
-    // cacheOptions.clear();  // видаляю кеш для коректного пошуку
     changeStorage();
     switcher.value = !switcher.value; //або або // логіка тогл
     emit('onChekfind', switcher.value);
@@ -172,10 +175,12 @@ const searchFilms = () => {
 };
 
 const toMainPage = () => { // повернення на основну сторінку
+  window.history.pushState(null, '', '/'); 
   window.localStorage.removeItem('numberPage');
   window.localStorage.removeItem('findedFilms');
-  route.fullPath !== '/'
-    ? router.push({ path: '/' })
+   
+   route.path !== '/'
+    ? router.push('/')
     : router.go(0);
 };
   

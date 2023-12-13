@@ -71,15 +71,14 @@ const getRef = computed<HTMLElement | null>(()=>featuresStore?.getters?.getRefIt
 const prop = defineProps<{path:string}>();
 
 const mangeDirectBtn = (ref?:HTMLElement | null)=> {
-console.log('mount');
+
   if (getRef.value) {
-          console.log(featuresStore?.getters?.getRefItem);
+          
           const intersectionObserver = new IntersectionObserver((entries) => {
             
             entries[0].isIntersecting && (locate.value = window.scrollY);
             !entries[0].isIntersecting && (locate.value = window.scrollY);
-            console.log('работает');
-
+            
           }, { threshold: .1 });
           // start observing
 
@@ -113,13 +112,13 @@ watch(locate, (n, o) => {
 
   n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
     ?
-    (toTop.value = (n < Number(o))? false : true)
+    (toTop.value = (n < Number(o) || Number(o) === 0 || Number(o) < document.documentElement.scrollHeight / 2 )? false : true)
     :
     (toTop.value = true);
 },{flush:'post'});
 
 watch(getRef, (n, o) => { n !== o && mangeDirectBtn(getRef.value); locate.value = 0; },{immediate:true,deep:true});
-watch(() => prop.path, () =>  (locate.value = 0))
+watch(() => prop.path, () => (locate.value = 0));
 </script>
 
 <style lang="scss" scoped>

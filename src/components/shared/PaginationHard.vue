@@ -44,7 +44,12 @@
 <script lang="ts" setup>
 import Bowser from 'bowser';
 import ModalExperementalVue from './ModalExperemental.vue'; // popover api on this moment 23.07.2023 only chrome ande edge
-import { reactive, ref, watch } from 'vue';
+import {reactive, ref, watch } from 'vue';
+import { getParamObj } from '@/helpers/urlChecker';
+import { useRoute } from 'vue-router';
+const params = new URL(window.location.href);
+
+const rout = useRoute();
 
 const props = withDefaults(defineProps<{ proppages: number, path: string }>(),
   {
@@ -63,17 +68,20 @@ const browser = ref(Bowser.getParser(window.navigator.userAgent)
 const emit = defineEmits<{ numPage: [page: number] }>();
 
 const controlStorage = () => {
-  if (
-    JSON.parse(window.localStorage.getItem('numberPage') as string) &&
-    JSON.parse(window.localStorage.getItem('filmsPage') as string)
-  ) {
-    return props.path === 'Home'
-      ? +JSON.parse(window.localStorage.getItem('numberPage') as string)
-      : 1;
-  }
 
-  return 1;
+     if (
+      JSON.parse(window.localStorage.getItem('numberPage') as string) &&
+      JSON.parse(window.localStorage.getItem('filmsPage') as string)
+    ) {
+      return props.path === 'Home'
+        ? +JSON.parse(window.localStorage.getItem('numberPage') as string)
+        : 1;
+    }
+   
+    return rout.query?.page ?? 1;
+  
 };
+
 
 const setServ = () => {
   //формування форми пагінації
@@ -98,7 +106,8 @@ const setPagination = () => {
 
   const created = ()=> {
     //те що мені потрібно одразу до рендера дома
-    page.value = controlStorage(); //
+    page.value = +controlStorage(); //
+    console.log('cre',page.value);
     setServ();
     if (+props.proppages <= 6) {
       return lessPage();
