@@ -56,7 +56,7 @@
           </li>
           <li
             class="librys__empty--li"
-            v-if="status === 'ready' && !templateArr?.trend?.length"
+            v-if="status === 'ready' && !templateArr?.trend?.length && props.path.includes('Biblioteka')"
           >
             Ваш список пустий, нічого не додано
           </li>
@@ -203,7 +203,7 @@ const startRenderPage = async () => {
           )
         : await http.fetchTopMovies( page.value.toString(), toMainPage);
 
-  data?.length === 0 && toMainPage();
+  // data?.length === 0 && toMainPage();
   templateArr.trend = controlStorage() || data;
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
  
@@ -301,7 +301,7 @@ const loaderBasic = () => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!checkParam) {
       //якщо потрібний запит
-    checkForStupid() && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
+    res.data.results.length > 0 && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
     }
 
     return res;
@@ -361,7 +361,7 @@ watch(
     // react to route changes...
         
     if ('page' in query) {
-     !previousParams["page"] && !previousParams["film"] && query["film"] && (templateArr.trend = []); 
+    //  !previousParams["page"] && !previousParams["film"] && query["film"] && (status.value = 'load'); 
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
       return;
@@ -535,7 +535,7 @@ watch(()=>templateArr.trend, () => {
   templateArr?.trend && templateArr?.trend?.length > 2
     ? sendRef()
     : featuresStore.commit('setRefItem', null);
- 
+  
   templateArr.trend && templateArr.trend.length > 0 && Block?.remove('.gallery__item');
 });
   
