@@ -9,6 +9,7 @@
             :proppages="max"
             ref="upBtn"
             :path="path"
+            :key="render"
           />
         </div>
         <ul class="gallery-js gallery__list">
@@ -71,6 +72,7 @@
             :proppages="max"
             ref="downBtn"
             :path="path"
+            :key="render"
           />
         </div>
       </section>
@@ -91,16 +93,17 @@ import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import img from '@/assets/images/ded.jpg';
 import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter,useRoute, onBeforeRouteUpdate } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
+import ModalBtn from '../btn/ModalBtn.vue';
 
 const $cookies = inject<VueCookies>('$cookies'); 
 
 const http = new MovieAPiServer();
 let checkParam = false;
 const router = useRouter();
-const rout = useRoute();
+const route = useRoute();
 
 type obj = {
   id: any,
@@ -138,8 +141,7 @@ const observer = ref<HTMLLIElement[] | null>(null);
 const upBtn = ref<typeof PaginationHardVue | null>(null);
 const downBtn = ref<typeof PaginationHardVue | null>(null);
 const lang = computed<string>(() => featuresStore.getters.getLanguage);
-
-
+const render = ref(0);
 
 const criticalGenres = computed<object[]>(()=>
       templateArr?.genrs?.length
@@ -152,7 +154,7 @@ beforeCreate();
 
 const checkFind = () => {
   //перевірка наявності пошуку
-  const exist = window.localStorage.getItem('findedFilms') || rout.query["film"]
+  const exist = window.localStorage.getItem('findedFilms')
     ? true
     : false;
   check.value = exist;
@@ -192,22 +194,22 @@ const getStaticGenres = async () => {
 };
       
 const startRenderPage = async () => {
-      
+  
       const data:obj[] = checkFind().value 
         ? await http.fetchMovieByQuery(
             page.value.toString(),
-            rout.query?.film as string || window.localStorage.getItem('findedFilms') as string,
+            route.query?.film as string || window.localStorage.getItem('findedFilms') as string,
             toMainPage
+
           )
         : await http.fetchTopMovies( page.value.toString(), toMainPage);
 
   data?.length === 0 && toMainPage();
   templateArr.trend = controlStorage() || data;
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
-  
-  const standartQuery = { page: page.value, max: max.value, lang: lang.value }; // url control
-  props.switcher && rout.fullPath.includes('?') && router.push({query:{...standartQuery, film:window.localStorage.getItem('findedFilms')}});
-      getStaticGenres();
+ 
+  getStaticGenres();
+
 };
 
 const syncIndexDBandStore = ()=> 
@@ -268,6 +270,7 @@ const funcUpdateBibliotekaPage = () => {
     )
     .then(() => {
       funcUpdateIfChangePath();
+     
     });
 };
 
@@ -306,55 +309,79 @@ const loaderBasic = () => {
   });
 };
 
-const setStateFromUrl = (query: { 
-  page?: string | number, lang?: 'en' | 'uk' | 'fi', max?:string | number, film?:string
-},num?:number) => {
-  if (rout.fullPath.includes('?')) {
-
-    if (query["page"]) {
-      window.localStorage.removeItem('filmsPage');
-      window.localStorage.removeItem('numberPage');
-      console.log(query?.film, window.localStorage.getItem('findedFilms'), 'query?');
-      query?.film !== window.localStorage.getItem('findedFilms') && window.localStorage.removeItem('findedFilms');
-      page.value = num ?? +query.page;
-      console.log(query["page"], 'templ', rout);
-
-      // window.localStorage.setItem('numberPage', query["page"].toString()); 
-    }
-    else if (query["max"]) {
-      max.value = +query.max;
-    }
-    else if (query["lang"]) {
-      window.localStorage.setItem('lang', query["lang"]);
-    }
-    else if (query["film"]) {
-      cacheOptions.clear();  // видаляю кеш для коректного пошуку
-      window.localStorage.setItem('findedFilms', query["film"]);
-    }
-    else {
-      return (page.value = 1);
-    }
+const transformLang = (lang:string) => {
+  switch (lang) {
+    case 'en':
+      return 'English';
+    case 'fi':
+      return 'Finish';
+    case 'uk':
+      return 'Ukrainian';
+  
+    default:
+      return 'English';
   }
+}
+
+const setStateFromUrl = (query: {
+  page?: string | number, lang?: 'en' | 'uk' | 'fi', max?: string | number, film?: string
+}) => {
+
+  window.localStorage.removeItem('filmsPage');
+  window.localStorage.removeItem('numberPage');
+  window.localStorage.removeItem('findedFilms');
+  window.localStorage.removeItem('currLang');
+
+  page.value = Number(query["page"]);
+  max.value = Number(query["max"]);
+  window.localStorage.setItem('currLang', transformLang(query["lang"]?.toString() ?? 'English'));
+  'film' in query && window.localStorage.setItem('findedFilms', query["film"] as string);
+  !props.path.includes('Biblioteka')?startRenderPage():setPageBiblioteka(page.value);
+  // на майбутнє на метод пагінації можу робити перехід згідно історії
+  return;
 };
 
-const created = async (num?:number) => {
-   setStateFromUrl(rout.query,num);
-   console.log(props.path === 'Home');
+
+const created = async () => {
+ "page" in route.query && setStateFromUrl(route.query);
+
   window.localStorage.getItem(props.path)
     ? (status.value = 'ready')
     : window.localStorage.removeItem(props.path);
   props.path === 'Home'
     ? startRenderPage()
     : funcUpdateBibliotekaPage();
+    
   loaderBasic(); 
+  
 };
 created();
-;
 
-router.options.history.listen((to) => { // слідкування за коректним отриманням номера сторінки
-created(Number(router.resolve(to)?.query?.page));
-});
-    
+watch(
+ () => route.query, (query, previousParams) => {
+       // react to route changes...
+       if ('page' in query) {
+      setStateFromUrl(query);
+      !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
+      return;
+    }
+    else if (props.path === 'Home') {
+     
+      window.localStorage.removeItem('filmsPage');
+      window.localStorage.removeItem('findedFilms');
+      page.value = 1;
+      max.value = 500;
+      startRenderPage();
+      render.value += 1;
+         return;
+    }
+       else {
+       props.path.includes('Biblioteka') && (page.value = 1); 
+       props.path.includes('Biblioteka') && setPageBiblioteka(1);
+    }  
+  }, { deep: true}
+);
+
 const year = (num: string) =>// рік
   num ? num.slice(0, 4) : 'no date';
     
@@ -409,31 +436,19 @@ const controlScroll = () => {
 
 const setPage = async (num: number) => {
   page.value = num;
+
   const standartQuery = { page: num, max: max.value, lang: lang.value }; // url control
-  router.push({ query: standartQuery });
+  !route.query.film && router.push({ query: standartQuery });
   
-  (props.switcher || window.localStorage.getItem('findedFilms')) && router.push({query:{...standartQuery,film: window.localStorage.getItem('findedFilms')}});
-  
+  (window.localStorage.getItem('findedFilms')) && router.push({query:{...standartQuery,film: window.localStorage.getItem('findedFilms')}});
+
   if (props.path === 'Home') {
     window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
-
-    const data: obj[] = checkFind().value
-      ? await http.fetchMovieByQuery(
-        page.value.toString(),
-        window.localStorage.getItem('findedFilms') as string
-      )
-      : await http.fetchTopMovies(num.toString());
-       
-    templateArr.trend = data;
-    max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
-    window.localStorage.setItem('filmsPage', JSON.stringify(data));
-    getStaticGenres();
-
-  } else if (props.path.includes('Biblioteka')) {
+    
+ } else if (props.path.includes('Biblioteka')) {
     await setPageBiblioteka(num); // контроль пагинації в бібліотеці
     controlScroll();
   }
-  
   controlScroll();
 };
     
@@ -488,12 +503,12 @@ watch(page, () => {
 });
 
 watch(()=>props.switcher, () => {
-  // тригер пошуку // завязано за імпут в хедері
-  page.value = 1;
-  const standartQuery = { page: 1, max: max.value, lang: lang.value }; // url control
-  props.switcher && router.push({query:{...standartQuery, film:window.localStorage.getItem('findedFilms')}});
-  max.value = 0;
-  startRenderPage();
+   
+  startRenderPage().then(() => {
+    const standartQuery = { page: 1, max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages), lang: lang.value }; // url control
+    props.switcher && router.push({ query: { ...standartQuery, film: window.localStorage.getItem('findedFilms') } });
+    render.value += 1;
+      });
 });
 
 watch(()=>props.path, () => {
@@ -502,7 +517,8 @@ watch(()=>props.path, () => {
     : () => { window.localStorage.removeItem(props.path); (status.value = 'ready'); };
   page.value = 1;
   funcUpdateBibliotekaPage();
-});
+
+  });
 
 watch(()=> props.modalstate,funcSubscribeForDelAction);
     
@@ -518,16 +534,18 @@ watch(()=>templateArr.trend, () => {
   templateArr?.trend && templateArr?.trend?.length > 2
     ? sendRef()
     : featuresStore.commit('setRefItem', null);
+
+  templateArr.trend && templateArr.trend.length > 0 && Block?.remove('.gallery__item');
 });
-// watch(()=>rout.query,created,{deep:true});
+  
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
   loaderBasic(); // важливо дочекатись змонтування дерева  
-  });
+  
+});
 
 onUpdated(() => {
-  
   (!props.path || props.path === 'Home') && startRenderPage();
   page.value === 1 && !props.modalstate // контроль пагінації
     ? funcUpdateBibliotekaPage()

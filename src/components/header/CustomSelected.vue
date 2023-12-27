@@ -43,11 +43,14 @@ const options = reactive([
   { text: 'ua', value: 'Ukrainian' },
   { text: 'fi', value: 'Finish' },
 ]);
- 
+
 const chooseOption = (opt:string) => {
   selected.value = opt;
   show.value = !show.value;
 };
+
+const created = () => selected.value = window.localStorage.getItem('currLang') ?? "English";
+created();
 
 const funcShowOption = (e: string | Event) => { // управління йде з батьківського компоненту через реф
   e !== 'out' ? (show.value = !show.value) : (show.value = false);

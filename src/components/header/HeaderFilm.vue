@@ -123,11 +123,11 @@ import ThemeMode from './ThemeMode.vue';
 import { Report, Notify } from 'notiflix';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getCont } from './contentLang';
-import { computed, inject, ref, type ComponentPublicInstance, onBeforeUnmount } from 'vue';
+import { computed, inject, ref, type ComponentPublicInstance,  watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
-import { cacheOptions } from '@/helpers/axios';
+
 const $cookies = inject<VueCookies>('$cookies'); 
 
 const router = useRouter();
@@ -145,14 +145,14 @@ const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 const emit = defineEmits<{onChekfind: [switcher: boolean]}>(); //передача тригера
 
 const changeStorage = () => {
-      window.localStorage.removeItem('numberPage'); //обнуляю сторінку
+  window.localStorage.removeItem('numberPage'); //обнуляю сторінку
   window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
   window.localStorage.setItem(
-        'findedFilms',
-        JSON.stringify(nameFilms.value)
+    'findedFilms',
+    JSON.stringify(nameFilms.value)
   ); //передаю в основу
   nameFilms.value = '';
- 
+
 };
 
 const searchFilms = () => {
@@ -175,7 +175,7 @@ const searchFilms = () => {
 };
 
 const toMainPage = () => { // повернення на основну сторінку
-  window.history.pushState(null, '', '/'); 
+  router.options.history.push('/');
   window.localStorage.removeItem('numberPage');
   window.localStorage.removeItem('findedFilms');
    
@@ -221,9 +221,14 @@ const getHeaderContent = (type?:headerContentT) => {
 const focusOut = ref<ComponentPublicInstance<typeof CustomSelected> | null>(null); // реф для керування функцієй на child
 const focusEvent = () => focusOut.value?.funcShowOption('out');
 
+watch(() => route.query, (query) => { // for url back btn
+ switcher.value = !query?.film?false:true;
+emit('onChekfind', false);
+}, { deep: true });
+
 const checkExpired = computed(()=>{
       const token = auth.state.token ?? $cookies?.get('token');
-       console.log('token',token);
+       
       if (!token) {
         return true;
       }
@@ -231,6 +236,8 @@ const checkExpired = computed(()=>{
       const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
       return Math.floor(+new Date() / 1000) > exp;
 });
+
+
 
  </script>
 

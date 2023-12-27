@@ -107,7 +107,6 @@ const setPagination = () => {
   const created = ()=> {
     //те що мені потрібно одразу до рендера дома
     page.value = +controlStorage(); //
-    console.log('cre',page.value);
     setServ();
     if (+props.proppages <= 6) {
       return lessPage();
