@@ -96,7 +96,6 @@ import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch 
 import { useRouter,useRoute, onBeforeRouteUpdate } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
-import ModalBtn from '../btn/ModalBtn.vue';
 
 const $cookies = inject<VueCookies>('$cookies'); 
 
@@ -360,7 +359,8 @@ created();
 watch(
  () => route.query, (query, previousParams) => {
        // react to route changes...
-       if ('page' in query) {
+    if ('page' in query) {
+      !previousParams["film"] && query["film"] && (templateArr.trend = []); 
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
       return;
@@ -534,7 +534,7 @@ watch(()=>templateArr.trend, () => {
   templateArr?.trend && templateArr?.trend?.length > 2
     ? sendRef()
     : featuresStore.commit('setRefItem', null);
-
+ 
   templateArr.trend && templateArr.trend.length > 0 && Block?.remove('.gallery__item');
 });
   
