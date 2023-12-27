@@ -164,7 +164,8 @@ const searchFilms = () => {
   if (nameFilms.value && !specifick) {
     changeStorage();
     switcher.value = !switcher.value; //або або // логіка тогл
-    emit('onChekfind', switcher.value);
+    emit('onChekfind', true);
+   
   } else if (specifick) {
     return Notify.failure(
       `You already have movies on request: ${nameFilms.value}`

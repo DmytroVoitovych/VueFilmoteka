@@ -358,9 +358,10 @@ created();
 
 watch(
  () => route.query, (query, previousParams) => {
-       // react to route changes...
+    // react to route changes...
+        
     if ('page' in query) {
-      !previousParams["film"] && query["film"] && (templateArr.trend = []); 
+     !previousParams["page"] && !previousParams["film"] && query["film"] && (templateArr.trend = []); 
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
       return;
