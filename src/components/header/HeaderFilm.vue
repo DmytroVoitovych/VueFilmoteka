@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home" @mouseleave="focusEvent">
+  
     <ContainerMain>
       <template v-if="props.show">
         <router-link

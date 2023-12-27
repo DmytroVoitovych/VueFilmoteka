@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div  class="gallery__item" style="display: none"></div>
-    <ContainerMain>
+ 
+   <ContainerMain>
       <section class="container gallery section">
         <div v-if="templateArr.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
@@ -12,7 +12,7 @@
             :key="render"
           />
         </div>
-        <ul class="gallery-js gallery__list">
+        <ul class="gallery__list">
           <li
             v-for="{
               id,
@@ -62,7 +62,7 @@
           </li>
         </ul>
         <SkeletonTrend
-          v-if="status === 'load' && !templateArr?.trend?.length"
+          v-if="status === 'load'"
           class="gallery__list"
            />
 
@@ -77,7 +77,7 @@
         </div>
       </section>
     </ContainerMain>
-  </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -192,7 +192,7 @@ const getStaticGenres = async () => {
   templateArr.genrs = genr;
 };
       
-const startRenderPage = async () => {
+const startRenderPage = async (sw?:string) => {
   
       const data:obj[] = checkFind().value 
         ? await http.fetchMovieByQuery(
@@ -204,7 +204,7 @@ const startRenderPage = async () => {
         : await http.fetchTopMovies( page.value.toString(), toMainPage);
 
   // data?.length === 0 && toMainPage();
-  templateArr.trend = controlStorage() || data;
+  !sw ?(templateArr.trend = controlStorage() || data):(status.value = 'load');
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
  
   getStaticGenres();
@@ -273,40 +273,41 @@ const funcUpdateBibliotekaPage = () => {
     });
 };
 
-const checkForStupid = ()=> templateArr.trend && templateArr.trend.length > 0;
+const checkForStupid = ()=> templateArr.trend && templateArr.trend.length > 5;
 
-const loaderBasic = () => {
-  // функція відповідальна за основний лоадер на сайті
+// const loaderBasic = () => {
+//   // функція відповідальна за основний лоадер на сайті
 
-  axio.loader.interceptors.request.use(config => {
-    //перехоплюєм запит
-
-    checkParam = !!config?.url?.includes('/3/movie/');
-    if (!checkParam) {
-      //якщо потрібний запит
-      checkForStupid() && //перевірка на дурня
-        Block?.dots('.gallery__item', {
-          //сам лофдер з конфігураціями
-          svgColor: 'var(--text-color-red)',
-          svgSize: '100px',
-          backgroundColor: 'var(--bg-loader-basic)',
-        });
-    }
+//   axio.loader.interceptors.request.use(config => {
+//     //перехоплюєм запит
+//     console.log('config', config);
+//     checkParam = !!config?.url?.includes('/3/movie/');
+//     if (!checkParam) {
+//       //якщо потрібний запит
+//       checkForStupid() && //перевірка на дурня
+//           Block?.dots('.gallery__item', {
+//           //сам лофдер з конфігураціями
+//           svgColor: 'var(--text-color-red)',
+//           svgSize: '100px',
+//           backgroundColor: 'var(--bg-loader-basic)',
+//         });
+//     }
     
     
-    return config;
-  });
+//     return config;
+//   });
 
-  axio.loader.interceptors.response.use(res => {
-    // коли дані нам надійшли  вимикаєм лоадер
-    if (!checkParam) {
-      //якщо потрібний запит
-    res.data.results.length > 0 && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
-    }
+//   axio.loader.interceptors.response.use(res => {
+//     // коли дані нам надійшли  вимикаєм лоадер
+//     if (!checkParam) {
+//       //якщо потрібний запит
+    
+//     res.data.results.length > 0 && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
+//     }
 
-    return res;
-  });
-};
+//     return res;
+//   });
+// };
 
 const transformLang = (lang:string) => {
   switch (lang) {
@@ -333,6 +334,7 @@ const setStateFromUrl = (query: {
 
   page.value = Number(query["page"]);
   max.value = Number(query["max"]);
+ 
   window.localStorage.setItem('currLang', transformLang(query["lang"]?.toString() ?? 'English'));
   'film' in query && window.localStorage.setItem('findedFilms', query["film"] as string);
   !props.path.includes('Biblioteka')?startRenderPage():setPageBiblioteka(page.value);
@@ -342,16 +344,20 @@ const setStateFromUrl = (query: {
 
 
 const created = async () => {
- "page" in route.query && setStateFromUrl(route.query);
-
+  
+  if ("page" in route.query) {
+    setStateFromUrl(route.query);
+    // loaderBasic(); 
+    return;
+  }
   window.localStorage.getItem(props.path)
     ? (status.value = 'ready')
     : window.localStorage.removeItem(props.path);
   props.path === 'Home'
     ? startRenderPage()
     : funcUpdateBibliotekaPage();
-    
-  loaderBasic(); 
+    // loaderBasic(); 
+  
   
 };
 created();
@@ -361,7 +367,6 @@ watch(
     // react to route changes...
         
     if ('page' in query) {
-    //  !previousParams["page"] && !previousParams["film"] && query["film"] && (status.value = 'load'); 
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
       return;
@@ -504,8 +509,8 @@ watch(page, () => {
 });
 
 watch(()=>props.switcher, () => {
-   
-  startRenderPage().then(() => {
+  
+  startRenderPage('sw').then(() => {
     const standartQuery = { page: 1, max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages), lang: lang.value }; // url control
     props.switcher && router.push({ query: { ...standartQuery, film: window.localStorage.getItem('findedFilms') } });
     render.value += 1;
@@ -542,7 +547,7 @@ watch(()=>templateArr.trend, () => {
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
-  loaderBasic(); // важливо дочекатись змонтування дерева  
+  // loaderBasic(); // важливо дочекатись змонтування дерева  
   
 });
 

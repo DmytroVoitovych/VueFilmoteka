@@ -18,6 +18,7 @@
     />
     <BtnTopandDownVue v-if="getRef" :path="path" />
     <main :class="polyHas && 'has--poly'">
+    <div  class="gallery__item" style="display: none"></div>
       <router-view
         :modalstate="path !== 'Home' && stateModal"
         :path="path"
