@@ -3,6 +3,7 @@ import type { AxiosAdapter } from 'axios';
 import axios from 'axios';
 import { cacheAdapterEnhancer, type ICacheLike } from 'axios-extensions';
 import LRUCache from 'lru-cache';
+import rateLimit from 'axios-rate-limit';
 
 export const cacheOptions = new LRUCache({
   ttl: 10 * 60 * 1000, // час життя елемента кешу
@@ -10,13 +11,16 @@ export const cacheOptions = new LRUCache({
   ttlAutopurge: true, //автоматичне видаленн протухших елементів
 });
 
-const http = axios.create({
-  baseURL: 'https://api.themoviedb.org',
-  headers: { 'Cache-Control': 'no-cache' },
-  adapter: cacheAdapterEnhancer(axios.defaults.adapter as AxiosAdapter, {
-    defaultCache: cacheOptions as ICacheLike<AxiosPromise<any>>,
-  }), //кешування
-});
+const http = rateLimit( // ліміт встановлено  із за недоліку апі по фільмах який має ліміт в 20 запитів зараз
+  axios.create({
+    baseURL: 'https://api.themoviedb.org',
+    headers: { 'Cache-Control': 'no-cache' },
+    adapter: cacheAdapterEnhancer(axios.defaults.adapter as AxiosAdapter, {
+      defaultCache: cacheOptions as ICacheLike<AxiosPromise<any>>,
+    }), //кешування
+  }),
+  { maxRequests: 20, perMilliseconds: 1000 }
+);
 
 export const axio = {
   //мідалвара для лоудера

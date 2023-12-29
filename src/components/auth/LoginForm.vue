@@ -74,7 +74,8 @@
 </template>
 
 <script setup lang="ts">
-import { store as auth} from '@/store/index';
+import { store as auth } from '@/store/index';
+import { store as filmStore} from '@/store/filmsStore';
 import { Confirm, Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 import { featuresStore } from '@/store/storeForFeatures';
@@ -103,9 +104,9 @@ const redirectFromHideRoute = () => {
 
 const funcRedirectAfterLogin = () => {
   $cookies?.set('token', auth.state.token, '60MIN'); // d кукіс
+  filmStore?.dispatch('getFromServerFilmId', auth.state.token ?? $cookies?.get('token'));
   router.push({ path: '/', replace: true });
-  auth.dispatch('getFromServerFilmId', auth.state.token);
-};
+  };
 
 const funcSignInUser = async () => {
   redirectFromHideRoute();

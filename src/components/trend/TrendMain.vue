@@ -269,45 +269,8 @@ const funcUpdateBibliotekaPage = () => {
     )
     .then(() => {
       funcUpdateIfChangePath();
-     
-    });
+       });
 };
-
-const checkForStupid = ()=> templateArr.trend && templateArr.trend.length > 5;
-
-// const loaderBasic = () => {
-//   // функція відповідальна за основний лоадер на сайті
-
-//   axio.loader.interceptors.request.use(config => {
-//     //перехоплюєм запит
-//     console.log('config', config);
-//     checkParam = !!config?.url?.includes('/3/movie/');
-//     if (!checkParam) {
-//       //якщо потрібний запит
-//       checkForStupid() && //перевірка на дурня
-//           Block?.dots('.gallery__item', {
-//           //сам лофдер з конфігураціями
-//           svgColor: 'var(--text-color-red)',
-//           svgSize: '100px',
-//           backgroundColor: 'var(--bg-loader-basic)',
-//         });
-//     }
-    
-    
-//     return config;
-//   });
-
-//   axio.loader.interceptors.response.use(res => {
-//     // коли дані нам надійшли  вимикаєм лоадер
-//     if (!checkParam) {
-//       //якщо потрібний запит
-    
-//     res.data.results.length > 0 && observer.value?.length as number > 0 && Block?.remove('.gallery__item');
-//     }
-
-//     return res;
-//   });
-// };
 
 const transformLang = (lang:string) => {
   switch (lang) {
