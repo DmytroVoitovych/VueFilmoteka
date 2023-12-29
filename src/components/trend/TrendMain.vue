@@ -93,14 +93,13 @@ import { featuresStore } from '@/store/storeForFeatures';
 import { myDatabase } from '@/store/filmsStore';
 import img from '@/assets/images/ded.jpg';
 import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
-import { useRouter,useRoute, onBeforeRouteUpdate } from 'vue-router';
+import { useRouter,useRoute,} from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
 
 const $cookies = inject<VueCookies>('$cookies'); 
 
 const http = new MovieAPiServer();
-let checkParam = false;
 const router = useRouter();
 const route = useRoute();
 
@@ -189,6 +188,7 @@ const getStaticGenres = async () => {
   const genr =
     JSON.parse(window.localStorage.getItem('genres') as string) ??
     (await http.getGenresList());
+    
   templateArr.genrs = genr;
 };
       
@@ -207,7 +207,7 @@ const startRenderPage = async (sw?:string) => {
   !sw ?(templateArr.trend = controlStorage() || data):(status.value = 'load');
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
  
-  getStaticGenres();
+   getStaticGenres();
 
 };
 
@@ -289,7 +289,7 @@ const transformLang = (lang:string) => {
 const setStateFromUrl = (query: {
   page?: string | number, lang?: 'en' | 'uk' | 'fi', max?: string | number, film?: string
 }) => {
-
+  
   window.localStorage.removeItem('filmsPage');
   window.localStorage.removeItem('numberPage');
   window.localStorage.removeItem('findedFilms');
@@ -360,9 +360,10 @@ const getPoster = (poster: string) =>
     
 const getGenre = (idg: object[]) => {
   //розбір жанрів
+  
   return idg
     ?.map(e =>
-      criticalGenres.value.filter((cr) => ('id' in cr && 'name' in cr) && cr.id === e && cr.name)
+      criticalGenres?.value.filter((cr) => ('id' in cr && 'name' in cr) && cr.id === e && cr.name)
     )
     .flat(3)
     .map((n) => 'name' in n && n.name)
@@ -405,15 +406,15 @@ const controlScroll = () => {
 
 const setPage = async (num: number) => {
   page.value = num;
-
+  
   const standartQuery = { page: num, max: max.value, lang: lang.value }; // url control
   !route.query.film && router.push({ query: standartQuery });
   
   (window.localStorage.getItem('findedFilms')) && router.push({query:{...standartQuery,film: window.localStorage.getItem('findedFilms')}});
 
   if (props.path === 'Home') {
-    window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
-    
+  window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
+   
  } else if (props.path.includes('Biblioteka')) {
     await setPageBiblioteka(num); // контроль пагинації в бібліотеці
     controlScroll();
@@ -503,8 +504,7 @@ watch(()=>templateArr.trend, () => {
   templateArr?.trend && templateArr?.trend?.length > 2
     ? sendRef()
     : featuresStore.commit('setRefItem', null);
-  
-  templateArr.trend && templateArr.trend.length > 0 && Block?.remove('.gallery__item');
+    
 });
   
 
