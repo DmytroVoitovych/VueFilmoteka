@@ -43,7 +43,6 @@ const loaderBasic = () => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!checkParam) {
       //якщо потрібний запит
-    console.log(res,'res');
       res?.data?.results && res?.data?.results.length > 0 && Block?.remove('.gallery__item');
       res?.data?.genres && res.data.genres.length > 0 && Block?.remove('.gallery__item');
     }

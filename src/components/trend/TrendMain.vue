@@ -1,7 +1,6 @@
 <template>
   <div>
- 
-   <ContainerMain>
+    <ContainerMain>
       <section class="container gallery section">
         <div v-if="templateArr.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
@@ -45,26 +44,26 @@
                   }"
                   >{{
                     getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
-                }}<span class="gallery__rating them">{{
-                  vote_average?.toFixed(1)
-                }}</span>
+                }}<span class="gallery__rating them">{{ vote_average?.toFixed(1) }}</span>
               </p>
             </div>
           </li>
           <li
             class="librys__empty--li"
-            v-if="status === 'ready' && !templateArr?.trend?.length && props.path.includes('Biblioteka')"
+            v-if="
+              status === 'ready' &&
+              !templateArr?.trend?.length &&
+              props.path.includes('Biblioteka')
+            "
           >
             Ваш список пустий, нічого не додано
           </li>
         </ul>
-        <SkeletonTrend
-          v-if="status === 'load'"
-          class="gallery__list"
-           />
+        <SkeletonTrend v-if="status === 'load'" class="gallery__list" />
 
         <div v-if="templateArr?.trend?.length && max > 1" class="pagination-wrap">
           <PaginationHardVue
@@ -77,60 +76,72 @@
         </div>
       </section>
     </ContainerMain>
-    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import ContainerMain from '../shared/ContainerMain.vue';
-import MovieAPiServer from '@/helpers/req';
-import PaginationHardVue from '../shared/PaginationHard.vue';
-import SkeletonTrend from './SkeletonTrend.vue';
-import { axio, cacheOptions, nodeHttp } from '../../helpers/axios';
-import { Report, Block } from 'notiflix';
-import { store } from '@/store/filmsStore';
-import {intersectionWith} from 'lodash';
-import { featuresStore } from '@/store/storeForFeatures';
-import { myDatabase } from '@/store/filmsStore';
-import img from '@/assets/images/ded.jpg';
-import { computed, inject, nextTick, onMounted, onUpdated, reactive, ref, watch } from 'vue';
-import { useRouter,useRoute,} from 'vue-router';
-import { store as auth } from '@/store/index';
-import type { VueCookies } from 'vue-cookies';
+import ContainerMain from "../shared/ContainerMain.vue";
+import MovieAPiServer from "@/helpers/req";
+import PaginationHardVue from "../shared/PaginationHard.vue";
+import SkeletonTrend from "./SkeletonTrend.vue";
+import { axio, cacheOptions, nodeHttp } from "../../helpers/axios";
+import { Report, Block } from "notiflix";
+import { store } from "@/store/filmsStore";
+import { intersectionWith } from "lodash";
+import { featuresStore } from "@/store/storeForFeatures";
+import { myDatabase } from "@/store/filmsStore";
+import img from "@/assets/images/ded.jpg";
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+  watch,
+} from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { store as auth } from "@/store/index";
+import type { VueCookies } from "vue-cookies";
 
-const $cookies = inject<VueCookies>('$cookies'); 
+const $cookies = inject<VueCookies>("$cookies");
 
 const http = new MovieAPiServer();
 const router = useRouter();
 const route = useRoute();
 
 type obj = {
-  id: any,
-  title: any,
-  release_date: any,
-  poster_path: any,
-  genre_ids: any,
-  vote_average: any,
-  genres: any,
+  id: any;
+  title: any;
+  release_date: any;
+  poster_path: any;
+  genre_ids: any;
+  vote_average: any;
+  genres: any;
 };
 type anyArrT = {
-  trend?: obj[]
-  genrs?: object[],
+  trend?: obj[];
+  genrs?: object[];
 };
 
-const props = withDefaults(defineProps<{
-  switcher: boolean, // false
-  modalstate: boolean, // false,
-  path: string // '',
-}>(), {
-  switcher: () => false,
-  modalstate: () => false,
-  path: ()=> ''
-});
-  
-const emit = defineEmits<{ 'get-find-id':[id: number] }>();
+const props = withDefaults(
+  defineProps<{
+    switcher: boolean; // false
+    modalstate: boolean; // false,
+    path: string; // '',
+  }>(),
+  {
+    switcher: () => false,
+    modalstate: () => false,
+    path: () => "",
+  }
+);
 
-const templateArr = reactive<anyArrT>({trend:[],genrs:[]});
-const status = ref<'load' | 'ready'>('load');
+const emit = defineEmits<{ "get-find-id": [id: number] }>();
+
+const templateArr = reactive<anyArrT>({ trend: [], genrs: [] });
+const status = ref<"load" | "ready">("load");
 const page = ref(1);
 const max = ref(0);
 const locate = ref(0);
@@ -141,118 +152,115 @@ const downBtn = ref<typeof PaginationHardVue | null>(null);
 const lang = computed<string>(() => featuresStore.getters.getLanguage);
 const render = ref(0);
 
-const criticalGenres = computed<object[]>(()=>
-      templateArr?.genrs?.length
-        ? templateArr.genrs
-        : JSON.parse(window.localStorage.getItem('genres') as string));
-    
+const criticalGenres = computed<object[]>(() =>
+  templateArr?.genrs?.length
+    ? templateArr.genrs
+    : JSON.parse(window.localStorage.getItem("genres") as string)
+);
 
-const beforeCreate = ()=> !window.localStorage.getItem('genres') && http.getGenresList();
+const beforeCreate = () => !window.localStorage.getItem("genres") && http.getGenresList();
 beforeCreate();
 
 const checkFind = () => {
   //перевірка наявності пошуку
-  const exist = window.localStorage.getItem('findedFilms')
-    ? true
-    : false;
+  const exist = window.localStorage.getItem("findedFilms") ? true : false;
   check.value = exist;
   return check;
 };
 
-const toMainPage = ()=> 
-      // добавити вспливаючу підказку (що нічого нема)
-      Report.info(
-        'Sorry',
-        'On your request we found nothing , we return you to the main.',
-        'Okay',
-        () => {
-          router.go(0);
-          window.localStorage.removeItem('numberPage');
-          window.localStorage.removeItem('findedFilms');
-        }
-      );
+const toMainPage = () =>
+  // добавити вспливаючу підказку (що нічого нема)
+  Report.info(
+    "Sorry",
+    "On your request we found nothing , we return you to the main.",
+    "Okay",
+    () => {
+      router.go(0);
+      window.localStorage.removeItem("numberPage");
+      window.localStorage.removeItem("findedFilms");
+    }
+  );
 
-const controlStorage = ():obj[] | false=> {
-      //перевіка локльного стора
-      if (
-        window.localStorage.getItem('numberPage') &&
-        window.localStorage.getItem('filmsPage')
-      ) {
-        return JSON.parse(window.localStorage.getItem('filmsPage') as string);
-      }
+const controlStorage = (): obj[] | false => {
+  //перевіка локльного стора
+  if (
+    window.localStorage.getItem("numberPage") &&
+    window.localStorage.getItem("filmsPage")
+  ) {
+    return JSON.parse(window.localStorage.getItem("filmsPage") as string);
+  }
 
-      return false;
+  return false;
 };
 
 const getStaticGenres = async () => {
   const genr =
-    JSON.parse(window.localStorage.getItem('genres') as string) ??
+    JSON.parse(window.localStorage.getItem("genres") as string) ??
     (await http.getGenresList());
-    
+
   templateArr.genrs = genr;
 };
-      
-const startRenderPage = async (sw?:string) => {
-  
-      const data:obj[] = checkFind().value 
-        ? await http.fetchMovieByQuery(
-            page.value.toString(),
-            route.query?.film as string || window.localStorage.getItem('findedFilms') as string,
-            toMainPage
 
-          )
-        : await http.fetchTopMovies( page.value.toString(), toMainPage);
+const startRenderPage = async (sw?: string) => {
+  const data: obj[] = checkFind().value
+    ? await http.fetchMovieByQuery(
+        page.value.toString(),
+        (route.query?.film as string) ||
+          (window.localStorage.getItem("findedFilms") as string),
+        toMainPage
+      )
+    : await http.fetchTopMovies(page.value.toString(), toMainPage);
 
   // data?.length === 0 && toMainPage();
-  !sw ?(templateArr.trend = controlStorage() || data):(status.value = 'load');
+  !sw ? (templateArr.trend = controlStorage() || data) : (status.value = "load");
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
- 
-   getStaticGenres();
 
+  getStaticGenres();
 };
 
-const syncIndexDBandStore = ()=> 
-      myDatabase.keys().then(keys => {
-        if (keys.includes('watched') && props.path === 'BibliotekaWatched') {
-          // перевірка ключа
-          myDatabase.getItem('watched').then((e) => {
-            templateArr.trend = JSON.parse(e as string).slice(0, 20); // якщо гуд коміт в стор
-            max.value = Math.ceil(JSON.parse(e as string).length / 20);
-            !JSON.parse(e as string).length &&
-              window.localStorage.setItem('BibliotekaWatched', 'empty');
-          });
-        }
-        if (keys.includes('queue') && props.path === 'BibliotekaQueue') {
-          myDatabase.getItem('queue').then(e => {
-            templateArr.trend = JSON.parse(e as string).slice(0, 20);
-            max.value = Math.ceil(JSON.parse(e as string).length / 20);
-            !JSON.parse(e as string).length &&
-              window.localStorage.setItem('BibliotekaQueue', 'empty');
-          }); // якщо гуд коміт в стор
-        }
-        return;
+const syncIndexDBandStore = () =>
+  myDatabase.keys().then((keys) => {
+    if (keys.includes("watched") && props.path === "BibliotekaWatched") {
+      // перевірка ключа
+      myDatabase.getItem("watched").then((e) => {
+        templateArr.trend = JSON.parse(e as string).slice(0, 20); // якщо гуд коміт в стор
+        max.value = Math.ceil(JSON.parse(e as string).length / 20);
+        !JSON.parse(e as string).length &&
+          window.localStorage.setItem("BibliotekaWatched", "empty");
       });
-    
+    }
+    if (keys.includes("queue") && props.path === "BibliotekaQueue") {
+      myDatabase.getItem("queue").then((e) => {
+        templateArr.trend = JSON.parse(e as string).slice(0, 20);
+        max.value = Math.ceil(JSON.parse(e as string).length / 20);
+        !JSON.parse(e as string).length &&
+          window.localStorage.setItem("BibliotekaQueue", "empty");
+      }); // якщо гуд коміт в стор
+    }
+    return;
+  });
 
-const funcUpdateIfChangePath = (watched?: obj[] | undefined, queue?: obj[] | undefined) => {
+const funcUpdateIfChangePath = (
+  watched?: obj[] | undefined,
+  queue?: obj[] | undefined
+) => {
   if (!store.state.infoWatched.length && !store.state.infoQueue.length) {
     syncIndexDBandStore();
   }
 
   switch (
-  props.path // звіряю по положеню
+    props.path // звіряю по положеню
   ) {
-    case 'BibliotekaWatched':
+    case "BibliotekaWatched":
       templateArr.trend = watched ?? store.state.infoWatched.slice(0, 20); // якщо параметр є  пишу його якшо ні першу 20
-      !templateArr.trend &&
-        window.localStorage.setItem('BibliotekaWatched', 'empty');
+      templateArr.trend && templateArr.trend.length < 1;
+      window.localStorage.setItem("BibliotekaWatched", "empty");
       max.value = store.state.max.numWatch; // всі сторінки
       break;
-    case 'BibliotekaQueue':
+    case "BibliotekaQueue":
       templateArr.trend = queue ?? store.state.infoQueue.slice(0, 20);
       max.value = store.state.max.numQue;
-      !templateArr.trend &&
-        window.localStorage.setItem('BibliotekaQueue', 'empty');
+      !templateArr.trend && window.localStorage.setItem("BibliotekaQueue", "empty");
       break;
     default:
       max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages); // всі сторінки
@@ -261,133 +269,138 @@ const funcUpdateIfChangePath = (watched?: obj[] | undefined, queue?: obj[] | und
 };
 
 const funcUpdateBibliotekaPage = () => {
-  store.state.max['numWatch' || 'numQue'] && funcUpdateIfChangePath(); // оптимізація швидкості
+  store.state.max["numWatch" || "numQue"] && funcUpdateIfChangePath(); // оптимізація швидкості
   store
-    .dispatch(
-      'getFromServerFilmId',
-      $cookies?.get('token') ?? auth.state.token
-    )
+    .dispatch("getFromServerFilmId", $cookies?.get("token") ?? auth.state.token)
     .then(() => {
       funcUpdateIfChangePath();
-       });
+    });
 };
 
-const transformLang = (lang:string) => {
+const transformLang = (lang: string) => {
   switch (lang) {
-    case 'en':
-      return 'English';
-    case 'fi':
-      return 'Finish';
-    case 'uk':
-      return 'Ukrainian';
-  
+    case "en":
+      return "English";
+    case "fi":
+      return "Finish";
+    case "uk":
+      return "Ukrainian";
+
     default:
-      return 'English';
+      return "English";
   }
-}
+};
 
 const setStateFromUrl = (query: {
-  page?: string | number, lang?: 'en' | 'uk' | 'fi', max?: string | number, film?: string
+  page?: string | number;
+  lang?: "en" | "uk" | "fi";
+  max?: string | number;
+  film?: string;
 }) => {
-  
-  window.localStorage.removeItem('filmsPage');
-  window.localStorage.removeItem('numberPage');
-  window.localStorage.removeItem('findedFilms');
-  window.localStorage.removeItem('currLang');
+  window.localStorage.removeItem("filmsPage");
+  window.localStorage.removeItem("numberPage");
+  window.localStorage.removeItem("findedFilms");
+  window.localStorage.removeItem("currLang");
 
   page.value = Number(query["page"]);
   max.value = Number(query["max"]);
- 
-  window.localStorage.setItem('currLang', transformLang(query["lang"]?.toString() ?? 'English'));
-  'film' in query && window.localStorage.setItem('findedFilms', query["film"] as string);
-  !props.path.includes('Biblioteka')?startRenderPage():setPageBiblioteka(page.value);
+
+  window.localStorage.setItem(
+    "currLang",
+    transformLang(query["lang"]?.toString() ?? "English")
+  );
+  "film" in query && window.localStorage.setItem("findedFilms", query["film"] as string);
+  !props.path.includes("Biblioteka") ? startRenderPage() : setPageBiblioteka(page.value);
   // на майбутнє на метод пагінації можу робити перехід згідно історії
   return;
 };
 
-
 const created = async () => {
-  
   if ("page" in route.query) {
     setStateFromUrl(route.query);
-    // loaderBasic(); 
+    // loaderBasic();
     return;
   }
   window.localStorage.getItem(props.path)
-    ? (status.value = 'ready')
+    ? (status.value = "ready")
     : window.localStorage.removeItem(props.path);
-  props.path === 'Home'
-    ? startRenderPage()
-    : funcUpdateBibliotekaPage();
-    // loaderBasic(); 
-  
-  
+  props.path === "Home" ? startRenderPage() : funcUpdateBibliotekaPage();
+  // loaderBasic();
 };
 created();
 
 watch(
- () => route.query, (query, previousParams) => {
+  () => route.query,
+  (query, previousParams) => {
     // react to route changes...
-        
-    if ('page' in query) {
+
+    route.fullPath.includes("watched") &&
+      window.localStorage.getItem("BibliotekaWatched") &&
+      (status.value = "ready");
+    route.fullPath.includes("queue") &&
+      window.localStorage.getItem("BibliotekaQueue") &&
+      (status.value = "ready");
+
+    if ("page" in query) {
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
       return;
-    }
-    else if (props.path === 'Home') {
-     
-      window.localStorage.removeItem('filmsPage');
-      window.localStorage.removeItem('findedFilms');
+    } else if (props.path === "Home") {
+      window.localStorage.removeItem("filmsPage");
+      window.localStorage.removeItem("findedFilms");
       page.value = 1;
       max.value = 500;
       startRenderPage();
       render.value += 1;
-         return;
+      return;
+    } else {
+      props.path.includes("Biblioteka") && (page.value = 1);
+      props.path.includes("Biblioteka") && setPageBiblioteka(1);
     }
-       else {
-       props.path.includes('Biblioteka') && (page.value = 1); 
-       props.path.includes('Biblioteka') && setPageBiblioteka(1);
-    }  
-  }, { deep: true}
+  },
+  { deep: true }
 );
 
-const year = (num: string) =>// рік
-  num ? num.slice(0, 4) : 'no date';
-    
+const year = (
+  num: string // рік
+) => (num ? num.slice(0, 4) : "no date");
+
 const getPoster = (poster: string) =>
   //постери
   `https://image.tmdb.org/t/p/w500/${poster}`;
-    
+
 const getGenre = (idg: object[]) => {
   //розбір жанрів
-  
+
   return idg
-    ?.map(e =>
-      criticalGenres?.value.filter((cr) => ('id' in cr && 'name' in cr) && cr.id === e && cr.name)
+    ?.map((e) =>
+      criticalGenres?.value.filter(
+        (cr) => "id" in cr && "name" in cr && cr.id === e && cr.name
+      )
     )
     .flat(3)
-    .map((n) => 'name' in n && n.name)
+    .map((n) => "name" in n && n.name)
     .slice(0, 2)
-    .join(', ');
+    .join(", ");
 };
 
-const setPageBiblioteka = async (num?:number) => {
+const setPageBiblioteka = async (num?: number) => {
   try {
-    const res = await nodeHttp.get('/films/', {
-      headers: { Authorization: 'Bearer ' + auth.state.token },
+    const res = await nodeHttp.get("/films/", {
+      headers: { Authorization: "Bearer " + auth.state.token },
       params: { page: num ?? page.value, limit: 20 }, // пока на тесті
     }); // забираю з беку списки юзера
-    
+
     const watchedFilter = intersectionWith(
       //звіряю з локальною базою і беру тіки ті які приніс бекенд
       store.state.infoWatched, // локальна база
-      res.data.watchedFilms.map((e:{}) => 'idFilm' in e && e.idFilm), // бекенд
-      (a:obj, b) =>'id' in a && a.id === b // фідвільтровую по id фільмів
+      res.data.watchedFilms.map((e: {}) => "idFilm" in e && e.idFilm), // бекенд
+      (a: obj, b) => "id" in a && a.id === b // фідвільтровую по id фільмів
     );
     const queueFilter = intersectionWith(
       store.state.infoQueue,
-      res.data.queueFilms.map((e:{}) => 'idFilm' in e && e.idFilm),
-      (a:obj, b) => 'id' in a && a.id === b
+      res.data.queueFilms.map((e: {}) => "idFilm" in e && e.idFilm),
+      (a: obj, b) => "id" in a && a.id === b
     );
     funcUpdateIfChangePath(watchedFilter, queueFilter); // передаю аргументи в функію зміни стану
   } catch (error) {
@@ -406,120 +419,133 @@ const controlScroll = () => {
 
 const setPage = async (num: number) => {
   page.value = num;
-  
+
   const standartQuery = { page: num, max: max.value, lang: lang.value }; // url control
   !route.query.film && router.push({ query: standartQuery });
-  
-  (window.localStorage.getItem('findedFilms')) && router.push({query:{...standartQuery,film: window.localStorage.getItem('findedFilms')}});
 
-  if (props.path === 'Home') {
-  window.localStorage.setItem('numberPage', num.toString()); // добавляю сторінку
-   
- } else if (props.path.includes('Biblioteka')) {
+  window.localStorage.getItem("findedFilms") &&
+    router.push({
+      query: { ...standartQuery, film: window.localStorage.getItem("findedFilms") },
+    });
+
+  if (props.path === "Home") {
+    window.localStorage.setItem("numberPage", num.toString()); // добавляю сторінку
+  } else if (props.path.includes("Biblioteka")) {
     await setPageBiblioteka(num); // контроль пагинації в бібліотеці
     controlScroll();
   }
   controlScroll();
 };
-    
- const getIdForModal = (id:number) =>
-      // отримання данних для модалки
-      emit('get-find-id', id);
-        
+
+const getIdForModal = (id: number) =>
+  // отримання данних для модалки
+  emit("get-find-id", id);
+
 const funcSubscribeForDelAction = () =>
   props.modalstate && // якщо модалка відкрита підписуюсь на зміни
-  store.subscribe((mutation:{type:any,payload:any}) => {
+  store.subscribe((mutation: { type: any; payload: any }) => {
     // слідкую за мутаціями стору
-    const folowIdDel =  mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
+    const folowIdDel = mutation.payload[0]?.id ?? false; // отримує id видаленого фільму
 
     folowIdDel && // якщо є
       // і модалка виключена
       !props.modalstate &&
       templateArr?.trend?.splice(
         //  видаляю з масиву
-        templateArr.trend.findIndex(e => e === folowIdDel),
+        templateArr.trend.findIndex((e) => e === folowIdDel),
         0
       );
-    !templateArr?.trend?.length && (status.value = 'ready');
+    !templateArr?.trend?.length && (status.value = "ready");
   });
-    
-  const funcSubscribeChangeLanguage = ()=> 
-      featuresStore.subscribe((mutation:{type:any,payload:any}) => {
-        if (mutation.type.includes('setLanguage')) {
-          window.localStorage.removeItem('genres');
-          props.path === 'Home'
-            ? setPage(page.value)
-            : funcUpdateBibliotekaPage();
-        }
-      });
-        
+
+const funcSubscribeChangeLanguage = () =>
+  featuresStore.subscribe((mutation: { type: any; payload: any }) => {
+    if (mutation.type.includes("setLanguage")) {
+      window.localStorage.removeItem("genres");
+      props.path === "Home" ? setPage(page.value) : funcUpdateBibliotekaPage();
+    }
+  });
+
 const sendRef = () => {
   //передаю реф
   const time = setTimeout(() => {
     featuresStore.commit(
-      'setRefItem',
-    templateArr?.trend &&  templateArr?.trend?.length > 8
-        ?observer.value?.length && observer.value[8]  
-        :observer.value?.length && observer.value.reverse()[2]
+      "setRefItem",
+      templateArr?.trend && templateArr?.trend?.length > 8
+        ? observer.value?.length && observer.value[8]
+        : observer.value?.length && observer.value.reverse()[2]
     );
-    status.value = 'ready';
+    status.value = "ready";
     clearTimeout(time);
   }, 200);
 };
 
 watch(page, () => {
- upBtn?.value && upBtn?.value.forcePage(page.value); //форс зверху
- downBtn?.value && downBtn?.value.forcePage(page.value); //форс знизу
+  upBtn?.value && upBtn?.value.forcePage(page.value); //форс зверху
+  downBtn?.value && downBtn?.value.forcePage(page.value); //форс знизу
 });
 
-watch(()=>props.switcher, () => {
-  
-  startRenderPage('sw').then(() => {
-    const standartQuery = { page: 1, max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages), lang: lang.value }; // url control
-    props.switcher && router.push({ query: { ...standartQuery, film: window.localStorage.getItem('findedFilms') } });
-    render.value += 1;
-      });
-});
+watch(
+  () => props.switcher,
+  () => {
+    startRenderPage("sw").then(() => {
+      const standartQuery = {
+        page: 1,
+        max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages),
+        lang: lang.value,
+      }; // url control
+      props.switcher &&
+        router.push({
+          query: { ...standartQuery, film: window.localStorage.getItem("findedFilms") },
+        });
+      render.value += 1;
+    });
+  }
+);
 
-watch(()=>props.path, () => {
-  window.localStorage.getItem(props.path)
-    ? (status.value = 'ready')
-    : () => { window.localStorage.removeItem(props.path); (status.value = 'ready'); };
-  page.value = 1;
-  funcUpdateBibliotekaPage();
+watch(
+  () => props.path,
+  () => {
+    window.localStorage.getItem(props.path)
+      ? (status.value = "ready")
+      : () => {
+          window.localStorage.removeItem(props.path);
+          status.value = "ready";
+        };
+    page.value = 1;
+    funcUpdateBibliotekaPage();
+  }
+);
 
-  });
+watch(() => props.modalstate, funcSubscribeForDelAction);
 
-watch(()=> props.modalstate,funcSubscribeForDelAction);
-    
-watch(()=>templateArr.trend, () => {
-  !templateArr?.trend?.length
-    ? () => {
-      window.localStorage.setItem(props.path, 'empty');
-      (status.value = 'ready')
-    }
-    : window.localStorage.getItem(props.path) &&
-    window.localStorage.removeItem(props.path);
+watch(
+  () => templateArr.trend,
+  () => {
+    !templateArr?.trend?.length
+      ? () => {
+          window.localStorage.setItem(props.path, "empty");
+          status.value = "ready";
+        }
+      : window.localStorage.getItem(props.path) &&
+        window.localStorage.removeItem(props.path);
 
-  templateArr?.trend && templateArr?.trend?.length > 2
-    ? sendRef()
-    : featuresStore.commit('setRefItem', null);
-    
-});
-  
+    templateArr?.trend && templateArr?.trend?.length > 2
+      ? sendRef()
+      : featuresStore.commit("setRefItem", null);
+  }
+);
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
-    
 });
 
 onUpdated(() => {
-  (!props.path || props.path === 'Home') && startRenderPage();
+  (!props.path || props.path === "Home") && startRenderPage();
   page.value === 1 && !props.modalstate // контроль пагінації
     ? funcUpdateBibliotekaPage()
     : setPageBiblioteka();
 });
-  
 </script>
 
 <style lang="scss" scoped>
@@ -556,12 +582,8 @@ onUpdated(() => {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: 30%;
-  background-image: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.56),
-      rgba(0, 0, 0, 0.56)
-    ),
-    url('../../assets/images/library.jpeg');
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
+    url("../../assets/images/library.jpeg");
 }
 
 .gallery__list {
@@ -710,12 +732,7 @@ onUpdated(() => {
 
 @keyframes load {
   50% {
-    background: linear-gradient(
-        to right,
-        transparent 0%,
-        #e8e8e8 50%,
-        transparent 100%
-      )
+    background: linear-gradient(to right, transparent 0%, #e8e8e8 50%, transparent 100%)
       top right;
   }
 }
@@ -723,7 +740,7 @@ onUpdated(() => {
 
 .noFilms {
   text-align: center;
-  background-image: url('@/assets/images/biblioteka/nofilms.jpg'),
+  background-image: url("@/assets/images/biblioteka/nofilms.jpg"),
     linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56));
   background-size: 100% 100%;
   background-position: center;
