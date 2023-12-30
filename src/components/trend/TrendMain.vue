@@ -45,6 +45,7 @@
                   >{{
                     getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
 
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -334,13 +335,6 @@ watch(
   (query, previousParams) => {
     // react to route changes...
 
-    route.fullPath.includes("watched") &&
-      window.localStorage.getItem("BibliotekaWatched") &&
-      (status.value = "ready");
-    route.fullPath.includes("queue") &&
-      window.localStorage.getItem("BibliotekaQueue") &&
-      (status.value = "ready");
-
     if ("page" in query) {
       setStateFromUrl(query);
       !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
@@ -538,6 +532,12 @@ watch(
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
+  route.fullPath.includes("watched") &&
+    window.localStorage.getItem("BibliotekaWatched") &&
+    (status.value = "ready");
+  route.fullPath.includes("queue") &&
+    window.localStorage.getItem("BibliotekaQueue") &&
+    (status.value = "ready");
 });
 
 onUpdated(() => {
