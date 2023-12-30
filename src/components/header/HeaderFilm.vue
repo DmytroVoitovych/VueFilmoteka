@@ -141,7 +141,7 @@ const props = defineProps<{
 
 const switcher = ref(false); //тригер пошуку
 const nameFilms = ref('');
-const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
 const emit = defineEmits<{onChekfind: [switcher: boolean]}>(); //передача тригера
 
@@ -208,15 +208,15 @@ const getName = () => {
 
 type headerContentT = 'authcontent' | 'navcontent' | 'holdercontent';
 
-const getHeaderContent = (type?:headerContentT) => {
+const getHeaderContent = (type?: headerContentT) => {
   if (type === 'authcontent') {
-    return getCont.getAuthContent(lang);
+    return getCont.getAuthContent(lang.value);
   } else if (type === 'navcontent') {
-    return getCont.getLinkContent(lang);
+    return getCont.getLinkContent(lang.value);
   } else if (type === 'holdercontent') {
-    return getCont.getInputContent(lang);
+    return getCont.getInputContent(lang.value);
   } else {
-    return getCont.getButtonContent(lang);
+    return getCont.getButtonContent(lang.value);
   }
 };
 

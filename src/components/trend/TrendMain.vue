@@ -510,8 +510,7 @@ watch(()=>templateArr.trend, () => {
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
-  // loaderBasic(); // важливо дочекатись змонтування дерева  
-  
+    
 });
 
 onUpdated(() => {

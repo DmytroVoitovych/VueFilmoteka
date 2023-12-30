@@ -62,7 +62,7 @@ watch(selected,(vanha, uusi) => {
       if (vanha !== uusi) { // при змінні мови перепис стору
         window.localStorage.setItem('currLang', vanha);
         featuresStore.commit('setLanguage', vanha);
-      }
+        }
     });
 </script>
 
