@@ -3,14 +3,15 @@
     <div class="switch btn-color-mode-switch">
       <input
         type="checkbox"
-        name="color_mode"
-        id="color_mode"
+        name="color-switcher"
+        aria-labelledby="color-switcher"
+        id="color-switcher"
         value="1"
         v-on:change="changeThemeMode"
         :checked="dark"
       />
       <label
-        for="color_mode"
+        for="color-switcher"
         data-on="&#127770;"
         data-off="&#127774;"
         class="btn-color-mode-switch-inner"
@@ -20,29 +21,29 @@
 </template>
 
 <script setup lang="ts">
-import {ref } from 'vue';
+import { ref } from "vue";
 
 const dark = ref(false);
 
 const changeThemeMode = () => {
   const html = document.documentElement.classList;
-  html.toggle('dark'); // міняєм клас в залежності від стану
-  html.contains('dark')
-    ? window.sessionStorage.setItem('theme', 'dark')
-    : window.sessionStorage.setItem('theme', 'light');
+  html.toggle("dark"); // міняєм клас в залежності від стану
+  html.contains("dark")
+    ? window.sessionStorage.setItem("theme", "dark")
+    : window.sessionStorage.setItem("theme", "light");
 };
 const getUserTheme = () => {
-  dark.value = window.matchMedia('(prefers-color-scheme:dark)').matches; // перевіряю тему юзера
-  window.sessionStorage.getItem('theme') === 'dark'
-    ? document.documentElement.classList.add('dark')
+  dark.value = window.matchMedia("(prefers-color-scheme:dark)").matches; // перевіряю тему юзера
+  window.sessionStorage.getItem("theme") === "dark"
+    ? document.documentElement.classList.add("dark")
     : dark.value &&
-    window.sessionStorage.getItem('theme') !== 'light' &&
-    document.documentElement.classList.add('dark'); // дефолтний стан чекбокса
+      window.sessionStorage.getItem("theme") !== "light" &&
+      document.documentElement.classList.add("dark"); // дефолтний стан чекбокса
 
   dark.value =
-    (window.sessionStorage.getItem('theme') !== 'light' &&
-      window.matchMedia('(prefers-color-scheme:dark)').matches) ||
-      window.sessionStorage.getItem('theme') === 'dark'
+    (window.sessionStorage.getItem("theme") !== "light" &&
+      window.matchMedia("(prefers-color-scheme:dark)").matches) ||
+    window.sessionStorage.getItem("theme") === "dark"
       ? true
       : false;
 };
@@ -118,7 +119,7 @@ label {
   cursor: pointer;
 }
 
-.btn-color-mode-switch input[type='checkbox'] {
+.btn-color-mode-switch input[type="checkbox"] {
   cursor: pointer;
   width: 50px;
   height: 25px;
@@ -130,14 +131,14 @@ label {
 }
 
 .btn-color-mode-switch
-  input[type='checkbox']:checked
+  input[type="checkbox"]:checked
   + label.btn-color-mode-switch-inner {
   background: #151515;
   color: var(--text-color-light);
 }
 
 .btn-color-mode-switch
-  input[type='checkbox']:checked
+  input[type="checkbox"]:checked
   + label.btn-color-mode-switch-inner:after {
   content: attr(data-on);
   left: 68px;
@@ -145,14 +146,14 @@ label {
 }
 
 .btn-color-mode-switch
-  input[type='checkbox']:checked
+  input[type="checkbox"]:checked
   + label.btn-color-mode-switch-inner:before {
   content: attr(data-off);
   right: auto;
   left: 20px;
 }
 
-.btn-color-mode-switch input[type='checkbox']:checked ~ .alert {
+.btn-color-mode-switch input[type="checkbox"]:checked ~ .alert {
   display: block;
 }
 
