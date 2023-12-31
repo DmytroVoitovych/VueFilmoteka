@@ -4,7 +4,6 @@
       <input
         type="checkbox"
         name="color-switcher"
-        aria-labelledby="color-switcher"
         aria-label="color-switcher"
         id="color-switcher"
         value="1"

@@ -11,7 +11,7 @@
             :key="render"
           />
         </div>
-        <ul v-if="status === 'ready'" class="gallery__list">
+        <ul v-show="status === 'ready'" class="gallery__list">
           <li
             v-for="{
               id,
@@ -44,6 +44,14 @@
                   }"
                   >{{
                     getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
+
+
+
+
+
+
+
+
 
 
 
@@ -472,6 +480,7 @@ const sendRef = () => {
         ? observer.value?.length && observer.value[8]
         : observer.value?.length && observer.value.reverse()[2]
     );
+
     status.value = "ready";
     clearTimeout(time);
   }, 200);
