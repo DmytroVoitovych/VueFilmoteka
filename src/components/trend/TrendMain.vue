@@ -11,7 +11,7 @@
             :key="render"
           />
         </div>
-        <ul class="gallery__list">
+        <ul v-if="status === 'ready'" class="gallery__list">
           <li
             v-for="{
               id,
@@ -44,6 +44,7 @@
                   }"
                   >{{
                     getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
+
 
 
 
