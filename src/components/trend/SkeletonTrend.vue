@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="e of fakeArrs.template" :key="e" class="gallery__item">
+    <li v-for="e of fakeArrs.template" :key="e">
       <img class="gallery__img" />
       <div class="gallery__info">
         <p class="gallery__title them"></p>
@@ -10,41 +10,42 @@
   </ul>
 </template>
 
-<script lang="ts"  setup>
-import { axio } from '@/helpers/axios';
-import { Block } from 'notiflix';
-import { reactive } from 'vue';
+<script lang="ts" setup>
+import { axio } from "@/helpers/axios";
+import { Block } from "notiflix";
+import { reactive } from "vue";
 
 const fakeArrs = reactive({ template: [...Array(20).keys()] });
 let checkParam = false;
 const loaderBasic = () => {
   // функція відповідальна за основний лоадер на сайті
 
-  axio.loader.interceptors.request.use(config => {
+  axio.loader.interceptors.request.use((config) => {
     //перехоплюєм запит
-    
-    checkParam = !!config?.url?.includes('/3/movie/');
+
+    checkParam = !!config?.url?.includes("/3/movie/");
     if (!checkParam) {
       //якщо потрібний запит
-       //перевірка на дурня
-          Block?.dots('.gallery__item', {
-          //сам лофдер з конфігураціями
-          svgColor: 'var(--text-color-red)',
-          svgSize: '100px',
-          backgroundColor: 'var(--bg-loader-basic)',
-        });
+      //перевірка на дурня
+      Block?.dots(".gallery__item", {
+        //сам лофдер з конфігураціями
+        svgColor: "var(--text-color-red)",
+        svgSize: "100px",
+        backgroundColor: "var(--bg-loader-basic)",
+      });
     }
-    
-    
+
     return config;
   });
 
-  axio.loader.interceptors.response.use(res => {
+  axio.loader.interceptors.response.use((res) => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!checkParam) {
       //якщо потрібний запит
-      res?.data?.results && res?.data?.results.length > 0 && Block?.remove('.gallery__item');
-      res?.data?.genres && res.data.genres.length > 0 && Block?.remove('.gallery__item');
+      res?.data?.results &&
+        res?.data?.results.length > 0 &&
+        Block?.remove(".gallery__item");
+      res?.data?.genres && res.data.genres.length > 0 && Block?.remove(".gallery__item");
     }
 
     return res;
@@ -129,12 +130,7 @@ loaderBasic();
 
 @keyframes load {
   50% {
-    background: linear-gradient(
-        to right,
-        transparent 0%,
-        #e8e8e8 50%,
-        transparent 100%
-      )
+    background: linear-gradient(to right, transparent 0%, #e8e8e8 50%, transparent 100%)
       top right;
   }
 }

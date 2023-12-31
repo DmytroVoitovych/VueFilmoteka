@@ -46,6 +46,8 @@
                     getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
 
 
+
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -532,6 +534,7 @@ watch(
 
 onMounted(() => {
   funcSubscribeChangeLanguage();
+
   route.fullPath.includes("watched") &&
     window.localStorage.getItem("BibliotekaWatched") &&
     (status.value = "ready");
