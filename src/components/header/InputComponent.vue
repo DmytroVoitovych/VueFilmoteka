@@ -5,7 +5,6 @@
 export default {
   props: ['find'],
   emits: ['update:find'],
-  
 };
 </script>
 

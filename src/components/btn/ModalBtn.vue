@@ -13,14 +13,13 @@
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
-  name: string,
-  content: string
+  name: string;
+  content: string;
 }>();
 
 const router = useRouter();
 
-const toggle = ()=> router.push({ path: props.name.toLowerCase() });
-
+const toggle = () => router.push({ path: props.name.toLowerCase() });
 </script>
 
 <style lang="scss" scoped>

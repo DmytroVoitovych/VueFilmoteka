@@ -11,7 +11,8 @@ export const cacheOptions = new LRUCache({
   ttlAutopurge: true, //автоматичне видаленн протухших елементів
 });
 
-const http = rateLimit( // ліміт встановлено  із за недоліку апі по фільмах який має ліміт в 20 запитів зараз
+const http = rateLimit(
+  // ліміт встановлено  із за недоліку апі по фільмах який має ліміт в 20 запитів зараз
   axios.create({
     baseURL: 'https://api.themoviedb.org',
     headers: { 'Cache-Control': 'no-cache' },

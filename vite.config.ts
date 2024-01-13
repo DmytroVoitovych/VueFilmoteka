@@ -30,21 +30,6 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
-  // build: {
-  //   rollupOptions: {
-  //     input: './src/main.js', // Здесь должен быть путь к вашему JavaScript-файлу
-  //     output: {
-  //       manualChunks: {
-  //         'group-main': [
-  //           './src/page/AuthPage.vue',
-  //           './src/page/BibliotekaPage.vue',
-  //           './src/page/Home.vue',
-  //         ],
-  //       },
-  //     },
-  //   },
-  // },
   css: {
     preprocessorOptions: {
       scss: {

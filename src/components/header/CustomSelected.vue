@@ -5,7 +5,6 @@
       :class="show && '--border__change'"
       v-model="selected"
       @mousedown.prevent="funcShowOption"
-      
     >
       <option
         :data-lang="option.text"
@@ -35,7 +34,6 @@
 import { reactive, ref, watch } from 'vue';
 import { featuresStore } from '../../store/storeForFeatures';
 
-
 const selected = ref(window.localStorage.getItem('currLang') ?? 'English');
 const show = ref(false);
 const options = reactive([
@@ -44,26 +42,29 @@ const options = reactive([
   { text: 'fi', value: 'Finish' },
 ]);
 
-const chooseOption = (opt:string) => {
+const chooseOption = (opt: string) => {
   selected.value = opt;
   show.value = !show.value;
 };
 
-const created = () => selected.value = window.localStorage.getItem('currLang') ?? "English";
+const created = () =>
+  (selected.value = window.localStorage.getItem('currLang') ?? 'English');
 created();
 
-const funcShowOption = (e: string | Event) => { // управління йде з батьківського компоненту через реф
+const funcShowOption = (e: string | Event) => {
+  // управління йде з батьківського компоненту через реф
   e !== 'out' ? (show.value = !show.value) : (show.value = false);
 };
 
 defineExpose({ funcShowOption }); // передаю в керування
 
-watch(selected,(vanha, uusi) => {
-      if (vanha !== uusi) { // при змінні мови перепис стору
-        window.localStorage.setItem('currLang', vanha);
-        featuresStore.commit('setLanguage', vanha);
-        }
-    });
+watch(selected, (vanha, uusi) => {
+  if (vanha !== uusi) {
+    // при змінні мови перепис стору
+    window.localStorage.setItem('currLang', vanha);
+    featuresStore.commit('setLanguage', vanha);
+  }
+});
 </script>
 
 <style lang="scss" scoped>

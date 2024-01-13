@@ -64,12 +64,13 @@ const num = ref(1);
 const el = ref<HTMLDivElement | null>(null);
 const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
-const props = withDefaults(defineProps<{max:number}>(), {
-  max: () => 0
+const props = withDefaults(defineProps<{ max: number }>(), {
+  max: () => 0,
 });
-const emit = defineEmits<{forcePage:[num:number]}>();
+const emit = defineEmits<{ forcePage: [num: number] }>();
 
-const togglePointer = (value: 'none' | '') => window.document.documentElement.style.setProperty('--pointer', value);
+const togglePointer = (value: 'none' | '') =>
+  window.document.documentElement.style.setProperty('--pointer', value);
 
 const stateOfModalPag = (e: Event) => {
   // функція перевірку стану попавера
@@ -84,13 +85,14 @@ const stateOfModalPag = (e: Event) => {
   }
 };
 
-const forcePage = (e:Event) =>  emit('forcePage', +num.value); // передай номер для пагінації
-    
-const modalContentPag = () => getModalContentPag(lang);// отримання користувацького контену відповідно до мови
-   
-onMounted(() =>  el.value?.addEventListener('beforetoggle', stateOfModalPag) ); // reg event
-onUnmounted(()=>el.value?.removeEventListener('beforetoggle',stateOfModalPag)); //clean event
- 
+const forcePage = (e: Event) => emit('forcePage', +num.value); // передай номер для пагінації
+
+const modalContentPag = () => getModalContentPag(lang); // отримання користувацького контену відповідно до мови
+
+onMounted(() => el.value?.addEventListener('beforetoggle', stateOfModalPag)); // reg event
+onUnmounted(() =>
+  el.value?.removeEventListener('beforetoggle', stateOfModalPag)
+); //clean event
 </script>
 
 <style lang="scss" scoped>

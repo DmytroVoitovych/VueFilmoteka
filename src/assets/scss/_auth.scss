@@ -6,7 +6,6 @@
   border-radius: 10px;
   overflow: hidden;
   background: transparent;
-
 }
 
 .login-form {
@@ -15,8 +14,7 @@
   background-color: #fff;
   padding-bottom: 33px;
   padding-top: 5px;
- text-align: center;
- 
+  text-align: center;
 }
 
 .login-form-logo {
@@ -79,14 +77,13 @@
   left: 0;
   pointer-events: none;
 
- & + .pass-eye {
-      opacity: 0;
-      visibility: hidden;
-  
-      right: 35px;
-      top: 20px;
-    }
-  
+  & + .pass-eye {
+    opacity: 0;
+    visibility: hidden;
+
+    right: 35px;
+    top: 20px;
+  }
 }
 
 .focus-input::before {
@@ -129,7 +126,6 @@
 .input:focus + .focus-input::after {
   left: 23px;
   color: #d41872;
-  
 }
 
 .input:focus + .focus-input + .pass-eye {
@@ -140,7 +136,7 @@
   color: #d41872;
   top: 20px;
   opacity: 1;
-    visibility: visible;
+  visibility: visible;
 }
 
 .input:focus + .focus-input::before {
@@ -215,5 +211,4 @@
 
 .homeBtnLink {
   fill: azure;
-  
 }

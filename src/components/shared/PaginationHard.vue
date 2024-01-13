@@ -44,74 +44,74 @@
 <script lang="ts" setup>
 import Bowser from 'bowser';
 import ModalExperementalVue from './ModalExperemental.vue'; // popover api on this moment 23.07.2023 only chrome ande edge
-import {reactive, ref, watch } from 'vue';
-import { getParamObj } from '@/helpers/urlChecker';
+import { reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-const params = new URL(window.location.href);
 
 const rout = useRoute();
 
-const props = withDefaults(defineProps<{ proppages: number, path: string }>(),
-  {
-    proppages: () => 0,
-    path: () => ''
-  });
-  
+const props = withDefaults(defineProps<{ proppages: number; path: string }>(), {
+  proppages: () => 0,
+  path: () => '',
+});
+
 const page = ref(1);
-const arrPage = reactive({template:['1', '2', '3', '4', '5', '6', '...', props.proppages.toString()]});
-const serverDate = reactive < { template: number[] | string [] }>({template:[]});
-const browser = ref(Bowser.getParser(window.navigator.userAgent)
-  .getBrowserName()
-  .toLowerCase());
-  
-    //описую передану функцію
+const arrPage = reactive({
+  template: ['1', '2', '3', '4', '5', '6', '...', props.proppages.toString()],
+});
+const serverDate = reactive<{ template: number[] | string[] }>({
+  template: [],
+});
+const browser = ref(
+  Bowser.getParser(window.navigator.userAgent).getBrowserName().toLowerCase()
+);
+
+//описую передану функцію
 const emit = defineEmits<{ numPage: [page: number] }>();
 
 const controlStorage = () => {
+  if (
+    JSON.parse(window.localStorage.getItem('numberPage') as string) &&
+    JSON.parse(window.localStorage.getItem('filmsPage') as string)
+  ) {
+    return props.path === 'Home'
+      ? +JSON.parse(window.localStorage.getItem('numberPage') as string)
+      : 1;
+  }
 
-     if (
-      JSON.parse(window.localStorage.getItem('numberPage') as string) &&
-      JSON.parse(window.localStorage.getItem('filmsPage') as string)
-    ) {
-      return props.path === 'Home'
-        ? +JSON.parse(window.localStorage.getItem('numberPage') as string)
-        : 1;
-    }
-   
-    return rout.query?.page ?? 1;
-  
+  return rout.query?.page ?? 1;
 };
-
 
 const setServ = () => {
   //формування форми пагінації
-  const serverDateGen = [...Array(props.proppages + 1).keys()].filter(
-    e => e > 0
-  ).map(e => typeof e !== 'number' ?e: e.toString());
-   
+  const serverDateGen = [...Array(props.proppages + 1).keys()]
+    .filter(e => e > 0)
+    .map(e => (typeof e !== 'number' ? e : e.toString()));
+
   return (serverDate.template = serverDateGen);
 };
 
-const lessPage = () => arrPage.template = [...serverDate.template].map(e => typeof e !== 'number' ?e: e.toString());
+const lessPage = () =>
+  (arrPage.template = [...serverDate.template].map(e =>
+    typeof e !== 'number' ? e : e.toString()
+  ));
 
 const setPagination = () => {
   //базовий вид [доопрацювати не готово]
   arrPage.template = [
     ...serverDate.template.slice(0, 6),
     '...',
-    serverDate.template[serverDate.template.length -1],
-  ].map(e => typeof e !== 'number' ? e : e.toString());
- 
+    serverDate.template[serverDate.template.length - 1],
+  ].map(e => (typeof e !== 'number' ? e : e.toString()));
 };
 
-  const created = ()=> {
-    //те що мені потрібно одразу до рендера дома
-    page.value = +controlStorage(); //
-    setServ();
-    if (+props.proppages <= 6) {
-      return lessPage();
-    }
-    setPagination();
+const created = () => {
+  //те що мені потрібно одразу до рендера дома
+  page.value = +controlStorage(); //
+  setServ();
+  if (+props.proppages <= 6) {
+    return lessPage();
+  }
+  setPagination();
 };
 
 created();
@@ -123,24 +123,27 @@ const checkSupport = () => {
     .split('.')[0];
   if (browser.value.includes('opera') && browsVers >= 100) {
     return true;
-  };
+  }
   return (
     (browser.value.includes('chrome') || browser.value.includes('edge')) &&
     browsVers >= 114
   );
 };
-    
-const forcePage = (n:number) => {
+
+const forcePage = (n: number) => {
   //функція відповідає за синхронність сторінок внизу і зверху //реф
   page.value = n;
 };
 
-defineExpose({forcePage});
+defineExpose({ forcePage });
 
 const setPage = (e: Event | number) => {
   //клік по кнопкам
-  const choose = typeof e !== 'number' && 'target' in e && (e?.target as HTMLButtonElement).textContent;
-  
+  const choose =
+    typeof e !== 'number' &&
+    'target' in e &&
+    (e?.target as HTMLButtonElement).textContent;
+
   if (choose && !isNaN(+choose)) {
     page.value = +choose;
     emit('numPage', page.value); //передаю наверх для запиту
@@ -150,7 +153,7 @@ const setPage = (e: Event | number) => {
     page.value = e;
     emit('numPage', page.value); //передаю наверх для запиту
   }
-  
+
   return;
 };
 
@@ -184,47 +187,48 @@ const mutateArr = () => {
     ...fillNum.sort((a, b) => a - b),
     '...',
     serverDate.template[serverDate.template.length - 1],
-  ].map(e => typeof e !== 'number' ?e: e.toString()));
+  ].map(e => (typeof e !== 'number' ? e : e.toString())));
 };
 
-  const noMutateArr = ()=>
-      // постійна паг мало сторінкова **можливе добавленя перевірки**
-      (arrPage.template = [
-        serverDate.template[0],
-        ...[...Array(7).keys()].filter(e => e > 1),
-        '...',
-        `${serverDate.template[serverDate.template.length - 1]}`,
-      ].map(e=> e.toString()));
-    
-const maxArr = () =>
-//кінцевий вид
-(arrPage.template = [
-  serverDate.template[0],
-  '...',
-  ...serverDate.template.slice(serverDate.template.length - 5),
-].map(e => typeof e !== 'number' ?e: e.toLocaleString()));
-    
-//контроль змін сторінки
-watch(page, () => {
-  
-  if (props.proppages <= 6) {
-    
-    return lessPage();
-  }
-  if (page.value >= 6 && page.value <= +serverDate.template[serverDate.template.length - 5]) {
-    
-    return mutateArr();
-  }
-  if (page.value < 6) {
-    
-    return noMutateArr();
-  }
-  if (page.value >= +arrPage.template[arrPage.template.length - 5]) {
-   
-    return maxArr();
-  }
-},{immediate:true});
+const noMutateArr = () =>
+  // постійна паг мало сторінкова **можливе добавленя перевірки**
+  (arrPage.template = [
+    serverDate.template[0],
+    ...[...Array(7).keys()].filter(e => e > 1),
+    '...',
+    `${serverDate.template[serverDate.template.length - 1]}`,
+  ].map(e => e.toString()));
 
+const maxArr = () =>
+  //кінцевий вид
+  (arrPage.template = [
+    serverDate.template[0],
+    '...',
+    ...serverDate.template.slice(serverDate.template.length - 5),
+  ].map(e => (typeof e !== 'number' ? e : e.toLocaleString())));
+
+//контроль змін сторінки
+watch(
+  page,
+  () => {
+    if (props.proppages <= 6) {
+      return lessPage();
+    }
+    if (
+      page.value >= 6 &&
+      page.value <= +serverDate.template[serverDate.template.length - 5]
+    ) {
+      return mutateArr();
+    }
+    if (page.value < 6) {
+      return noMutateArr();
+    }
+    if (page.value >= +arrPage.template[arrPage.template.length - 5]) {
+      return maxArr();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

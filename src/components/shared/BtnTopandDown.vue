@@ -62,63 +62,83 @@
 <script setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import Bowser from 'bowser';
-import { computed, onMounted,ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const toTop = ref(false);
 const locate = ref(0);
 
-const getRef = computed<HTMLElement | null>(()=>featuresStore?.getters?.getRefItem);
-const prop = defineProps<{path:string}>();
+const getRef = computed<HTMLElement | null>(
+  () => featuresStore?.getters?.getRefItem
+);
+const prop = defineProps<{ path: string }>();
 
-const mangeDirectBtn = (ref?:HTMLElement | null)=> {
-
+const mangeDirectBtn = (ref?: HTMLElement | null) => {
   if (getRef.value) {
-          
-          const intersectionObserver = new IntersectionObserver((entries) => {
-            
-            entries[0].isIntersecting && (locate.value = window.scrollY);
-            !entries[0].isIntersecting && (locate.value = window.scrollY);
-            
-          }, { threshold: .1 });
-          // start observing
+    const intersectionObserver = new IntersectionObserver(
+      entries => {
+        entries[0].isIntersecting && (locate.value = window.scrollY);
+        !entries[0].isIntersecting && (locate.value = window.scrollY);
+      },
+      { threshold: 0.1 }
+    );
+    // start observing
 
-          intersectionObserver.observe(ref as HTMLElement);
-
-        }
+    intersectionObserver.observe(ref as HTMLElement);
+  }
 };
 
-onMounted(()=>mangeDirectBtn(getRef.value));
-      
-const toTopOrDown = () => {
+onMounted(() => mangeDirectBtn(getRef.value));
 
-  let scrollHeight = Math.max( // взнаємо висоту скролу (можна винести для чистоти коду)
-    document.body.scrollHeight, document.documentElement.scrollHeight,
-    document.body.offsetHeight, document.documentElement.offsetHeight,
-    document.body.clientHeight, document.documentElement.clientHeight
+const toTopOrDown = () => {
+  let scrollHeight = Math.max(
+    // взнаємо висоту скролу (можна винести для чистоти коду)
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    document.body.offsetHeight,
+    document.documentElement.offsetHeight,
+    document.body.clientHeight,
+    document.documentElement.clientHeight
   );
 
   if (toTop.value) {
-    window.scroll({ top: 0, behavior: 'smooth', });
-    
+    window.scroll({ top: 0, behavior: 'smooth' });
+
     return;
   }
-  window.scrollBy({ top: scrollHeight, behavior: "smooth" });
-  
+  window.scrollBy({ top: scrollHeight, behavior: 'smooth' });
 };
 
+watch(
+  locate,
+  (n, o) => {
+    const platforTypeMobile =
+      Bowser.getParser(window.navigator.userAgent).getPlatformType() ===
+      'mobile';
 
-watch(locate, (n, o) => {
-  const platforTypeMobile = Bowser.getParser(window.navigator.userAgent).getPlatformType() === 'mobile';
+    n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
+      ? (toTop.value =
+          n < Number(o) ||
+          Number(o) === 0 ||
+          Number(o) < document.documentElement.scrollHeight / 2
+            ? false
+            : true)
+      : (toTop.value = true);
+  },
+  { flush: 'post' }
+);
 
-  n < document.documentElement.scrollHeight / (platforTypeMobile ? 1.5 : 2)
-    ?
-    (toTop.value = (n < Number(o) || Number(o) === 0 || Number(o) < document.documentElement.scrollHeight / 2 )? false : true)
-    :
-    (toTop.value = true);
-},{flush:'post'});
-
-watch(getRef, (n, o) => { n !== o && mangeDirectBtn(getRef.value); locate.value = 0; },{immediate:true,deep:true});
-watch(() => prop.path, () => (locate.value = 0));
+watch(
+  getRef,
+  (n, o) => {
+    n !== o && mangeDirectBtn(getRef.value);
+    locate.value = 0;
+  },
+  { immediate: true, deep: true }
+);
+watch(
+  () => prop.path,
+  () => (locate.value = 0)
+);
 </script>
 
 <style lang="scss" scoped>

@@ -25,7 +25,7 @@
         v-if="info.infos?.videos?.results?.length"
         type="button"
         class="btnyou"
-        :style="play ?{ stroke: 'var(--yt-modal-btn)' }:undefined"
+        :style="play ? { stroke: 'var(--yt-modal-btn)' } : undefined"
         @click="() => (play = !play)"
       >
         <svg width="50" height="50">
@@ -47,25 +47,34 @@
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[0] }}</p>
               <p class="modal__rV">
-                <span class="reitV">{{ info.infos.vote_average?.toFixed(1) }}</span>
+                <span class="reitV">{{
+                  info.infos.vote_average?.toFixed(1)
+                }}</span>
                 /
                 <span class="countV">{{ info.infos.vote_count }}</span>
               </p>
             </li>
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[1] }}</p>
-              <p class="modal__valV t-js">{{'popularity' in info.infos && info.infos.popularity?.toFixed(1) }}</p>
+              <p class="modal__valV t-js">
+                {{
+                  'popularity' in info.infos &&
+                  info.infos.popularity?.toFixed(1)
+                }}
+              </p>
             </li>
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[2] }}</p>
-              <p class="modal__valV uperV t-js">{{ 'original_title' in info.infos && info.infos.original_title }}</p>
+              <p class="modal__valV uperV t-js">
+                {{
+                  'original_title' in info.infos && info.infos.original_title
+                }}
+              </p>
             </li>
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[3] }}</p>
               <p class="modal__valV t-js">
-                {{
-                 genres
-                }}
+                {{ genres }}
               </p>
             </li>
           </ul>
@@ -73,7 +82,7 @@
             <p class="modal__aboutV t-js">{{ getContent()[4] }}</p>
             <p class="overview t-js">
               {{
-              ('overview' in info.infos && info.infos.overview) ||
+                ('overview' in info.infos && info.infos.overview) ||
                 'No description will be added soon. Sorry for the inconvenience'
               }}
             </p>
@@ -126,68 +135,71 @@ import { getModalContent, getNotifyContent } from './contentLang';
 import YouIframeVue from '../iframe/YouIframe.vue';
 import { Notify, type INotifyOptions } from 'notiflix';
 import imageUrl from '@/assets/images/ded.jpg';
-import sprite  from '../../assets/sprite.svg';
+import sprite from '../../assets/sprite.svg';
 import { computed, reactive, ref, watch } from 'vue';
-
 
 const http = new MovieAPiServer();
 
 type category = 'watched' | 'queue';
 
 const props = withDefaults(defineProps<{ filmsid: number }>(), {
-  filmsid: () => -1
+  filmsid: () => -1,
 });
 
-const yt = ref<typeof YouIframeVue | null>(null); 
+const yt = ref<typeof YouIframeVue | null>(null);
 const play = ref(false);
 const openModal = ref(false); //стан модалки
-const info = reactive<{infos:{[key:string]:any}}>({infos: {}});
+const info = reactive<{ infos: { [key: string]: any } }>({ infos: {} });
 const checkParam = ref(false);
 const loading = ref(false);
 const img = ref(imageUrl);
 
 const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
-const doneWatched = computed<boolean>(()=> 
-      // звірка з наявністю в базі і зміна класів від результату
-      store.getters.doneWatcheds('id' in info.infos && info.infos.id));
-    
-const doneQueue = computed<boolean>(()=> 
-      // звірка з наявністю в базі і зміна класів від результату
-    store.getters.doneQueues('id' in info.infos && info.infos.id));
+const doneWatched = computed<boolean>(() =>
+  // звірка з наявністю в базі і зміна класів від результату
+  store.getters.doneWatcheds('id' in info.infos && info.infos.id)
+);
+
+const doneQueue = computed<boolean>(() =>
+  // звірка з наявністю в базі і зміна класів від результату
+  store.getters.doneQueues('id' in info.infos && info.infos.id)
+);
 
 const getAuth = computed(() => auth.state.token);
 
-const switcher = computed(() => !play.value ? '#icon-btnyou' : '#icon-close');
+const switcher = computed(() => (!play.value ? '#icon-btnyou' : '#icon-close'));
 
-const genres = computed<string>(()=>info.infos.genres?.length > 0
-  ? info.infos.genres
-    .map((g:{[key:string]:any}) => g.name + ', ')
-    .join('')
-    .slice(0, -2)
-  : 'No date');
-    
-  
-const emit = defineEmits<{    //передача стана наверх
-  modalstate:[openModal:boolean]
+const genres = computed<string>(() =>
+  info.infos.genres?.length > 0
+    ? info.infos.genres
+        .map((g: { [key: string]: any }) => g.name + ', ')
+        .join('')
+        .slice(0, -2)
+    : 'No date'
+);
+
+const emit = defineEmits<{
+  //передача стана наверх
+  modalstate: [openModal: boolean];
 }>();
 
-  const syncIndexDBandStore = () => 
-      myDatabase.keys().then(keys => {
-        if (keys.includes('watched')) {
-          // перевірка ключа
-          myDatabase.getItem('watched').then((e) => {
-            store.commit('setWatched', JSON.parse(e as string)); // якщо гуд коміт в стор
-          });
-        }
-        if (keys.includes('queue')) {
-          myDatabase
-            .getItem('queue')
-            .then(e => store.commit('setQueue', JSON.parse(e as string))); // якщо гуд коміт в стор
-        }
-        return;
+const syncIndexDBandStore = () =>
+  myDatabase.keys().then(keys => {
+    if (keys.includes('watched')) {
+      // перевірка ключа
+      myDatabase.getItem('watched').then(e => {
+        store.commit('setWatched', JSON.parse(e as string)); // якщо гуд коміт в стор
       });
-    
+    }
+    if (keys.includes('queue')) {
+      myDatabase
+        .getItem('queue')
+        .then(e => store.commit('setQueue', JSON.parse(e as string))); // якщо гуд коміт в стор
+    }
+    return;
+  });
+
 syncIndexDBandStore(); // синхрон стора і бази
 
 const getInfoOfFilms = async () => {
@@ -233,9 +245,9 @@ const loaderBasic = () => {
   });
 
   nodeHttp.interceptors.response.use(res => {
-        loading.value = false; // вимикаю лоудер
-        return res;
-      });
+    loading.value = false; // вимикаю лоудер
+    return res;
+  });
 };
 
 const getModalNotifyContent = () => getNotifyContent(lang);
@@ -283,10 +295,7 @@ const addFilmToQueue = async () => {
     });
 
     store.commit('setQueue', info.infos);
-    await myDatabase.setItem(
-      'queue',
-      JSON.stringify(store.state.infoQueue)
-    ); // додаю в локальну базу
+    await myDatabase.setItem('queue', JSON.stringify(store.state.infoQueue)); // додаю в локальну базу
     funcNotify(true, 1);
   } catch (err) {
     console.log(err);
@@ -307,17 +316,19 @@ const dellFilmFromDb = async (type: category) => {
     console.log(err);
   }
 };
-     
+
 const getContent = () => getModalContent(lang);
-  
-watch(() => props.filmsid, () => {
-  
-  if (props.filmsid >= 0) {
-    getInfoOfFilms();
-    openModal.value = true;
-    emit('modalstate', openModal.value);
+
+watch(
+  () => props.filmsid,
+  () => {
+    if (props.filmsid >= 0) {
+      getInfoOfFilms();
+      openModal.value = true;
+      emit('modalstate', openModal.value);
+    }
   }
-});
+);
 
 watch(openModal, () => {
   window.addEventListener('keydown', funcKeyDown);
@@ -326,8 +337,7 @@ watch(openModal, () => {
   !openModal.value && (play.value = false);
 });
 
-watch(play,()=> !play.value ? yt.value?.exitFrame(): yt.value?.runFrame());
-
+watch(play, () => (!play.value ? yt.value?.exitFrame() : yt.value?.runFrame()));
 </script>
 
 <style lang="scss" scoped>

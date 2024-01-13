@@ -7,14 +7,13 @@
   </div>
 </template>
 
-<script  setup lang="ts">
+<script setup lang="ts">
 import { featuresStore } from '@/store/storeForFeatures';
 import { getNotfoundContent } from './contentLang';
 import { computed } from 'vue';
 
 const lang = computed<string>(() => featuresStore.getters.getLanguage);
-const notfoundContent = ()=>getNotfoundContent(lang.value);
-
+const notfoundContent = () => getNotfoundContent(lang.value);
 </script>
 
 <style lang="scss" scoped>

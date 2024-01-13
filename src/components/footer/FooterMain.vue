@@ -48,30 +48,29 @@
 </template>
 
 <script setup lang="ts">
-import {inject, onMounted, onUpdated, ref } from 'vue';
+import { inject, onMounted, onUpdated, ref } from 'vue';
 import FeedbackFormVue from './FeedbackForm.vue';
 import type { VueCookies } from 'vue-cookies';
-const $cookies = inject<VueCookies>('$cookies'); 
-  
+const $cookies = inject<VueCookies>('$cookies');
+
 const open = ref(false);
 const feedLimit = ref(false);
 
-const checkLimit = ():void => {
+const checkLimit = (): void => {
   // обмеження відправлень
   $cookies?.get('feedlimit')
     ? (feedLimit.value = true)
     : (feedLimit.value = false);
 };
 
-const year = ():number => new Date().getFullYear();
+const year = (): number => new Date().getFullYear();
 
-const toggle = ():void => {
+const toggle = (): void => {
   open.value = !open.value;
 };
 
-onUpdated(checkLimit);    
+onUpdated(checkLimit);
 onMounted(checkLimit);
- 
 </script>
 
 <style lang="scss" scoped>

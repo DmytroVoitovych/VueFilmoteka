@@ -45,60 +45,59 @@
   </div>
 </template>
 
-<script setup lang="ts" >
-
-import  { featuresStore } from '@/store/storeForFeatures';
+<script setup lang="ts">
+import { featuresStore } from '@/store/storeForFeatures';
 import { getModalContentFeed, getModalContentNotify } from './feedContentLang';
 import { botSend } from '@/helpers/axios';
 import { Block, Report } from 'notiflix';
-import { computed,inject,onMounted, ref} from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import type { VueCookies } from 'vue-cookies';
-const $cookies = inject<VueCookies>('$cookies'); 
- 
+const $cookies = inject<VueCookies>('$cookies');
+
 const props = defineProps<{
-  toggle: Function // обовязково
+  toggle: Function; // обовязково
 }>();
 
 const el = ref<HTMLDivElement | null>(null);
 const feedback = ref('');
 const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
 
-    const sendMessage = async () => {
-      //відправка в теге
-      try {
-        Block.dots('.modal-feedback', {
-          //сам лофдер з конфігураціями
-          svgColor: 'var(--text-color-red)',
-          backgroundColor: 'var(--bg-loader-basic)',
-        });
-        await botSend.post('/feedback', { feedback: feedback.value });
-        $cookies?.set('feedlimit', 'min', '30MIN');
-        Report.success('Feedback', modalContentNotify()[0], 'okay');
-      } catch (error: any ) {
-        Report.warning('Feedback', error.response?.data.message, 'okay');
-      } finally {
-        Block.remove('.modal-feedback');
-        props.toggle();
-      }
-    }
+const sendMessage = async () => {
+  //відправка в теге
+  try {
+    Block.dots('.modal-feedback', {
+      //сам лофдер з конфігураціями
+      svgColor: 'var(--text-color-red)',
+      backgroundColor: 'var(--bg-loader-basic)',
+    });
+    await botSend.post('/feedback', { feedback: feedback.value });
+    $cookies?.set('feedlimit', 'min', '30MIN');
+    Report.success('Feedback', modalContentNotify()[0], 'okay');
+  } catch (error: any) {
+    Report.warning('Feedback', error.response?.data.message, 'okay');
+  } finally {
+    Block.remove('.modal-feedback');
+    props.toggle();
+  }
+};
 
-    const mangeDirectForm = ()=> {
-      // закритя коли не в зоні видимості
-      if (el) {
-        const intersectionObserver = new IntersectionObserver(
-          entries => {
-            entries[0].boundingClientRect.bottom > 0 &&
-              !entries[0].isIntersecting &&
-              props.toggle();
-          },
+const mangeDirectForm = () => {
+  // закритя коли не в зоні видимості
+  if (el) {
+    const intersectionObserver = new IntersectionObserver(
+      entries => {
+        entries[0].boundingClientRect.bottom > 0 &&
+          !entries[0].isIntersecting &&
+          props.toggle();
+      },
 
-          { threshold: 0 }
-        );
-        // start observing
-        intersectionObserver.observe(el.value as HTMLElement);
-      }
-    }
-   
+      { threshold: 0 }
+    );
+    // start observing
+    intersectionObserver.observe(el.value as HTMLElement);
+  }
+};
+
 const modalContentFeed = () => {
   return getModalContentFeed(lang); // отримання користувацького контену відповідно до мови
 };
@@ -106,8 +105,7 @@ const modalContentNotify = () => {
   return getModalContentNotify(lang);
 };
 
-  onMounted(mangeDirectForm);
-    
+onMounted(mangeDirectForm);
 </script>
 
 <style lang="scss" scoped>

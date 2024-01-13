@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { store as auth } from '@/store/index';
-import { store as filmStore} from '@/store/filmsStore';
+import { store as filmStore } from '@/store/filmsStore';
 import { Confirm, Loading, Notify, Report } from 'notiflix';
 import CustomInput from '../header/InputComponent.vue';
 import { featuresStore } from '@/store/storeForFeatures';
@@ -91,7 +91,7 @@ const router = useRouter();
 const mailLog = ref('');
 const passLog = ref('');
 const hide = ref(true);
-   
+
 const redirectFromHideRoute = () => {
   window.history.state.current.toLowerCase().includes('bibl') &&
     !$cookies?.get('token') &&
@@ -104,9 +104,12 @@ const redirectFromHideRoute = () => {
 
 const funcRedirectAfterLogin = () => {
   $cookies?.set('token', auth.state.token, '60MIN'); // d кукіс
-  filmStore?.dispatch('getFromServerFilmId', auth.state.token ?? $cookies?.get('token'));
+  filmStore?.dispatch(
+    'getFromServerFilmId',
+    auth.state.token ?? $cookies?.get('token')
+  );
   router.push({ path: '/', replace: true });
-  };
+};
 
 const funcSignInUser = async () => {
   redirectFromHideRoute();
@@ -126,7 +129,8 @@ const funcSignInUser = async () => {
       if ('response' in err && err.response) {
         return Report.failure(
           `Error ${err.response.data.code}`,
-          err.response.data.message, 'ok'
+          err.response.data.message,
+          'ok'
         );
       }
       return Report.failure(`Error ${err.code}`, err.message, 'ok');
@@ -143,10 +147,9 @@ const googleLogin = async () => {
     try {
       await auth.dispatch('googleLogin');
       await funcRedirectAfterLogin();
-      Notify.success(
-        `User ${window?.localStorage?.getItem('name')} signIn`,
-        { timeout: 1000 }
-      );
+      Notify.success(`User ${window?.localStorage?.getItem('name')} signIn`, {
+        timeout: 1000,
+      });
     } catch (err) {
       router.push({ path: '/auth/login' });
       Notify.info('User stop auth');
@@ -156,23 +159,23 @@ const googleLogin = async () => {
   }
 };
 
-const funcConfirmContent= ()=> getAuthLoginConfirmContent(lang);
-  
-const funcSendEmail = ()=> 
-      Confirm.prompt(
-        funcConfirmContent()[0],
-        funcConfirmContent()[1],
-        `${mailLog.value ?? ''}`,
-        funcConfirmContent()[2],
-        funcConfirmContent()[3],
-        funcSendEmailForReset,
-        () => {
-          console.log('cancel');
-        },
-        { messageMaxLength: 2700 }
-      );
-    
-const  funcSendEmailForReset = async (mail: string) => {
+const funcConfirmContent = () => getAuthLoginConfirmContent(lang);
+
+const funcSendEmail = () =>
+  Confirm.prompt(
+    funcConfirmContent()[0],
+    funcConfirmContent()[1],
+    `${mailLog.value ?? ''}`,
+    funcConfirmContent()[2],
+    funcConfirmContent()[3],
+    funcSendEmailForReset,
+    () => {
+      console.log('cancel');
+    },
+    { messageMaxLength: 2700 }
+  );
+
+const funcSendEmailForReset = async (mail: string) => {
   try {
     const res = await auth.dispatch('resetPassword', {
       email: mail,
@@ -193,11 +196,9 @@ const funcHide = () => {
 
 const funcFormContent = () => getAuthLoginContent(lang);
 const noEmpty = computed(() =>
-      // контроль кнопки
-       mailLog.value && passLog.value && passLog.value.length >= 6
-        ? false
-        : true)
-
+  // контроль кнопки
+  mailLog.value && passLog.value && passLog.value.length >= 6 ? false : true
+);
 </script>
 
 <style lang="scss" scoped>

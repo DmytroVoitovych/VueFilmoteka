@@ -12,19 +12,26 @@
 
 <script lang="ts" setup>
 import { axio } from "@/helpers/axios";
+import { featuresStore } from "@/store/storeForFeatures";
 import { Block } from "notiflix";
-import { reactive } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 
 const fakeArrs = reactive({ template: [...Array(20).keys()] });
 let checkParam = false;
+
 const loaderBasic = () => {
   // функція відповідальна за основний лоадер на сайті
 
   axio.loader.interceptors.request.use((config) => {
-    //перехоплюєм запит
+    const listOfFilms = document.querySelectorAll(".gallery__item");
 
+    //перехоплюєм запит
+    listOfFilms.length === 1 &&
+      document.querySelector(".notiflix-block") &&
+      Block.remove(".dummy");
     checkParam = !!config?.url?.includes("/3/movie/");
-    if (!checkParam) {
+
+    if (!checkParam && !config?.url?.includes("genre")) {
       //якщо потрібний запит
       //перевірка на дурня
       Block?.dots(".gallery__item", {
@@ -33,6 +40,10 @@ const loaderBasic = () => {
         svgSize: "100px",
         backgroundColor: "var(--bg-loader-basic)",
       });
+
+      listOfFilms.length === 1 &&
+        document.querySelector(".notiflix-block") &&
+        Block.remove(".dummy");
     }
 
     return config;
@@ -40,18 +51,16 @@ const loaderBasic = () => {
 
   axio.loader.interceptors.response.use((res) => {
     // коли дані нам надійшли  вимикаєм лоадер
-    if (!checkParam) {
-      //якщо потрібний запит
-      res?.data?.results &&
-        res?.data?.results.length > 0 &&
+    if (!res?.data?.genres && !checkParam) {
+      res.status === 200 &&
+        document.querySelector(".notiflix-block") &&
         Block?.remove(".gallery__item");
-      res?.data?.genres && res.data.genres.length > 0 && Block?.remove(".gallery__item");
     }
-
     return res;
   });
 };
-loaderBasic();
+
+onMounted(loaderBasic);
 </script>
 
 <style lang="scss" scoped>
@@ -74,7 +83,7 @@ loaderBasic();
 
 .gallery__img {
   position: relative;
-  border: none;
+  border: noneLaunche;
   width: 100%;
   height: 574px;
   // display: block;

@@ -1,5 +1,5 @@
 <template>
-<TrendMain />
+  <TrendMain />
 </template>
 
 <script setup>

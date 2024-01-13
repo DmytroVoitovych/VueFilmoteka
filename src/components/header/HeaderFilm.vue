@@ -1,7 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <header class="header header__home" @mouseleave="focusEvent">
-  
     <ContainerMain>
       <template v-if="props.show">
         <router-link
@@ -109,13 +108,16 @@
         <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
         <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1]" /></li>
       </ul>
-      <CustomSelected v-if="!props.path.includes('Biblioteka')" ref="focusOut" />
+      <CustomSelected
+        v-if="!props.path.includes('Biblioteka')"
+        ref="focusOut"
+      />
     </ContainerMain>
   </header>
 </template>
 ;
 
-<script setup lang="ts" >
+<script setup lang="ts">
 import ContainerMain from '../shared/ContainerMain.vue';
 import CustomInput from './InputComponent.vue';
 import CustomSelected from './CustomSelected.vue';
@@ -124,49 +126,50 @@ import ThemeMode from './ThemeMode.vue';
 import { Report, Notify } from 'notiflix';
 import { featuresStore } from '@/store/storeForFeatures';
 import { getCont } from './contentLang';
-import { computed, inject, ref, type ComponentPublicInstance,  watch } from 'vue';
+import {
+  computed,
+  inject,
+  ref,
+  type ComponentPublicInstance,
+  watch,
+} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { store as auth } from '@/store/index';
 import type { VueCookies } from 'vue-cookies';
 
-const $cookies = inject<VueCookies>('$cookies'); 
+const $cookies = inject<VueCookies>('$cookies');
 
 const router = useRouter();
 const route = useRoute();
 
 const props = defineProps<{
-  path: string,
-  show: boolean
+  path: string;
+  show: boolean;
 }>();
 
 const switcher = ref(false); //тригер пошуку
 const nameFilms = ref('');
 const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
-const emit = defineEmits<{onChekfind: [switcher: boolean]}>(); //передача тригера
+const emit = defineEmits<{ onChekfind: [switcher: boolean] }>(); //передача тригера
 
 const changeStorage = () => {
   window.localStorage.removeItem('numberPage'); //обнуляю сторінку
   window.localStorage.removeItem('filmsPage'); // обнуляю старі дані
-  window.localStorage.setItem(
-    'findedFilms',
-    JSON.stringify(nameFilms.value)
-  ); //передаю в основу
+  window.localStorage.setItem('findedFilms', JSON.stringify(nameFilms.value)); //передаю в основу
   nameFilms.value = '';
-
 };
 
 const searchFilms = () => {
-
-  const specifick = nameFilms.value === window.localStorage.getItem('findedFilms');
+  const specifick =
+    nameFilms.value === window.localStorage.getItem('findedFilms');
 
   // cacheOptions.clear();  // видаляю кеш для коректного пошуку
-  
+
   if (nameFilms.value && !specifick) {
     changeStorage();
     switcher.value = !switcher.value; //або або // логіка тогл
     emit('onChekfind', true);
-   
   } else if (specifick) {
     return Notify.failure(
       `You already have movies on request: ${nameFilms.value}`
@@ -176,29 +179,28 @@ const searchFilms = () => {
   }
 };
 
-const toMainPage = () => { // повернення на основну сторінку
+const toMainPage = () => {
+  // повернення на основну сторінку
   router.options.history.push('/');
   window.localStorage.removeItem('numberPage');
   window.localStorage.removeItem('findedFilms');
-   
-   route.path !== '/'
-    ? router.push('/')
-    : router.go(0);
+
+  route.path !== '/' ? router.push('/') : router.go(0);
 };
-  
 
 const funcLogOut = async () => {
   try {
     await auth.dispatch('LogOut', auth.state.token);
     $cookies?.remove('token');
-  } catch (err:any) {
-     if ('response' in err  && err?.response) {
+  } catch (err: any) {
+    if ('response' in err && err?.response) {
       return Report.failure(
         `Error ${err.response.data.code}`,
-        err.response.data.message,'ok'
+        err.response.data.message,
+        'ok'
       );
     }
-    return Report.failure(`Error ${err.code}`, err.message,'ok');
+    return Report.failure(`Error ${err.code}`, err.message, 'ok');
   }
 };
 
@@ -220,28 +222,32 @@ const getHeaderContent = (type?: headerContentT) => {
   }
 };
 
-const focusOut = ref<ComponentPublicInstance<typeof CustomSelected> | null>(null); // реф для керування функцієй на child
+const focusOut = ref<ComponentPublicInstance<typeof CustomSelected> | null>(
+  null
+); // реф для керування функцієй на child
 const focusEvent = () => focusOut.value?.funcShowOption('out');
 
-watch(() => route.query, (query) => { // for url back btn
- switcher.value = !query?.film?false:true;
-emit('onChekfind', false);
-}, { deep: true });
+watch(
+  () => route.query,
+  query => {
+    // for url back btn
+    switcher.value = !query?.film ? false : true;
+    emit('onChekfind', false);
+  },
+  { deep: true }
+);
 
-const checkExpired = computed(()=>{
-      const token = auth.state.token ?? $cookies?.get('token');
-       
-      if (!token) {
-        return true;
-      }
+const checkExpired = computed(() => {
+  const token = auth.state.token ?? $cookies?.get('token');
 
-      const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
-      return Math.floor(+new Date() / 1000) > exp;
+  if (!token) {
+    return true;
+  }
+
+  const { exp } = JSON.parse(window?.atob(token?.split('.')[1]));
+  return Math.floor(+new Date() / 1000) > exp;
 });
-
-
-
- </script>
+</script>
 
 <style lang="scss" scoped>
 [v-cloak] {

@@ -1,3 +1,4 @@
+import { Block } from 'notiflix';
 import http from './axios';
 import 'ts-replace-all';
 
@@ -89,12 +90,16 @@ export default class MovieAPiServer {
 
     try {
       const response = await http.get(URL);
+      if (!response.data.results.length) {
+        throw new Error("We didn't find anything");
+      }
+
       this.maxPages = response.data.total_pages;
 
       return response.data.results;
     } catch (error) {
       toBack && toBack();
-      return error;
+      console.log(error);
     }
   }
 

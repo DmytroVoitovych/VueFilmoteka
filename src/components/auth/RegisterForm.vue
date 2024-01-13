@@ -75,9 +75,9 @@ import { computed, ref } from 'vue';
 import { store as auth } from '@/store';
 import { useRouter } from 'vue-router';
 
-const nameReg =ref('');
-const mailReg =ref('');
-const passReg =ref('');
+const nameReg = ref('');
+const mailReg = ref('');
+const passReg = ref('');
 const hide = ref(true);
 
 const router = useRouter();
@@ -114,16 +114,13 @@ const funcHide = () => {
 };
 
 const funcFormContent = () => getAuthRegistrationContent(lang);
-  
+
 const noEmpty = computed(() =>
   // контроль кнопки
-  nameReg.value &&
-    mailReg.value &&
-    passReg.value &&
-    passReg.value.length >= 6
+  nameReg.value && mailReg.value && passReg.value && passReg.value.length >= 6
     ? false
-    : true);
-
+    : true
+);
 </script>
 
 <style lang="scss" scoped>

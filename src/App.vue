@@ -7,7 +7,10 @@
     class="flex"
     v-else
     :class="{ modal: stateModal }"
-    :style="{ top: stateModal ? `${-locate}px` : '', right: scrollWidth + 'px' }"
+    :style="{
+      top: stateModal ? `${-locate}px` : '',
+      right: scrollWidth + 'px',
+    }"
   >
     <HeaderFilm
       @onChekfind="onChekfind"
@@ -18,6 +21,7 @@
     />
     <BtnTopandDownVue v-if="getRef" :path="path" />
     <main :class="polyHas && 'has--poly'">
+      <div class="gallery__item dummy" style="display: none"></div>
       <router-view
         :modalstate="path !== 'Home' && stateModal"
         :path="path"
@@ -37,21 +41,29 @@
 </template>
 
 <script lang="ts" setup>
-import HeaderFilm from "./components/header/HeaderFilm.vue";
-import FooterMain from "./components/footer/FooterMain.vue";
+import HeaderFilm from './components/header/HeaderFilm.vue';
+import FooterMain from './components/footer/FooterMain.vue';
 // import TrendMain from './components/trend/TrendMain.vue';
-import ModalMain from "./components/shared/ModalMain.vue";
-import BtnTopandDownVue from "./components/shared/BtnTopandDown.vue";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { store } from "./store/filmsStore";
-import { store as auth } from "./store/index";
-import { featuresStore } from "./store/storeForFeatures";
-import Bowser from "bowser";
-import { nodeHttp } from "./helpers/axios";
-import { computed, inject, nextTick, onBeforeUnmount, onUpdated, ref, watch } from "vue";
-import type { VueCookies } from "vue-cookies";
-import { useRoute, useRouter } from "vue-router";
-const $cookies = inject<VueCookies>("$cookies");
+import ModalMain from './components/shared/ModalMain.vue';
+import BtnTopandDownVue from './components/shared/BtnTopandDown.vue';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { store } from './store/filmsStore';
+import { store as auth } from './store/index';
+import { featuresStore } from './store/storeForFeatures';
+import Bowser from 'bowser';
+import { nodeHttp } from './helpers/axios';
+import {
+  computed,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  onUpdated,
+  ref,
+  watch,
+} from 'vue';
+import type { VueCookies } from 'vue-cookies';
+import { useRoute, useRouter } from 'vue-router';
+const $cookies = inject<VueCookies>('$cookies');
 
 const route = useRoute();
 const router = useRouter();
@@ -61,7 +73,7 @@ const filmsid = ref(-1); // id фільму
 const locate = ref(0); //положеня скролу
 const stateModal = ref(false); //стан модалки
 const scrollWidth = ref(0); //ширина скролу
-const path = ref(""); //поточний роут
+const path = ref(''); //поточний роут
 const show = ref(false); // ?? під питанням чи потрібно мені це(обдумать)
 const counterSign = ref(0); // для контроля кількості фокусів при гості
 const browser = ref(
@@ -71,17 +83,17 @@ const browser = ref(
 const refreshToken = async () => {
   // вертає нову пару ключів
   try {
-    await auth.dispatch("refreshToken", auth.state.refresh); // записую токен в незалежності від його наявності
-    currentUser(auth.state.token || $cookies?.get("token") || undefined); // звичайний контроль  користувача
+    await auth.dispatch('refreshToken', auth.state.refresh); // записую токен в незалежності від його наявності
+    currentUser(auth.state.token || $cookies?.get('token') || undefined); // звичайний контроль  користувача
     show.value = true;
   } catch (err) {
     // !!можлива детальна обробка
     const authFire = getAuth();
     if (!authFire.currentUser) {
-      auth.commit("setLogin", ""); //  обнулюю
-      window.localStorage.removeItem("name"); // чищу сторедж
-      $cookies?.remove("token"); // при приході помилки вбиваю токен
-      auth.dispatch("googleAuthInfo"); // перевіряю google вхід
+      auth.commit('setLogin', ''); //  обнулюю
+      window.localStorage.removeItem('name'); // чищу сторедж
+      $cookies?.remove('token'); // при приході помилки вбиваю токен
+      auth.dispatch('googleAuthInfo'); // перевіряю google вхід
     }
 
     console.log(err);
@@ -94,37 +106,39 @@ const refreshToken = async () => {
 const controlLogin = async () => {
   const authFire = getAuth();
 
-  onAuthStateChanged(authFire, (user) => {
+  onAuthStateChanged(authFire, user => {
     // контроль змін
     if (user) {
       user
         .getIdToken(true) // дає новий токен
-        .then((newToken) => {
-          auth.dispatch("googleAuthInfo", newToken);
+        .then(newToken => {
+          auth.dispatch('googleAuthInfo', newToken);
         })
-        .then(() => currentUser(auth.state.token || $cookies?.get("token") || undefined)) //записую в стейт
-        .catch((err) => console.log(err));
+        .then(() =>
+          currentUser(auth.state.token || $cookies?.get('token') || undefined)
+        ) //записую в стейт
+        .catch(err => console.log(err));
     } else {
-      currentUser(auth.state.token || $cookies?.get("token") || undefined); // звичайний контроль  користувача
-      !$cookies?.get("token") && refreshToken(); // рефрещ пр  звичайному вході
+      currentUser(auth.state.token || $cookies?.get('token') || undefined); // звичайний контроль  користувача
+      !$cookies?.get('token') && refreshToken(); // рефрещ пр  звичайному вході
     }
   });
 };
 
 const currentUser = async (t: string | undefined) => {
   try {
-    await auth.dispatch("currentUser", t); // сигналізую про можливий вхід іншим браузером
-    store.dispatch("getFromServerFilmId", auth.state.token); // достаю всі id для синхрона
-    $cookies?.set("token", auth.state.token, "60MIN"); // на годину зберігаю
+    await auth.dispatch('currentUser', t); // сигналізую про можливий вхід іншим браузером
+    store.dispatch('getFromServerFilmId', auth.state.token); // достаю всі id для синхрона
+    $cookies?.set('token', auth.state.token, '60MIN'); // на годину зберігаю
     const { exp } = JSON.parse(
-      window?.atob(auth.state.token?.split(".")[1]) // парсю час смерті
+      window?.atob(auth.state.token?.split('.')[1]) // парсю час смерті
     );
 
     const expired = exp - (Math.floor(+new Date() / 1000) + 10 * 60); // роблю 10 хвилин запаса для рефреш токена
     show.value = true;
     const refresh = setTimeout(
       async () => {
-        window?.atob($cookies?.get("token")?.split(".")[1]).includes("firebase")
+        window?.atob($cookies?.get('token')?.split('.')[1]).includes('firebase')
           ? await controlLogin()
           : await refreshToken(); //??
         clearTimeout(refresh); // чищу після виконання
@@ -132,8 +146,8 @@ const currentUser = async (t: string | undefined) => {
       expired > 0 ? expired * 1000 : 0 // слідкую за часом в разі перезавантаження сторінки {in/now}
     );
   } catch (err) {
-    $cookies?.remove("token"); // при приході помилки вбиваю токен
-    auth.commit("setLogin", ""); //  обнулюю
+    $cookies?.remove('token'); // при приході помилки вбиваю токен
+    auth.commit('setLogin', ''); //  обнулюю
     console.log(err);
   } finally {
     show.value = true;
@@ -144,12 +158,12 @@ const checkFocus = async () => {
   if (auth.state.token) {
     // тест на сторонній бекенд
     const checkOwnerOfToken = window
-      .atob(auth.state.token.split(".")[1])
-      .includes("firebase");
+      .atob(auth.state.token.split('.')[1])
+      .includes('firebase');
     if (checkOwnerOfToken) {
       // чи є юзер
-      console.log("тест");
-      auth.dispatch("googleAuthInfo"); // якщо є перевірити в наявній базі
+      console.log('тест');
+      auth.dispatch('googleAuthInfo'); // якщо є перевірити в наявній базі
     } else {
       // рефрещ пр  звичайному вході
       currentUser(auth.state.token); // звичайний контроль  користувача
@@ -166,40 +180,40 @@ const watchPath = () => {
   // слідкую за змінами сторінки (роут)
   watch(
     () => route.name,
-    (fullPath) => {
-      path.value = fullPath ? fullPath.toString().replace("/", "") : "";
-      route?.redirectedFrom?.fullPath?.includes("auth") && checkFocus();
+    fullPath => {
+      path.value = fullPath ? fullPath.toString().replace('/', '') : '';
+      route?.redirectedFrom?.fullPath?.includes('auth') && checkFocus();
     }
   );
 };
 
 const redirectFromHideRoute = () => {
-  path.value.toLowerCase().includes("bibl") &&
-    !$cookies?.get("token") &&
-    router.push({ name: "AuthLogin" });
+  path.value.toLowerCase().includes('bibl') &&
+    !$cookies?.get('token') &&
+    router.push({ name: 'AuthLogin' });
 
-  path.value.toLowerCase().includes("auth") &&
-    $cookies?.get("token") &&
-    router.push({ path: "/" });
+  path.value.toLowerCase().includes('auth') &&
+    $cookies?.get('token') &&
+    router.push({ path: '/' });
 };
 
 const axiosRedirect = () =>
   nodeHttp.interceptors.response.use(
-    (response) => {
+    response => {
       redirectFromHideRoute();
       return response;
     },
-    (error) => {
+    error => {
       redirectFromHideRoute();
       return Promise.reject(error);
     }
   );
 
 const created = () => {
-  !$cookies?.get("token") && (show.value = true);
-  window.addEventListener("focus", checkFocus); //рефреш логіна
+  !$cookies?.get('token') && (show.value = true);
+  window.addEventListener('focus', checkFocus); //рефреш логіна
   watchPath(); //контроль поточного шляху
-  !window.history.state.current.includes("auth") && controlLogin();
+  !window.history.state.current.includes('auth') && controlLogin();
   // постій контроль авторизації
   axiosRedirect();
 };
@@ -213,12 +227,13 @@ const onChekfind = (triger: boolean) => {
 
 const scrollCount = () => {
   //прорахунок ширини
-  scrollWidth.value = window?.innerWidth - window?.document?.documentElement?.clientWidth;
+  scrollWidth.value =
+    window?.innerWidth - window?.document?.documentElement?.clientWidth;
 
   window.document.documentElement.style.setProperty(
     // динамічно міняю положеня модалки
-    "--left-modal",
-    scrollWidth.value / 2 + "px"
+    '--left-modal',
+    scrollWidth.value / 2 + 'px'
   );
 };
 
@@ -247,8 +262,8 @@ watch(stateModal, () => {
     //якщо закрита
     window.document.documentElement.style.setProperty(
       // динамічно міняю положеня модалки
-      "--left-modal",
-      0 + "px"
+      '--left-modal',
+      0 + 'px'
     );
     scrollWidth.value = 0; //скрол по дефолту
     nextTick().then(() => {
@@ -259,13 +274,18 @@ watch(stateModal, () => {
   }
 });
 
-onBeforeUnmount(() => window.removeEventListener("focus", checkFocus)); // видалення
+onBeforeUnmount(() => window.removeEventListener('focus', checkFocus)); // видалення
 
-const getRef = computed<HTMLElement | null>(() => featuresStore?.getters?.getRefItem);
+const getRef = computed<HTMLElement | null>(
+  () => featuresStore?.getters?.getRefItem
+);
 
 const polyHas = computed(() => {
   // полифил для firefox
-  return browser.value.includes("firefox") && window?.localStorage?.getItem(path.value);
+  return (
+    browser.value.includes('firefox') &&
+    window?.localStorage?.getItem(path.value)
+  );
 });
 </script>
 

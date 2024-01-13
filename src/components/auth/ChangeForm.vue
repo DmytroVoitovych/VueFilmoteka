@@ -91,7 +91,7 @@ const oldPass = ref(''); // чи код
 const mailChange = ref('');
 const passChange = ref('');
 const hide = ref(true);
-    
+
 const funcChangeUserPass = async () => {
   if ((oldPass.value, mailChange.value, passChange.value)) {
     Loading.dots();
@@ -103,14 +103,15 @@ const funcChangeUserPass = async () => {
       });
       router.push({ path: '/auth/login' });
       Notify.success(`Success`);
-    } catch (err:any) {
+    } catch (err: any) {
       if ('response' in err && err.response) {
         return Report.failure(
           `Error ${err.response.data.code}`,
-          err.response.data.message,'ok'
+          err.response.data.message,
+          'ok'
         );
       }
-      return Report.failure(`Error ${err.code}`, err.message,'ok');
+      return Report.failure(`Error ${err.code}`, err.message, 'ok');
     } finally {
       Loading.remove();
     }
@@ -121,13 +122,13 @@ const funcHide = () => {
   hide.value = !hide.value;
 };
 
-const funcFormContent = ()=> getAuthChangeContent(lang);
-  
-const noEmpty = computed(()=> 
-      // контроль кнопки
-       mailChange.value && passChange.value && passChange.value.length >= 6
-        ? false
-        : true
+const funcFormContent = () => getAuthChangeContent(lang);
+
+const noEmpty = computed(() =>
+  // контроль кнопки
+  mailChange.value && passChange.value && passChange.value.length >= 6
+    ? false
+    : true
 );
 </script>
 

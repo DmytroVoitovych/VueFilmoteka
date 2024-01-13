@@ -43,13 +43,7 @@
                       getGenre(genre_ids ?? genres?.map((e:obj) => e.id))?.length > 27,
                   }"
                   >{{
-                    getGenre(genre_ids ?? genres?.map((e:obj) => e.id))
-
-
-
-
-
-
+                    getGenre(genre_ids ?? genres?.map((e: obj) => e.id))
 
 
 
@@ -187,7 +181,7 @@ const toMainPage = () =>
     "On your request we found nothing , we return you to the main.",
     "Okay",
     () => {
-      router.go(0);
+      router.push("/");
       window.localStorage.removeItem("numberPage");
       window.localStorage.removeItem("findedFilms");
     }
@@ -223,8 +217,7 @@ const startRenderPage = async (sw?: string) => {
       )
     : await http.fetchTopMovies(page.value.toString(), toMainPage);
 
-  // data?.length === 0 && toMainPage();
-  !sw ? (templateArr.trend = controlStorage() || data) : (status.value = "load");
+  !sw ? (templateArr.trend = data) : (status.value = "load");
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
 
   getStaticGenres();
@@ -330,14 +323,12 @@ const setStateFromUrl = (query: {
 const created = async () => {
   if ("page" in route.query) {
     setStateFromUrl(route.query);
-    // loaderBasic();
     return;
   }
   window.localStorage.getItem(props.path)
     ? (status.value = "ready")
     : window.localStorage.removeItem(props.path);
   props.path === "Home" ? startRenderPage() : funcUpdateBibliotekaPage();
-  // loaderBasic();
 };
 created();
 
@@ -430,7 +421,10 @@ const setPage = async (num: number) => {
 
   window.localStorage.getItem("findedFilms") &&
     router.push({
-      query: { ...standartQuery, film: window.localStorage.getItem("findedFilms") },
+      query: {
+        ...standartQuery,
+        film: window.localStorage.getItem("findedFilms"),
+      },
     });
 
   if (props.path === "Home") {
@@ -494,19 +488,21 @@ watch(page, () => {
 watch(
   () => props.switcher,
   () => {
-    startRenderPage("sw").then(() => {
-      const standartQuery = {
-        page: 1,
-        max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages),
-        lang: lang.value,
-      }; // url control
-      props.switcher &&
-        router.push({
-          query: { ...standartQuery, film: window.localStorage.getItem("findedFilms") },
-        });
-      render.value += 1;
-    });
-  }
+    const standartQuery = {
+      page: 1,
+      max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages),
+      lang: lang.value,
+    }; // url control
+    props.switcher &&
+      router.push({
+        query: {
+          ...standartQuery,
+          film: window.localStorage.getItem("findedFilms"),
+        },
+      });
+    render.value += 1;
+  },
+  { immediate: true }
 );
 
 watch(
@@ -554,7 +550,6 @@ onMounted(() => {
 });
 
 onUpdated(() => {
-  (!props.path || props.path === "Home") && startRenderPage();
   page.value === 1 && !props.modalstate // контроль пагінації
     ? funcUpdateBibliotekaPage()
     : setPageBiblioteka();
