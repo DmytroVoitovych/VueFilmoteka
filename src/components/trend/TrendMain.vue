@@ -83,6 +83,13 @@
 
 
 
+
+
+
+
+
+
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -514,10 +521,9 @@ const sendRef = () => {
     featuresStore.commit(
       "setRefItem",
       templateArr?.trend && templateArr?.trend?.length > 8
-        ? observer.value?.length && observer.value[8]
+        ? observer.value?.length && observer.value[Math.ceil(observer.value.length / 2)]
         : observer.value?.length && observer.value.reverse()[2]
     );
-
     status.value = "ready";
     clearTimeout(time);
   }, 200);
