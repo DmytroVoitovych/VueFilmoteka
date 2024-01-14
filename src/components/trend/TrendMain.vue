@@ -51,6 +51,38 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -207,7 +239,7 @@ const getStaticGenres = async () => {
   templateArr.genrs = genr;
 };
 
-const startRenderPage = async (sw?: string) => {
+const startRenderPage = async () => {
   const data: obj[] = checkFind().value
     ? await http.fetchMovieByQuery(
         page.value.toString(),
@@ -217,7 +249,7 @@ const startRenderPage = async (sw?: string) => {
       )
     : await http.fetchTopMovies(page.value.toString(), toMainPage);
 
-  !sw ? (templateArr.trend = data) : (status.value = "load");
+  templateArr.trend = controlStorage() || data;
   max.value = http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages);
 
   getStaticGenres();
@@ -336,24 +368,35 @@ watch(
   () => route.query,
   (query, previousParams) => {
     // react to route changes...
-
-    if ("page" in query) {
-      setStateFromUrl(query);
-      !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
-      return;
-    } else if (props.path === "Home") {
-      window.localStorage.removeItem("filmsPage");
-      window.localStorage.removeItem("findedFilms");
-      page.value = 1;
-      max.value = 500;
-      startRenderPage();
-      render.value += 1;
+    if (
+      !previousParams.max &&
+      previousParams.film &&
+      previousParams.page === "1" &&
+      query.max &&
+      query.lang === previousParams.lang
+    ) {
+      // для запобіганню лишнього рендеру
       return;
     } else {
-      props.path.includes("Biblioteka") && (page.value = 1);
-      props.path.includes("Biblioteka") && setPageBiblioteka(1);
+      if ("page" in query) {
+        setStateFromUrl(query);
+        !window.document.documentElement.style["0"] && (render.value += 1); // for modal pattern
+        return;
+      } else if (props.path === "Home") {
+        window.localStorage.removeItem("filmsPage");
+        window.localStorage.removeItem("findedFilms");
+        page.value = 1;
+        max.value = 500;
+        startRenderPage();
+        render.value += 1;
+        return;
+      } else {
+        props.path.includes("Biblioteka") && (page.value = 1);
+        props.path.includes("Biblioteka") && setPageBiblioteka(1);
+      }
     }
   },
+
   { deep: true }
 );
 
@@ -490,9 +533,9 @@ watch(
   () => {
     const standartQuery = {
       page: 1,
-      max: http.maxPages && +http.maxPages > 500 ? 500 : Number(http.maxPages),
       lang: lang.value,
     }; // url control
+
     props.switcher &&
       router.push({
         query: {
@@ -502,7 +545,7 @@ watch(
       });
     render.value += 1;
   },
-  { immediate: true }
+  {}
 );
 
 watch(

@@ -16,9 +16,7 @@
           class="pagination__button"
           :class="{ active: +p === page }"
           v-bind="
-            p === '...' && checkSupport()
-              ? { popovertarget: 'pagination-popover' }
-              : {}
+            p === '...' && checkSupport() ? { popovertarget: 'pagination-popover' } : {}
           "
         >
           {{ p }}
@@ -33,30 +31,30 @@
     >
       &rsaquo;
     </button>
-    <ModalExperementalVue
-      v-if="checkSupport()"
-      @forcePage="setPage"
-      :max="proppages"
-    />
+    <ModalExperementalVue v-if="checkSupport()" @forcePage="setPage" :max="proppages" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import Bowser from 'bowser';
-import ModalExperementalVue from './ModalExperemental.vue'; // popover api on this moment 23.07.2023 only chrome ande edge
-import { reactive, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import Bowser from "bowser";
+import ModalExperementalVue from "./ModalExperemental.vue"; // popover api on this moment 23.07.2023 only chrome ande edge
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { featuresStore } from "@/store/storeForFeatures";
 
 const rout = useRoute();
+const router = useRouter();
 
 const props = withDefaults(defineProps<{ proppages: number; path: string }>(), {
   proppages: () => 0,
-  path: () => '',
+  path: () => "",
 });
+
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
 const page = ref(1);
 const arrPage = reactive({
-  template: ['1', '2', '3', '4', '5', '6', '...', props.proppages.toString()],
+  template: ["1", "2", "3", "4", "5", "6", "...", props.proppages.toString()],
 });
 const serverDate = reactive<{ template: number[] | string[] }>({
   template: [],
@@ -70,11 +68,11 @@ const emit = defineEmits<{ numPage: [page: number] }>();
 
 const controlStorage = () => {
   if (
-    JSON.parse(window.localStorage.getItem('numberPage') as string) &&
-    JSON.parse(window.localStorage.getItem('filmsPage') as string)
+    JSON.parse(window.localStorage.getItem("numberPage") as string) &&
+    JSON.parse(window.localStorage.getItem("filmsPage") as string)
   ) {
-    return props.path === 'Home'
-      ? +JSON.parse(window.localStorage.getItem('numberPage') as string)
+    return props.path === "Home"
+      ? +JSON.parse(window.localStorage.getItem("numberPage") as string)
       : 1;
   }
 
@@ -84,28 +82,29 @@ const controlStorage = () => {
 const setServ = () => {
   //формування форми пагінації
   const serverDateGen = [...Array(props.proppages + 1).keys()]
-    .filter(e => e > 0)
-    .map(e => (typeof e !== 'number' ? e : e.toString()));
+    .filter((e) => e > 0)
+    .map((e) => (typeof e !== "number" ? e : e.toString()));
 
   return (serverDate.template = serverDateGen);
 };
 
 const lessPage = () =>
-  (arrPage.template = [...serverDate.template].map(e =>
-    typeof e !== 'number' ? e : e.toString()
+  (arrPage.template = [...serverDate.template].map((e) =>
+    typeof e !== "number" ? e : e.toString()
   ));
 
 const setPagination = () => {
   //базовий вид [доопрацювати не готово]
   arrPage.template = [
     ...serverDate.template.slice(0, 6),
-    '...',
+    "...",
     serverDate.template[serverDate.template.length - 1],
-  ].map(e => (typeof e !== 'number' ? e : e.toString()));
+  ].map((e) => (typeof e !== "number" ? e : e.toString()));
 };
 
 const created = () => {
   //те що мені потрібно одразу до рендера дома
+
   page.value = +controlStorage(); //
   setServ();
   if (+props.proppages <= 6) {
@@ -120,12 +119,12 @@ const checkSupport = () => {
   // перевіряю користувацбкий браузер
   const browsVers = +Bowser.getParser(window.navigator.userAgent)
     .getBrowserVersion()
-    .split('.')[0];
-  if (browser.value.includes('opera') && browsVers >= 100) {
+    .split(".")[0];
+  if (browser.value.includes("opera") && browsVers >= 100) {
     return true;
   }
   return (
-    (browser.value.includes('chrome') || browser.value.includes('edge')) &&
+    (browser.value.includes("chrome") || browser.value.includes("edge")) &&
     browsVers >= 114
   );
 };
@@ -140,18 +139,18 @@ defineExpose({ forcePage });
 const setPage = (e: Event | number) => {
   //клік по кнопкам
   const choose =
-    typeof e !== 'number' &&
-    'target' in e &&
+    typeof e !== "number" &&
+    "target" in e &&
     (e?.target as HTMLButtonElement).textContent;
 
   if (choose && !isNaN(+choose)) {
     page.value = +choose;
-    emit('numPage', page.value); //передаю наверх для запиту
+    emit("numPage", page.value); //передаю наверх для запиту
     return;
-  } else if (typeof e === 'number') {
+  } else if (typeof e === "number") {
     // вказує на прихід сторінки з інпута модалки
     page.value = e;
-    emit('numPage', page.value); //передаю наверх для запиту
+    emit("numPage", page.value); //передаю наверх для запиту
   }
 
   return;
@@ -160,13 +159,13 @@ const setPage = (e: Event | number) => {
 const pagePlus = () => {
   //кнопка права
   page.value++;
-  emit('numPage', page.value);
+  emit("numPage", page.value);
 };
 
 const pageMinus = () => {
   //кнопка ліва
   page.value--;
-  emit('numPage', page.value);
+  emit("numPage", page.value);
 };
 
 const mutateArr = () => {
@@ -183,29 +182,29 @@ const mutateArr = () => {
 
   return (arrPage.template = [
     serverDate.template[0].toString(),
-    '...',
+    "...",
     ...fillNum.sort((a, b) => a - b),
-    '...',
+    "...",
     serverDate.template[serverDate.template.length - 1],
-  ].map(e => (typeof e !== 'number' ? e : e.toString())));
+  ].map((e) => (typeof e !== "number" ? e : e.toString())));
 };
 
 const noMutateArr = () =>
   // постійна паг мало сторінкова **можливе добавленя перевірки**
   (arrPage.template = [
     serverDate.template[0],
-    ...[...Array(7).keys()].filter(e => e > 1),
-    '...',
+    ...[...Array(7).keys()].filter((e) => e > 1),
+    "...",
     `${serverDate.template[serverDate.template.length - 1]}`,
-  ].map(e => e.toString()));
+  ].map((e) => e.toString()));
 
 const maxArr = () =>
   //кінцевий вид
   (arrPage.template = [
     serverDate.template[0],
-    '...',
+    "...",
     ...serverDate.template.slice(serverDate.template.length - 5),
-  ].map(e => (typeof e !== 'number' ? e : e.toLocaleString())));
+  ].map((e) => (typeof e !== "number" ? e : e.toLocaleString())));
 
 //контроль змін сторінки
 watch(
@@ -281,10 +280,7 @@ watch(
 .arrow {
   width: 40px;
   height: 40px;
-  background-color: var(
-    --pagination-transparent-bg,
-    var(--bg-color-light-grey)
-  );
+  background-color: var(--pagination-transparent-bg, var(--bg-color-light-grey));
   border: var(--pagination-border, none);
   &:active {
     background-color: var(--text-color-light-orange);

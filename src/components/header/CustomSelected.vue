@@ -31,16 +31,20 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
-import { featuresStore } from '../../store/storeForFeatures';
+import { computed, reactive, ref, watch } from "vue";
+import { featuresStore } from "../../store/storeForFeatures";
+import { useRoute } from "vue-router";
 
-const selected = ref(window.localStorage.getItem('currLang') ?? 'English');
+const route = useRoute();
+
+const selected = ref(window.localStorage.getItem("currLang") ?? "English");
 const show = ref(false);
 const options = reactive([
-  { text: 'en', value: 'English' },
-  { text: 'ua', value: 'Ukrainian' },
-  { text: 'fi', value: 'Finish' },
+  { text: "en", value: "English" },
+  { text: "ua", value: "Ukrainian" },
+  { text: "fi", value: "Finish" },
 ]);
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
 const chooseOption = (opt: string) => {
   selected.value = opt;
@@ -48,12 +52,12 @@ const chooseOption = (opt: string) => {
 };
 
 const created = () =>
-  (selected.value = window.localStorage.getItem('currLang') ?? 'English');
+  (selected.value = window.localStorage.getItem("currLang") ?? "English");
 created();
 
 const funcShowOption = (e: string | Event) => {
   // управління йде з батьківського компоненту через реф
-  e !== 'out' ? (show.value = !show.value) : (show.value = false);
+  e !== "out" ? (show.value = !show.value) : (show.value = false);
 };
 
 defineExpose({ funcShowOption }); // передаю в керування
@@ -61,10 +65,21 @@ defineExpose({ funcShowOption }); // передаю в керування
 watch(selected, (vanha, uusi) => {
   if (vanha !== uusi) {
     // при змінні мови перепис стору
-    window.localStorage.setItem('currLang', vanha);
-    featuresStore.commit('setLanguage', vanha);
+    window.localStorage.setItem("currLang", vanha);
+    featuresStore.commit("setLanguage", vanha);
   }
 });
+
+watch(
+  () => route.query.lang,
+  (n) => {
+    if (typeof n === "string") {
+      selected.value = { ...options.find((e) => e.text[0] === n[0]) }.value ?? "English";
+    }
+
+    // deep: true,
+  }
+);
 </script>
 
 <style lang="scss" scoped>

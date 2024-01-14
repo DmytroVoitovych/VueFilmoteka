@@ -15,8 +15,11 @@ import { axio } from "@/helpers/axios";
 import { featuresStore } from "@/store/storeForFeatures";
 import { Block } from "notiflix";
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const fakeArrs = reactive({ template: [...Array(20).keys()] });
+const router = useRouter();
+const route = useRoute();
 let checkParam = false;
 
 const loaderBasic = () => {
@@ -26,9 +29,6 @@ const loaderBasic = () => {
     const listOfFilms = document.querySelectorAll(".gallery__item");
 
     //перехоплюєм запит
-    listOfFilms.length === 1 &&
-      document.querySelector(".notiflix-block") &&
-      Block.remove(".dummy");
     checkParam = !!config?.url?.includes("/3/movie/");
 
     if (!checkParam && !config?.url?.includes("genre")) {
@@ -52,10 +52,16 @@ const loaderBasic = () => {
   axio.loader.interceptors.response.use((res) => {
     // коли дані нам надійшли  вимикаєм лоадер
     if (!res?.data?.genres && !checkParam) {
+      route.query.film &&
+        !route.query.max &&
+        res.status === 200 &&
+        router.replace({ query: { ...route.query, max: res.data.total_pages } });
+
       res.status === 200 &&
         document.querySelector(".notiflix-block") &&
         Block?.remove(".gallery__item");
     }
+
     return res;
   });
 };
