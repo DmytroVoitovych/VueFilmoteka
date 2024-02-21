@@ -28,5 +28,5 @@ export const featuresStore = createStore<State>({
     getRefItem(state) {
       return state.refItem;
     },
-  },
+  }
 });

@@ -6,6 +6,7 @@ import LoginForm from './components/auth/LoginForm.vue';
 import RegisterForm from './components/auth/RegisterForm.vue';
 import ChangeForm from './components/auth/ChangeForm.vue';
 import Home from './page/Home.vue';
+const SelectionPage = () => import('./page/SelectionPage.vue'); // lazy
 
 import cookie from 'vue-cookies';
 
@@ -54,6 +55,11 @@ const routes = [
         component: ChangeForm,
       },
     ],
+  },
+  {
+    path: '/filmSelection',
+    name: 'SelectionRoom',
+    component: SelectionPage,
   },
   {
     path: '/:pathMatch(.*)*',

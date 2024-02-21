@@ -128,6 +128,7 @@ watch(
     // попадає перший елемент зсереднього
     n !== o && mangeDirectBtn(getRef.value);
     locate.value = 0;
+    !n?.id && (toTop.value = true); /// тимчасово
   },
   { immediate: true, deep: true }
 );

@@ -7,7 +7,7 @@
           v-if="!props.path.includes('Biblioteka') && checkExpired"
           :to="{ path: 'auth/login' }"
           class="custom-btn btn-A"
-          ><span>{{ getHeaderContent('authcontent') }}</span></router-link
+          ><span>{{ getHeaderContent("authcontent") }}</span></router-link
         >
         <button
           class="btn__logout"
@@ -16,33 +16,19 @@
           v-if="!props.path.includes('Biblioteka') && !checkExpired"
           v-on:click.prevent="funcLogOut"
         >
-          <svg
-            class="subscribe-form__icon rotate-vert-center"
-            width="32"
-            height="32"
-          >
+          <svg class="subscribe-form__icon rotate-vert-center" width="32" height="32">
             <use href="../../assets/sprite.svg#icon-exit"></use>
           </svg>
         </button>
       </template>
       <div>
         <nav class="navigation">
-          <router-link
-            :to="{ name: 'Home' }"
-            v-on:click="toMainPage"
-            class="logo-link"
-          >
-            <svg
-              class="subscribe-form__icon rotate-vert-center"
-              width="24"
-              height="24"
-            >
+          <router-link :to="{ name: 'Home' }" v-on:click="toMainPage" class="logo-link">
+            <svg class="subscribe-form__icon rotate-vert-center" width="24" height="24">
               <use href="../../assets/sprite.svg#icon-logo"></use>
             </svg>
             <span class="logo-text tracking-in-expand"
-              ><abbr title="Go to page main" role="contentinfo"
-                >Filmoteka</abbr
-              ></span
+              ><abbr title="Go to page main" role="contentinfo">Filmoteka</abbr></span
             >
           </router-link>
           <ul class="nav-list">
@@ -53,7 +39,7 @@
                 data-lang="home"
                 class="nav-btn home__btn"
               >
-                {{ getHeaderContent('navcontent')[0] }}
+                {{ getHeaderContent("navcontent")[0] }}
               </router-link>
             </li>
 
@@ -67,7 +53,7 @@
                 data-lang="library"
                 class="nav-btn library__btn js-auth"
               >
-                {{ getHeaderContent('navcontent')[1] }}
+                {{ getHeaderContent("navcontent")[1] }}
               </router-link>
               <div class="auth-chek">
                 <svg width="32px" height="32px">
@@ -108,10 +94,7 @@
         <li><ModalBtn :name="'WATCHED'" :content="getHeaderContent()[0]" /></li>
         <li><ModalBtn :name="'QUEUE'" :content="getHeaderContent()[1]" /></li>
       </ul>
-      <CustomSelected
-        v-if="!props.path.includes('Biblioteka')"
-        ref="focusOut"
-      />
+      <CustomSelected v-if="!props.path.includes('Biblioteka')" ref="focusOut" />
     </ContainerMain>
   </header>
 </template>
@@ -160,10 +143,30 @@ const changeStorage = () => {
   nameFilms.value = '';
 };
 
+const funcCheckNoTrendPage = () => {
+  if (route.name === "SelectionRoom") {// може бути змінено в разі росту сторінок на сайті
+    const standartQuery = {
+      page: 1,
+      lang: lang.value,
+    }; // url control
+
+    router.push({
+      path: '/',
+      name:'Home',
+      query: {
+        ...standartQuery,
+        film: nameFilms.value,
+      },
+    });
+  }
+};
+
+
 const searchFilms = () => {
+  funcCheckNoTrendPage();
+
   const specifick =
     nameFilms.value === window.localStorage.getItem('findedFilms');
-
   // cacheOptions.clear();  // видаляю кеш для коректного пошуку
 
   if (nameFilms.value && !specifick) {
@@ -266,11 +269,7 @@ const checkExpired = computed(() => {
 }
 
 .header__home {
-  background-image: linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.56),
-      rgba(0, 0, 0, 0.56)
-    ),
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
     url(../../assets/images/desc/header-desc@1x.jpg);
   background-size: cover;
   background-repeat: no-repeat;
@@ -279,53 +278,33 @@ const checkExpired = computed(() => {
     (-webkit-min-device-pixel-ratio: 2),
     (min-resolution: 192dpi),
     (min-resolution: 2dppx) {
-    background-image: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.56),
-        rgba(0, 0, 0, 0.56)
-      ),
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
       url(../../assets/images/mob/header-mob@2x.jpg);
   }
 
   @include mq(tablet) {
     padding-bottom: 81px;
-    background-image: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.56),
-        rgba(0, 0, 0, 0.56)
-      ),
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
       url(../../assets/images/tab/header-tab@1x.jpg);
 
     @media (min-device-pixel-ratio: 2),
       (-webkit-min-device-pixel-ratio: 2),
       (min-resolution: 192dpi),
       (min-resolution: 2dppx) {
-      background-image: linear-gradient(
-          90deg,
-          rgba(0, 0, 0, 0.56),
-          rgba(0, 0, 0, 0.56)
-        ),
+      background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
         url(../../assets/images/tab/header-tab@2x.jpg);
     }
   }
 
   @include mq(desktop) {
-    background-image: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.56),
-        rgba(0, 0, 0, 0.56)
-      ),
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
       url(../../assets/images/desc/header-desc@1x.jpg);
 
     @media (min-device-pixel-ratio: 2),
       (-webkit-min-device-pixel-ratio: 2),
       (min-resolution: 192dpi),
       (min-resolution: 2dppx) {
-      background-image: linear-gradient(
-          90deg,
-          rgba(0, 0, 0, 0.56),
-          rgba(0, 0, 0, 0.56)
-        ),
+      background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.56), rgba(0, 0, 0, 0.56)),
         url(../../assets/images/desc/header-desc@2x.jpg);
     }
   }
@@ -480,7 +459,7 @@ const checkExpired = computed(() => {
 }
 
 .nav-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 12px;
@@ -517,10 +496,10 @@ const checkExpired = computed(() => {
 
 //**animation logo */
 .rotate-vert-center {
-  -webkit-animation: rotate-vert-center 3s
-    cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s infinite both;
-  animation: rotate-vert-center 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s
+  -webkit-animation: rotate-vert-center 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s
     infinite both;
+  animation: rotate-vert-center 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 2s infinite
+    both;
   path {
     color: currentColor;
   }
@@ -556,7 +535,7 @@ const checkExpired = computed(() => {
   color: #fff;
   border-radius: 5px;
   padding: 10px 25px;
-  font-family: 'Lato', sans-serif;
+  font-family: "Lato", sans-serif;
   font-weight: 500;
   background: transparent;
   cursor: pointer;
@@ -574,11 +553,7 @@ const checkExpired = computed(() => {
 }
 
 .btn-A {
-  background: linear-gradient(
-    0deg,
-    rgba(255, 151, 0, 1) 0%,
-    rgba(251, 75, 2, 1) 100%
-  );
+  background: linear-gradient(0deg, rgba(255, 151, 0, 1) 0%, rgba(251, 75, 2, 1) 100%);
   line-height: 42px;
   padding: 0;
   border: none;
@@ -594,13 +569,13 @@ const checkExpired = computed(() => {
 .btn-A:before,
 .btn-A:after {
   position: absolute;
-  content: '';
+  content: "";
   right: 0;
   bottom: 0;
   background: rgba(251, 75, 2, 1);
   box-shadow: -7px -7px 20px 0px rgba(255, 255, 255, 0.9),
-    -4px -4px 5px 0px rgba(255, 255, 255, 0.9),
-    7px 7px 20px 0px rgba(0, 0, 0, 0.2), 4px 4px 5px 0px rgba(0, 0, 0, 0.3);
+    -4px -4px 5px 0px rgba(255, 255, 255, 0.9), 7px 7px 20px 0px rgba(0, 0, 0, 0.2),
+    4px 4px 5px 0px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -630,7 +605,7 @@ const checkExpired = computed(() => {
 .btn-A span:before,
 .btn-A span:after {
   position: absolute;
-  content: '';
+  content: "";
   left: 0;
   top: 0;
   background: rgba(251, 75, 2, 1);
