@@ -10,6 +10,8 @@
     --footer-text: var(--text-light-grey);
     --scroll-btn: var(--bg-color-light-grey);
     --yt-modal-btn: var(--bg-color-light-grey);
+    --form-mood-selection: var(--modal-grey);
+    --form-mood-sbox-shadow:var(--border-radio-shadow);
     }
 }
 
@@ -25,5 +27,7 @@
     --footer-text: var(--text-light-grey);
     --scroll-btn: var(--bg-color-light-grey);
     --yt-modal-btn: var(--bg-color-light-grey);
-  }
+    --form-mood-selection: var(--modal-grey);
+    --form-mood-sbox-shadow: var(--border-radio-shadow);
+     }
 }

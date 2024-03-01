@@ -1,8 +1,10 @@
 <template>
   <ContainerMain>
     <!-- <div ref="observe">Test</div> -->
+    <section class="fortum-formSection">
     <FormMoodSelection/>
     <FormAddFilmInRandom/>
+    </section>
     <WheelOfFortune />
   </ContainerMain>
 </template>
@@ -18,3 +20,13 @@ const observe = ref<HTMLDivElement[] | null>(null);
 
 onMounted(() => featuresStore.commit("setRefItem", observe));
 </script>
+
+<style lang="scss" scoped>
+.fortum-formSection{
+  display: flex;
+  justify-content: space-between;
+  padding-top: 60px;
+
+}
+
+</style>

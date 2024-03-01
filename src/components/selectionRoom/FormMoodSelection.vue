@@ -3,61 +3,64 @@
 2.локалсторедж приймає час обертів колеса
 
 <template>
-<form action="" name="modeSelection"> 
+<form  @keypress.enter="$event.preventDefault()" name="modeSelection" oninput="seconds.value=timerSec.value"> 
 <fieldset>
-<legend>Вибір способу відбору</legend>
+<legend>{{ setLangContent()[0]}}</legend>
   <RadioGroupRoot
     v-model="radioStateSingle" class="RadioGroupRoot" default-value="default"
     aria-label="View density"
   >
-    <div :style="{ display: 'flex', alignItems: 'center' }">
+    <div >
       <RadioGroupItem
-        id="r1"
-        class="RadioGroupItem" value="default"
+        id="standartRadio"
+        class="RadioGroupItem" value="standart"
       >
         <RadioGroupIndicator
           class="RadioGroupIndicator"
         />
       </RadioGroupItem>
-      <label class="Label" for="r1">
-        Default
+      <label class="Label" for="standartRadio">
+        {{ setLangContent()[1] }}
       </label>
     </div>
-    <div :style="{ display: 'flex', alignItems: 'center' }">
+    <div >
       <RadioGroupItem
-        id="r2"
-        class="RadioGroupItem" value="comfortable"
+        id="takeOff"
+        class="RadioGroupItem" value="takeoff"
       >
         <RadioGroupIndicator
           class="RadioGroupIndicator"
         />
       </RadioGroupItem>
-      <label class="Label" for="r2">
-        Comfortable
+      <label class="Label" for="takeOff">
+        {{ setLangContent()[2] }}
       </label>
     </div>
-    <div :style="{ display: 'flex', alignItems: 'center' }">
+    <div >
       <RadioGroupItem
-        id="r3"
-        class="RadioGroupItem" value="compact"
+        id="battle"
+        class="RadioGroupItem" value="battle"
       >
         <RadioGroupIndicator
           class="RadioGroupIndicator"
         />
       </RadioGroupItem>
-      <label class="Label" for="r3">
-        Compact
+      <label class="Label" for="battle">
+        {{ setLangContent()[3] }}
       </label>
     </div>
   </RadioGroupRoot>
-  <div :style="{ display: 'flex', padding: '0 20px', flexWrap: 'wrap', gap: 15, alignItems: 'center' }">
-    <Label class="LabelRoot" for="firstName"> First name </Label>
-    <InputComponent
-      id="firstName"
+  <div class="timerSelection" >
+     <InputComponent
+      id="timerSec"
+      name="timerSec"
       class="Input"
-      type="text"
-      value="Pedro Duarte"
+      type="number"
+      value="10"
+      min="10"
+      max="60"
     />
+    <Label class="LabelRoot" for="timerSec">{{ setLangContent()[4] }}:&#32;<output name="seconds" for="timerSec">10</output>{{ setLangContent()[5]}}</Label>
   </div>
  </fieldset>
 </form>
@@ -65,11 +68,15 @@
 
 <script setup lang="ts">
 import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot,Label } from 'radix-vue';
-import { ref, watch } from 'vue';
+import { ref, watch,getCurrentInstance, computed } from 'vue';
 import InputComponent from '../header/InputComponent.vue';
+import { featuresStore } from '@/store/storeForFeatures';
+import { getSelectionContent } from './contentLang';
 
+const radioStateSingle = ref('standart');
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
-const radioStateSingle = ref('default');
+const setLangContent = ()=> getSelectionContent(lang.value);
 
 watch(radioStateSingle, (n)=>console.log(n));
 
@@ -78,29 +85,44 @@ console.log(radioStateSingle,'radioStateSingle');
 
 <style lang="scss" scoped>
 
+legend{
+  padding: 0 10px;
+}
 
 /* reset */
 button {
   all: unset;
 }
 
+fieldset{
+  border-color: var(--text-color-light-orange);
+}
+
 .RadioGroupRoot {
   display: flex;
   gap: 10px;
+
+  > div{
+    display: flex;
+   flex-direction: column-reverse; 
+   align-items: center;
+   gap: 8px;
+  }
 }
 
 .RadioGroupItem {
-  background-color: white;
+  background-color: var(--bg-color-light-white);
   width: 25px;
   height: 25px;
   border-radius: 100%;
-  box-shadow: 0 2px 10px #2d2a2a;
+  box-shadow: 0 2px 10px var(--form-mood-sbox-shadow);
+  cursor: pointer;
 }
 .RadioGroupItem:hover {
-  background-color: var(--modal-grey);
+  background-color:  var(--form-mood-selection);
 }
 .RadioGroupItem:focus {
-  box-shadow: 0 0 0 2px black;
+  box-shadow: 0 0 0 2px var(--text-color-light-orange);
 }
 
 .RadioGroupIndicator {
@@ -121,10 +143,30 @@ button {
 }
 
 .Label {
-  color: white;
+  color: var(--base-text-theme);
   font-size: 15px;
   line-height: 1;
-  padding-left: 15px;
+  
+}
+
+.timerSelection{
+  display: inline-block;
+  margin-top:8px;
+
+  #timerSec{
+    max-width: 42px;
+    background-color: inherit;
+    border: 0.5px;
+    outline: none; 
+    border-bottom: 0.5px solid var(--text-color-light-orange);
+    margin-right: 8px;
+    color: var(--base-text-theme);
+  }
+}
+
+.LabelRoot{
+  font-size: 14px;
+  color: inherit;
 }
 
 </style>

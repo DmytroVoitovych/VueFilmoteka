@@ -35,6 +35,7 @@
   --bordo-background: #751d1d;
   --border-arrow: 1px solid var(--text-color-light-orange);
   --text-light-grey: #f7f7f7;
+  --border-radio-shadow: rgba(255, 106, 0, 0.4);
 
   /* Кольори для теми  (світла)*/
   --base-background-theme: var(--bg-color-light-white);
@@ -43,4 +44,6 @@
   --modal-grey: var(--text-color-light-grey);
   --scroll-btn: #000000;
   --yt-modal-btn: var(--extra-white);
+  --form-mood-selection: var(--extra-white);
+  --form-mood-sbox-shadow: #ff6b01;
 }
