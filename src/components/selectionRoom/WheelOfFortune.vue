@@ -1,31 +1,43 @@
 <template>
   <div class="test">
+
   <div class="pie-wrap gallery__info">
   <svg class="arrow-fortun" viewBox="0 0 100 100"><use href="../../assets/sprite.svg#icon-fortun"></use></svg>
       <ul class="pie-chart">
       <li 
-      v-for="obj of (wheelFilms as FilmForWheel[])"
+      @mouseenter="()=>funcHover(index)"
+      @mouseleave="funcHoverOut"
+      v-for="(obj,index) of (wheelFilms as FilmForWheel[])"
        :key="obj.id" class="pie-slice"
        :style="{backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`}"
        >
-      <p class="pie-chartTitle">{{ obj.title }}</p>
-      <YouIframe
-        v-if="obj.video.results.length"
+       <YouIframe
+        v-if="showYt && wheelFilms.length && index === selectedIndex"
         :video="obj.video.results"
         class="iframe__main"
-        :player-vars="{ autoplay: 0, listType: 'user_uploads' }"
-        ref="yt"
-      />
+        :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
+         />
+       
+      <p v-else class="pie-chartTitle">{{ obj.title }}</p>
+     
        </li>
-    
-    </ul>//
+       </ul>
+       <YouIframe
+        v-if="showYt && wheelFilms.length"
+        :video="(wheelFilms as FilmForWheel[])[selectedIndex].video.results "
+        class="iframe__backgrounnd"
+        :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
+        ref="yt"
+        data-bg="true"
+        />
   </div>
+   
   </div>
 </template>
 
 <script lang="ts" setup>
 import MovieAPiServer from '@/helpers/req';
-import { reactive } from 'vue';
+import { nextTick, onMounted, reactive, ref, watch } from 'vue';
 import YouIframe from '../iframe/YouIframe.vue';
 
 type FilmForWheel ={
@@ -38,9 +50,14 @@ type FilmForWheel ={
 
 const http = new MovieAPiServer();
 
-const wheelFilms = reactive<FilmForWheel[] | object[]>([]);
+//стейт
+const wheelFilms = reactive<FilmForWheel[] | object[]>([]); // дефолтні або ж додані з різних точок
+const showYt = ref(false);
+const selectedIndex = ref(0);
+const yt = ref<typeof YouIframe | null>(null);
+// const urlYoutube = ref('');
 
-const created =  () => {
+const created =  () => {  // запит першого входу
   http.fetchMovieWatchedNow().then((data) => {
     if (data) {
       const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
@@ -62,6 +79,27 @@ const created =  () => {
 };
 
 created();
+
+const funcHover = (index:number) => {
+  console.log('testEnter', index);
+  showYt.value = true;
+  console.log(index,'index');
+  selectedIndex.value = index;
+    
+};
+
+const funcHoverOut = () => {
+  console.log('testOut');
+  showYt.value = false;
+  selectedIndex.value = 0;
+  
+};
+
+
+
+onMounted(() => {
+
+})
 
 </script>
 
@@ -342,8 +380,25 @@ created();
 /* iframe video */
 
 .iframe__main{ 
-  position: absolute;
+    
     width: 100%;
-    height: 100%;
+    height: auto;
+    align-self: stretch;
+    pointer-events: none;
+    scale: 2;
+    }
+
+
+    .iframe__backgrounnd{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  object-fit: contain;
+  border: none;
+  scale: 1.2;
+  filter: opacity(.5);
     }
 </style>
