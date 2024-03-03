@@ -1,6 +1,7 @@
 import { Block } from 'notiflix';
 import http from './axios';
 import 'ts-replace-all';
+import { sampleSize, pick } from 'lodash';
 
 export default class MovieAPiServer {
   searchQuery: string;
@@ -11,6 +12,15 @@ export default class MovieAPiServer {
 
   maxPages: null | number | string;
   isLoadGenres: boolean;
+
+  numberOfRandomFilms: number = 6;
+  keysOfRandomFilms: string[] = [
+    'title',
+    'backdrop_path',
+    'id',
+    'poster_path',
+    'video',
+  ];
 
   constructor() {
     this.searchQuery = '';
@@ -97,6 +107,46 @@ export default class MovieAPiServer {
       this.maxPages = response.data.total_pages;
 
       return response.data.results;
+    } catch (error) {
+      toBack && toBack();
+      console.log(error);
+    }
+  }
+
+  async fetchMovieWatchedNow(toBack?: Function) {
+    const URL = `/3/movie/now_playing?api_key=${
+      this.API_KEY
+    }&page=1&language=${this.getlang()}`;
+
+    try {
+      const response = await http.get(URL);
+      if (!response.data.results.length) {
+        throw new Error('Something happened wrong');
+      }
+      const transformData = sampleSize(
+        response.data.results,
+        this.numberOfRandomFilms
+      );
+
+      const video = await Promise.all(
+        transformData.map(e =>
+          http.get(
+            `/3/movie/${e.id.toString()}/videos?api_key=${
+              this.API_KEY
+            }&language=en-US'`
+          )
+        )
+      );
+
+      transformData.map((e, i) => (e.video = video.map(e => e.data)[i]));
+
+      const particularKeys = transformData.map(obj =>
+        pick(obj, this.keysOfRandomFilms)
+      );
+
+      console.log(particularKeys, 'response');
+
+      return particularKeys;
     } catch (error) {
       toBack && toBack();
       console.log(error);

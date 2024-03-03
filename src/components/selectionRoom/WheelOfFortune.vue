@@ -1,20 +1,69 @@
 <template>
   <div class="test">
   <div class="pie-wrap gallery__info">
-   <svg class="arrow-fortun" viewBox="0 0 100 100"><use href="../../assets/sprite.svg#icon-fortun"></use></svg>
-    <div class="pie-chart">
-      <div class="pie-slice"></div>
-      <div class="pie-slice"></div>
-      <div class="pie-slice"></div>
-      <div class="pie-slice"></div>
-      <div class="pie-slice"></div>
-      <div class="pie-slice"></div>
-    </div>//
+  <svg class="arrow-fortun" viewBox="0 0 100 100"><use href="../../assets/sprite.svg#icon-fortun"></use></svg>
+      <ul class="pie-chart">
+      <li 
+      v-for="obj of (wheelFilms as FilmForWheel[])"
+       :key="obj.id" class="pie-slice"
+       :style="{backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`}"
+       >
+      <p class="pie-chartTitle">{{ obj.title }}</p>
+      <YouIframe
+        v-if="obj.video.results.length"
+        :video="obj.video.results"
+        class="iframe__main"
+        :player-vars="{ autoplay: 0, listType: 'user_uploads' }"
+        ref="yt"
+      />
+       </li>
+    
+    </ul>//
   </div>
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import MovieAPiServer from '@/helpers/req';
+import { reactive } from 'vue';
+import YouIframe from '../iframe/YouIframe.vue';
+
+type FilmForWheel ={
+  title: string;
+  backdrop_path: string;
+  id: number;
+  poster_path: string;
+  video: { id: number; results: {[key: string]: string;}[]}
+};
+
+const http = new MovieAPiServer();
+
+const wheelFilms = reactive<FilmForWheel[] | object[]>([]);
+
+const created =  () => {
+  http.fetchMovieWatchedNow().then((data) => {
+    if (data) {
+      const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
+        return (
+          typeof item.title === 'string' &&
+          typeof item.backdrop_path === 'string' &&
+          typeof item.id === 'number' &&
+          typeof item.poster_path === 'string'
+        );
+      });
+
+      wheelFilms.push(...typedData);
+      console.log(wheelFilms,'wheelFilms');
+    }
+   }).catch((error) => {
+      console.error('Error fetching movies:', error);
+    });;
+ 
+};
+
+created();
+
+</script>
 
 <style lang="scss" scoped>
 
@@ -72,6 +121,15 @@
   overflow: hidden;
 }
 
+.pie-chartTitle{
+      align-self: flex-start;
+    margin-top: 65px;
+        background-color: var(--base-background-theme);
+    border-radius: 5px;
+        filter: opacity(0.5);
+
+}
+
 .pie-slice {
   position: absolute;
   transform: translateX(-50%);
@@ -79,6 +137,11 @@
   clip-path: polygon(100% 0, 50% 100%, 0 0);
   width: 58%;
   height: 50%;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
  }
 
 .pie-slice:nth-of-type(1) {
@@ -275,4 +338,12 @@
     padding: 60px;
   }
 } */
+
+/* iframe video */
+
+.iframe__main{ 
+  position: absolute;
+    width: 100%;
+    height: 100%;
+    }
 </style>
