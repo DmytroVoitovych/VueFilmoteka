@@ -35,6 +35,52 @@ export default class MovieAPiServer {
     this.isLoadGenres = true;
   }
 
+  getVideoById(lang: string, transformData?: any[], arrId?: number[]) {
+    if (!lang.includes('en') && transformData) {
+      return Promise.all(
+        transformData.map(e =>
+          http.get(
+            `/3/movie/${e.id.toString()}/videos?api_key=${
+              this.API_KEY
+            }&language=${this.getlang()}`
+          )
+        )
+      );
+    } else {
+      return Promise.all(
+        arrId!.map(e =>
+          http.get(
+            `/3/movie/${e.toString()}/videos?api_key=${
+              this.API_KEY
+            }&language=en`
+          )
+        )
+      );
+    }
+    //  let missingVideos: any[] = [];
+
+    //  if (!this.getlang().includes('en') && videoContentCheck) {
+    //    const arrId: number[] = video
+    //      .filter(e => !e.data.results.length)
+    //      .map(e => e.data.id);
+    //    missingVideos = await this.getVideoById('en', undefined, arrId);
+    //  }
+
+    // console.log(missingVideos, 'missingVideos');
+
+    //  Promise.all(
+    //     arrId!.map(e =>
+    //       http.get(
+    //         `/3/movie/${e.toString()}/videos?api_key=${
+    //           this.API_KEY
+    //         }&language=en`
+    //       )
+    //     )
+    //   );
+
+    // return data;
+  }
+
   getlang() {
     // метод вертаючий поточну мову
     return (
@@ -128,18 +174,25 @@ export default class MovieAPiServer {
         this.numberOfRandomFilms
       );
 
-      const video = await Promise.all(
-        transformData.map(e =>
-          http.get(
-            `/3/movie/${e.id.toString()}/videos?api_key=${
-              this.API_KEY
-            }&language=en-US'`
-          )
-        )
+      const video = await this.getVideoById(this.getlang(), transformData); //base data
+      const idVideo = video
+        .filter(e => !e.data.results.length)
+        .map(e => e.data.id);
+      const videoEN = await this.getVideoById('en', undefined, idVideo); //base data
+
+      const combineVideo = [
+        ...video.filter(e => e.data.results.length),
+        ...videoEN,
+      ];
+
+      if (!video) {
+        throw new Error('We coud not get videos by this request');
+      }
+      console.log('combineVideo', combineVideo);
+      transformData.map(
+        e => (e.video = combineVideo.map(e => e.data).find(v => v.id === e.id))
       );
-
-      transformData.map((e, i) => (e.video = video.map(e => e.data)[i]));
-
+      // не забути проконтролювати поведінку якщо відео не буде
       const particularKeys = transformData.map(obj =>
         pick(obj, this.keysOfRandomFilms)
       );

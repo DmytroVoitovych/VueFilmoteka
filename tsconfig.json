@@ -14,7 +14,7 @@
  
   "compilerOptions": {
   "target": "esNext",   
- "lib": ["es2021"],   
+ "lib": ["es2021","es2022","es2023"],   
  "allowJs": true,
  "isolatedModules": false,
  "skipLibCheck": true,

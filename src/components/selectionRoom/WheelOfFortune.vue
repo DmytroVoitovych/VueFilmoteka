@@ -12,7 +12,7 @@
        :style="{backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`}"
        >
        <YouIframe
-        v-if="showYt && wheelFilms.length && index === selectedIndex"
+        v-if="showYt && videoExist && index === selectedIndex"
         :video="obj.video.results"
         class="iframe__main"
         :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
@@ -23,13 +23,17 @@
        </li>
        </ul>
        <YouIframe
-        v-if="showYt && wheelFilms.length"
+        v-if="showYt && videoExist"
         :video="(wheelFilms as FilmForWheel[])[selectedIndex].video.results "
         class="iframe__backgrounnd"
         :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
         ref="yt"
         data-bg="true"
         />
+       
+        <div v-else-if="showYt" class="wheelPosterFilm" :style="showPoster">
+        
+        </div>
   </div>
    
   </div>
@@ -37,8 +41,9 @@
 
 <script lang="ts" setup>
 import MovieAPiServer from '@/helpers/req';
-import { nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import YouIframe from '../iframe/YouIframe.vue';
+
 
 type FilmForWheel ={
   title: string;
@@ -56,6 +61,12 @@ const showYt = ref(false);
 const selectedIndex = ref(0);
 const yt = ref<typeof YouIframe | null>(null);
 // const urlYoutube = ref('');
+
+const videoExist = computed<boolean>(() => !!(wheelFilms[selectedIndex.value] as FilmForWheel).video.results.length);
+const showPoster = computed(() => ({
+  "display": showYt.value ? "block" : "none",
+  backgroundImage:`url(${getPoster((wheelFilms[selectedIndex.value] as FilmForWheel).poster_path)})`
+}));
 
 const created =  () => {  // запит першого входу
   http.fetchMovieWatchedNow().then((data) => {
@@ -95,6 +106,9 @@ const funcHoverOut = () => {
   
 };
 
+const getPoster = (poster: string) =>
+  //постери
+  `https://image.tmdb.org/t/p/original/${poster}`;
 
 
 onMounted(() => {
@@ -400,5 +414,18 @@ onMounted(() => {
   border: none;
   scale: 1.2;
   filter: opacity(.5);
+    }
+
+    .wheelPosterFilm{
+    position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  object-fit: contain;
+  border: none;
+  scale: 1.2;
+  filter: opacity(.5);  
     }
 </style>
