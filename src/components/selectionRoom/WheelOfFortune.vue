@@ -1,147 +1,183 @@
 <template>
-  <div class="test">
+  <div class="pie-container">
+    <div class="pie-wrap gallery__info">
+      <svg class="arrow-fortun" viewBox="0 0 100 100">
+        <use href="../../assets/sprite.svg#icon-fortun"></use>
+      </svg>
+      <ul class="pie-chart" :class="rotateClass && 'wheel-animation'" ref="pie">
+        <li
+          @mouseenter="() => funcHover(index)"
+          @mouseleave="funcHoverOut"
+          v-for="(obj,index) of (wheelFilms as FilmForWheel[])"
+          :key="obj.id"
+          class="pie-slice"
+          :style="{
+            backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`,
+          }"
+        >
+          <YouIframe
+            v-if="showYt && videoExist && index === selectedIndex"
+            :video="obj.video.results"
+            class="iframe__main"
+            :player-vars="{ autoplay: 1, listType: 'user_uploads', controls: 0, loop: 1 }"
+          />
 
-  <div class="pie-wrap gallery__info">
-  <svg class="arrow-fortun" viewBox="0 0 100 100"><use href="../../assets/sprite.svg#icon-fortun"></use></svg>
-      <ul class="pie-chart">
-      <li 
-      @mouseenter="()=>funcHover(index)"
-      @mouseleave="funcHoverOut"
-      v-for="(obj,index) of (wheelFilms as FilmForWheel[])"
-       :key="obj.id" class="pie-slice"
-       :style="{backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`}"
-       >
-       <YouIframe
-        v-if="showYt && videoExist && index === selectedIndex"
-        :video="obj.video.results"
-        class="iframe__main"
-        :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
-         />
-       
-      <p v-else class="pie-chartTitle">{{ obj.title }}</p>
-     
-       </li>
-       </ul>
-       <YouIframe
+          <p v-else class="pie-chartTitle">{{ obj.title }}</p>
+        </li>
+      </ul>
+      <YouIframe
         v-if="showYt && videoExist"
         :video="(wheelFilms as FilmForWheel[])[selectedIndex].video.results "
         class="iframe__backgrounnd"
-        :player-vars="{ autoplay: 1, listType: 'user_uploads', controls:0, loop:1}"
+        :player-vars="{ autoplay: 1, listType: 'user_uploads', controls: 0, loop: 1 }"
         ref="yt"
         data-bg="true"
-        />
-       
-        <div v-else-if="showYt" class="wheelPosterFilm" :style="showPoster">
-        
-        </div>
-  </div>
-   
+      />
+
+      <div v-else-if="showYt" class="wheelPosterFilm" :style="showPoster"></div>
+    </div>
+    <button class="btnRun-wheel" @click="startRotateWheel">Запустити</button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import MovieAPiServer from '@/helpers/req';
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
-import YouIframe from '../iframe/YouIframe.vue';
+import MovieAPiServer from "@/helpers/req";
+import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
+import YouIframe from "../iframe/YouIframe.vue";
 
-
-type FilmForWheel ={
+type FilmForWheel = {
   title: string;
   backdrop_path: string;
   id: number;
   poster_path: string;
-  video: { id: number; results: {[key: string]: string;}[]}
+  video: { id: number; results: { [key: string]: string }[] };
 };
 
 const http = new MovieAPiServer();
+
+//props
+const props = defineProps<{
+  moode: "standard" | "takeoff" | "battle";
+  duration: string;
+}>();
+console.log(props.moode);
 
 //стейт
 const wheelFilms = reactive<FilmForWheel[] | object[]>([]); // дефолтні або ж додані з різних точок
 const showYt = ref(false);
 const selectedIndex = ref(0);
 const yt = ref<typeof YouIframe | null>(null);
+const rotateClass = ref(false);
+const pie = ref<HTMLUListElement>();
+const numCubic = ref<string>("360deg");
+const numCubicPrev = ref<string>("0deg");
 // const urlYoutube = ref('');
 
-const videoExist = computed<boolean>(() => !!(wheelFilms[selectedIndex.value] as FilmForWheel).video.results.length);
+const videoExist = computed<boolean>(
+  () => !!(wheelFilms[selectedIndex.value] as FilmForWheel).video.results.length
+);
 const showPoster = computed(() => ({
-  "display": showYt.value ? "block" : "none",
-  backgroundImage:`url(${getPoster((wheelFilms[selectedIndex.value] as FilmForWheel).poster_path)})`
+  display: showYt.value ? "block" : "none",
+  backgroundImage: `url(${getPoster(
+    (wheelFilms[selectedIndex.value] as FilmForWheel).poster_path
+  )})`,
 }));
 
-const created =  () => {  // запит першого входу
-  http.fetchMovieWatchedNow().then((data) => {
-    if (data) {
-      const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
-        return (
-          typeof item.title === 'string' &&
-          typeof item.backdrop_path === 'string' &&
-          typeof item.id === 'number' &&
-          typeof item.poster_path === 'string'
-        );
-      });
+const created = () => {
+  // запит першого входу
+  http
+    .fetchMovieWatchedNow()
+    .then((data) => {
+      if (data) {
+        const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
+          return (
+            typeof item.title === "string" &&
+            typeof item.backdrop_path === "string" &&
+            typeof item.id === "number" &&
+            typeof item.poster_path === "string"
+          );
+        });
 
-      wheelFilms.push(...typedData);
-      console.log(wheelFilms,'wheelFilms');
-    }
-   }).catch((error) => {
-      console.error('Error fetching movies:', error);
-    });;
- 
+        wheelFilms.push(...typedData);
+        console.log(wheelFilms, "wheelFilms");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching movies:", error);
+    });
 };
 
 created();
 
-const funcHover = (index:number) => {
-  console.log('testEnter', index);
+const funcHover = (index: number) => {
+  console.log("testEnter", index);
   showYt.value = true;
-  console.log(index,'index');
+  console.log(index, "index");
   selectedIndex.value = index;
-    
 };
 
 const funcHoverOut = () => {
-  console.log('testOut');
+  console.log("testOut");
   showYt.value = false;
   selectedIndex.value = 0;
-  
 };
 
 const getPoster = (poster: string) =>
   //постери
   `https://image.tmdb.org/t/p/original/${poster}`;
 
+const getRandomNum = (): void => {
+  const randomNum = Math.floor(Math.random() * (3600 + 1 - 100) + 100);
+  numCubic.value = (+props.duration * randomNum).toString() + "deg";
+};
 
-onMounted(() => {
+const startRotateWheel = () => {
+  // const randomNum = Math.floor(Math.random() * (+props.duration + 1 - 1) + 1);
+  document.documentElement.style.setProperty("--wheel-duration", `${+props.duration}s`);
+  rotateClass.value = true;
+  getRandomNum();
+  pie.value && (pie.value.style.animationPlayState = "running");
+  let stopAnimation = setTimeout(() => {
+    pie.value && (pie.value.style.animationPlayState = "paused");
 
-})
+    const intNumCub: number = +numCubic.value.replace("deg", "");
+    const intNumCubPrev: number = +numCubicPrev.value.replace("deg", "");
 
+    numCubicPrev.value =
+      intNumCub < intNumCubPrev
+        ? (intNumCub + intNumCubPrev).toString() + "deg"
+        : intNumCub.toString() + "deg";
+
+    clearTimeout(stopAnimation);
+    console.log(numCubicPrev.value, numCubic.value);
+  }, +(props.duration + "000"));
+};
 </script>
 
 <style lang="scss" scoped>
-
-.arrow-fortun{
-  
+.arrow-fortun {
   display: inline-block;
   stroke-width: 0;
   stroke: currentColor;
   fill: currentColor;
   z-index: 1;
-    position: absolute;
-    rotate: 180deg;
-    top: -20%;
-    width: 50%;
-    left: 50%;
-    transform: translateX(50%);
+  position: absolute;
+  rotate: 180deg;
+  top: -20%;
+  width: 50%;
+  left: 50%;
+  transform: translateX(50%);
 }
 
-.test{
+.pie-container {
   padding: 60px 0;
+  text-align: center;
 }
 .pie-wrap {
   position: relative;
   background-color: azure;
   overflow: hidden;
-  transition: .2s;
+  transition: 0.2s;
   margin: auto;
   width: 600px;
   height: 600px;
@@ -153,18 +189,17 @@ onMounted(() => {
     height: 417px;
   }
 
- @media screen and (max-width: 488px) {
-       width: 240px;
+  @media screen and (max-width: 488px) {
+    width: 240px;
     height: 240px;
   }
-  
 }
 
 .pie-chart {
-  position: absolute;
+  /* position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); */
   width: 100%;
   height: 100%;
   display: flex;
@@ -173,13 +208,16 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.pie-chartTitle{
-      align-self: flex-start;
-    margin-top: 65px;
-        background-color: var(--base-background-theme);
-    border-radius: 5px;
-        filter: opacity(0.5);
+.wheel-animation {
+  animation: rotate var(--wheel-duration) cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
 
+.pie-chartTitle {
+  align-self: flex-start;
+  margin-top: 65px;
+  background-color: var(--base-background-theme);
+  border-radius: 5px;
+  filter: opacity(0.5);
 }
 
 .pie-slice {
@@ -194,7 +232,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
- }
+}
 
 .pie-slice:nth-of-type(1) {
   /* transform: rotate(0deg); */
@@ -368,6 +406,16 @@ onMounted(() => {
   transition: all 500ms linear;
 }
 
+// animation wheel
+@keyframes rotate {
+  0% {
+    transform: rotate(v-bind(numCubicPrev));
+  }
+  100% {
+    transform: rotate(v-bind(numCubic));
+  }
+}
+
 /* .fortune {
   display: flex;
   justify-content: center;
@@ -393,17 +441,15 @@ onMounted(() => {
 
 /* iframe video */
 
-.iframe__main{ 
-    
-    width: 100%;
-    height: auto;
-    align-self: stretch;
-    pointer-events: none;
-    scale: 2;
-    }
+.iframe__main {
+  width: 100%;
+  height: auto;
+  align-self: stretch;
+  pointer-events: none;
+  scale: 2;
+}
 
-
-    .iframe__backgrounnd{
+.iframe__backgrounnd {
   position: fixed;
   top: 0;
   left: 0;
@@ -413,11 +459,11 @@ onMounted(() => {
   object-fit: contain;
   border: none;
   scale: 1.2;
-  filter: opacity(.5);
-    }
+  filter: opacity(0.5);
+}
 
-    .wheelPosterFilm{
-    position: fixed;
+.wheelPosterFilm {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -426,6 +472,15 @@ onMounted(() => {
   object-fit: contain;
   border: none;
   scale: 1.2;
-  filter: opacity(.5);  
-    }
+  filter: opacity(0.5);
+}
+
+.btnRun-wheel {
+  margin: 24px;
+  padding: 16px 56px;
+  border-radius: 5px;
+  background: linear-gradient(0deg, rgb(255, 151, 0) 0%, rgb(251, 75, 2) 100%);
+  color: var(--text-color-light);
+  border: none;
+}
 </style>

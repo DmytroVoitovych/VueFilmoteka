@@ -1,91 +1,93 @@
-//tasks 
-1. передає один з трьох режимів рандому
-2.локалсторедж приймає час обертів колеса
+//tasks 1. передає один з трьох режимів рандому 2.локалсторедж приймає час обертів колеса
 
 <template>
-<form  @keypress.enter="$event.preventDefault()" name="modeSelection" oninput="seconds.value=timerSec.value"> 
-<fieldset>
-<legend>{{ setLangContent()[0]}}</legend>
-  <RadioGroupRoot
-    v-model="radioStateSingle" class="RadioGroupRoot" default-value="default"
-    aria-label="View density"
+  <form
+    @keypress.enter="$event.preventDefault()"
+    name="modeSelection"
+    oninput="seconds.value=timerSec.value"
   >
-    <div >
-      <RadioGroupItem
-        id="standartRadio"
-        class="RadioGroupItem" value="standart"
+    <fieldset>
+      <legend>{{ setLangContent()[0] }}</legend>
+      <RadioGroupRoot
+        v-model="radioStateSingle"
+        class="RadioGroupRoot"
+        default-value="default"
+        aria-label="View density"
       >
-        <RadioGroupIndicator
-          class="RadioGroupIndicator"
+        <div>
+          <RadioGroupItem id="standartRadio" class="RadioGroupItem" value="standart">
+            <RadioGroupIndicator class="RadioGroupIndicator" />
+          </RadioGroupItem>
+          <label class="Label" for="standartRadio">
+            {{ setLangContent()[1] }}
+          </label>
+        </div>
+        <div>
+          <RadioGroupItem id="takeOff" class="RadioGroupItem" value="takeoff">
+            <RadioGroupIndicator class="RadioGroupIndicator" />
+          </RadioGroupItem>
+          <label class="Label" for="takeOff">
+            {{ setLangContent()[2] }}
+          </label>
+        </div>
+        <div>
+          <RadioGroupItem id="battle" class="RadioGroupItem" value="battle">
+            <RadioGroupIndicator class="RadioGroupIndicator" />
+          </RadioGroupItem>
+          <label class="Label" for="battle">
+            {{ setLangContent()[3] }}
+          </label>
+        </div>
+      </RadioGroupRoot>
+      <div class="timerSelection">
+        <InputComponent
+          id="timerSec"
+          name="timerSec"
+          class="Input"
+          type="number"
+          :value="inputDuration"
+          min="10"
+          max="60"
+          v-model:find="inputDuration"
         />
-      </RadioGroupItem>
-      <label class="Label" for="standartRadio">
-        {{ setLangContent()[1] }}
-      </label>
-    </div>
-    <div >
-      <RadioGroupItem
-        id="takeOff"
-        class="RadioGroupItem" value="takeoff"
-      >
-        <RadioGroupIndicator
-          class="RadioGroupIndicator"
-        />
-      </RadioGroupItem>
-      <label class="Label" for="takeOff">
-        {{ setLangContent()[2] }}
-      </label>
-    </div>
-    <div >
-      <RadioGroupItem
-        id="battle"
-        class="RadioGroupItem" value="battle"
-      >
-        <RadioGroupIndicator
-          class="RadioGroupIndicator"
-        />
-      </RadioGroupItem>
-      <label class="Label" for="battle">
-        {{ setLangContent()[3] }}
-      </label>
-    </div>
-  </RadioGroupRoot>
-  <div class="timerSelection" >
-     <InputComponent
-      id="timerSec"
-      name="timerSec"
-      class="Input"
-      type="number"
-      value="10"
-      min="10"
-      max="60"
-    />
-    <Label class="LabelRoot" for="timerSec">{{ setLangContent()[4] }}:&#32;<output name="seconds" for="timerSec">10</output>{{ setLangContent()[5]}}</Label>
-  </div>
- </fieldset>
-</form>
+        <Label class="LabelRoot" for="timerSec"
+          >{{ setLangContent()[4] }}:&#32;<output name="seconds" for="timerSec">10</output
+          >{{ setLangContent()[5] }}</Label
+        >
+      </div>
+    </fieldset>
+  </form>
 </template>
 
 <script setup lang="ts">
-import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot,Label } from 'radix-vue';
-import { ref, watch,getCurrentInstance, computed } from 'vue';
-import InputComponent from '../header/InputComponent.vue';
-import { featuresStore } from '@/store/storeForFeatures';
-import { getSelectionContent } from './contentLang';
+import { RadioGroupIndicator, RadioGroupItem, RadioGroupRoot, Label } from "radix-vue";
+import { ref, watch, getCurrentInstance, computed, provide } from "vue";
+import InputComponent from "../header/InputComponent.vue";
+import { featuresStore } from "@/store/storeForFeatures";
+import { getSelectionContent } from "./contentLang";
 
-const radioStateSingle = ref('standart');
+const radioStateSingle = ref<"standard" | "takeoff" | "battle">("standard");
+const inputDuration = ref<string>("10");
 const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
-const setLangContent = ()=> getSelectionContent(lang.value);
+const setLangContent = () => getSelectionContent(lang.value);
 
-watch(radioStateSingle, (n)=>console.log(n));
+watch(radioStateSingle, () => emit("moode", radioStateSingle.value));
+watch(inputDuration, () => {
+  emit("duration", inputDuration.value);
+  console.log(inputDuration.value, "input");
+});
 
-console.log(radioStateSingle,'radioStateSingle');
+const emit = defineEmits<{
+  moode: [radioStateSingle: "standard" | "takeoff" | "battle"];
+  duration: [inputDuration: string];
+}>();
+
+console.log(inputDuration, "inputDuration");
 </script>
 
 <style lang="scss" scoped>
-
-legend{
+legend {
   padding: 0 10px;
 }
 
@@ -94,7 +96,7 @@ button {
   all: unset;
 }
 
-fieldset{
+fieldset {
   border-color: var(--text-color-light-orange);
 }
 
@@ -102,11 +104,11 @@ fieldset{
   display: flex;
   gap: 10px;
 
-  > div{
+  > div {
     display: flex;
-   flex-direction: column-reverse; 
-   align-items: center;
-   gap: 8px;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 8px;
   }
 }
 
@@ -119,7 +121,7 @@ fieldset{
   cursor: pointer;
 }
 .RadioGroupItem:hover {
-  background-color:  var(--form-mood-selection);
+  background-color: var(--form-mood-selection);
 }
 .RadioGroupItem:focus {
   box-shadow: 0 0 0 2px var(--text-color-light-orange);
@@ -134,7 +136,7 @@ fieldset{
   position: relative;
 }
 .RadioGroupIndicator::after {
-  content: '';
+  content: "";
   display: block;
   width: 11px;
   height: 11px;
@@ -146,27 +148,25 @@ fieldset{
   color: var(--base-text-theme);
   font-size: 15px;
   line-height: 1;
-  
 }
 
-.timerSelection{
+.timerSelection {
   display: inline-block;
-  margin-top:8px;
+  margin-top: 8px;
 
-  #timerSec{
+  #timerSec {
     max-width: 42px;
     background-color: inherit;
     border: 0.5px;
-    outline: none; 
+    outline: none;
     border-bottom: 0.5px solid var(--text-color-light-orange);
     margin-right: 8px;
     color: var(--base-text-theme);
   }
 }
 
-.LabelRoot{
+.LabelRoot {
   font-size: 14px;
   color: inherit;
 }
-
 </style>

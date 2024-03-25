@@ -36,13 +36,13 @@ export default class MovieAPiServer {
   }
 
   getVideoById(lang: string, transformData?: any[], arrId?: number[]) {
-    if (!lang.includes('en') && transformData) {
+    if (!arrId && transformData) {
       return Promise.all(
         transformData.map(e =>
           http.get(
             `/3/movie/${e.id.toString()}/videos?api_key=${
               this.API_KEY
-            }&language=${this.getlang()}`
+            }&language=${lang}`
           )
         )
       );
