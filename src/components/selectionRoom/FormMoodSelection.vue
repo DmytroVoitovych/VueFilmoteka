@@ -11,11 +11,11 @@
       <RadioGroupRoot
         v-model="radioStateSingle"
         class="RadioGroupRoot"
-        default-value="default"
+        default-value="standard"
         aria-label="View density"
       >
         <div>
-          <RadioGroupItem id="standartRadio" class="RadioGroupItem" value="standart">
+          <RadioGroupItem id="standartRadio" class="RadioGroupItem" value="standard">
             <RadioGroupIndicator class="RadioGroupIndicator" />
           </RadioGroupItem>
           <label class="Label" for="standartRadio">

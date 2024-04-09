@@ -41,15 +41,13 @@
         ref="yt"
       />
       <div>
-        <h3 class="modal__titleV t-js">{{ info.infos.title ?? 'No date' }}</h3>
+        <h3 class="modal__titleV t-js">{{ info.infos.title ?? "No date" }}</h3>
         <div class="flexboxV">
           <ul class="modal__listV">
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[0] }}</p>
               <p class="modal__rV">
-                <span class="reitV">{{
-                  info.infos.vote_average?.toFixed(1)
-                }}</span>
+                <span class="reitV">{{ info.infos.vote_average?.toFixed(1) }}</span>
                 /
                 <span class="countV">{{ info.infos.vote_count }}</span>
               </p>
@@ -57,18 +55,13 @@
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[1] }}</p>
               <p class="modal__valV t-js">
-                {{
-                  'popularity' in info.infos &&
-                  info.infos.popularity?.toFixed(1)
-                }}
+                {{ "popularity" in info.infos && info.infos.popularity?.toFixed(1) }}
               </p>
             </li>
             <li class="modal__descV">
               <p class="modal__pV">{{ getContent()[2] }}</p>
               <p class="modal__valV uperV t-js">
-                {{
-                  'original_title' in info.infos && info.infos.original_title
-                }}
+                {{ "original_title" in info.infos && info.infos.original_title }}
               </p>
             </li>
             <li class="modal__descV">
@@ -82,8 +75,8 @@
             <p class="modal__aboutV t-js">{{ getContent()[4] }}</p>
             <p class="overview t-js">
               {{
-                ('overview' in info.infos && info.infos.overview) ||
-                'No description will be added soon. Sorry for the inconvenience'
+                ("overview" in info.infos && info.infos.overview) ||
+                "No description will be added soon. Sorry for the inconvenience"
               }}
             </p>
           </div>
@@ -91,8 +84,7 @@
             <li>
               <button
                 @click.prevent="
-                  () =>
-                    !doneWatched ? addFilmToWatch() : dellFilmFromDb('watched')
+                  () => (!doneWatched ? addFilmToWatch() : dellFilmFromDb('watched'))
                 "
                 data-btn="${id}"
                 type="button"
@@ -106,8 +98,7 @@
             <li>
               <button
                 @click.prevent="
-                  () =>
-                    !doneQueue ? addFilmToQueue() : dellFilmFromDb('queue')
+                  () => (!doneQueue ? addFilmToQueue() : dellFilmFromDb('queue'))
                 "
                 :data-btn="'id' in info.infos && info.infos.id"
                 type="button"
@@ -154,7 +145,7 @@ const checkParam = ref(false);
 const loading = ref(false);
 const img = ref(imageUrl);
 
-const lang = computed<string>(() => featuresStore.getters.getLanguage).value;
+const lang = computed<string>(() => featuresStore.getters.getLanguage);
 
 const doneWatched = computed<boolean>(() =>
   // звірка з наявністю в базі і зміна класів від результату
@@ -250,7 +241,7 @@ const loaderBasic = () => {
   });
 };
 
-const getModalNotifyContent = () => getNotifyContent(lang);
+const getModalNotifyContent = () => getNotifyContent(lang.value);
 
 const funcNotify = (type: boolean, num: number) => {
   const option = {
@@ -317,7 +308,7 @@ const dellFilmFromDb = async (type: category) => {
   }
 };
 
-const getContent = () => getModalContent(lang);
+const getContent = () => getModalContent(lang.value);
 
 watch(
   () => props.filmsid,

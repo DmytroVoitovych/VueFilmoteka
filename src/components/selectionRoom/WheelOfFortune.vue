@@ -4,6 +4,7 @@
       <svg class="arrow-fortun" viewBox="0 0 100 100">
         <use href="../../assets/sprite.svg#icon-fortun"></use>
       </svg>
+      <div class="dot" ref="arrowFortun">.</div>
       <ul class="pie-chart" :class="rotateClass && 'wheel-animation'" ref="pie">
         <li
           @mouseenter="() => funcHover(index)"
@@ -11,8 +12,11 @@
           v-for="(obj,index) of (wheelFilms as FilmForWheel[])"
           :key="obj.id"
           class="pie-slice"
+          :class="wheelFilms.length > 2 ? 'clipPath-wheel' : ''"
           :style="{
             backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`,
+            transform: `rotate(${numberOfDeg[index]}deg)`,
+            height: wheelFilms.length === 1 ? '100%' : '50%',
           }"
         >
           <YouIframe
@@ -44,6 +48,7 @@
 import MovieAPiServer from "@/helpers/req";
 import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
 import YouIframe from "../iframe/YouIframe.vue";
+import { getSegmentWidth } from "./helper";
 
 type FilmForWheel = {
   title: string;
@@ -69,9 +74,17 @@ const selectedIndex = ref(0);
 const yt = ref<typeof YouIframe | null>(null);
 const rotateClass = ref(false);
 const pie = ref<HTMLUListElement>();
+const arrowFortun = ref<HTMLDivElement>();
 const numCubic = ref<string>("360deg");
 const numCubicPrev = ref<string>("0deg");
-// const urlYoutube = ref('');
+const dynamicWidth = ref<string>("58%");
+
+const xCoordinate = computed<number>(
+  () => arrowFortun.value?.getBoundingClientRect().x as number
+);
+const yCoordinate = computed<number>(
+  () => arrowFortun.value?.getBoundingClientRect().y as number
+);
 
 const videoExist = computed<boolean>(
   () => !!(wheelFilms[selectedIndex.value] as FilmForWheel).video.results.length
@@ -82,6 +95,9 @@ const showPoster = computed(() => ({
     (wheelFilms[selectedIndex.value] as FilmForWheel).poster_path
   )})`,
 }));
+const circle = computed<number>(() => 2 * Math.PI * (pie.value!.offsetWidth / 2));
+
+const numberOfDeg = reactive<number[]>([0, 60, 120, 180, 240, 300]);
 
 const created = () => {
   // запит першого входу
@@ -99,7 +115,13 @@ const created = () => {
         });
 
         wheelFilms.push(...typedData);
-        console.log(wheelFilms, "wheelFilms");
+        numberOfDeg.length = 0;
+        for (let index = 0; index < wheelFilms.length; index++) {
+          numberOfDeg.push((360 / wheelFilms.length) * index);
+        }
+        //  width: calc((100% + var(--deleted-width)) / (var(--num-slices) - 1));
+        dynamicWidth.value = getSegmentWidth(circle.value, 0, wheelFilms.length);
+        console.log(circle.value, "circle");
       }
     })
     .catch((error) => {
@@ -127,16 +149,38 @@ const getPoster = (poster: string) =>
   `https://image.tmdb.org/t/p/original/${poster}`;
 
 const getRandomNum = (): void => {
-  const randomNum = Math.floor(Math.random() * (3600 + 1 - 100) + 100);
+  const randomNum: number = Math.floor(Math.random() * (3600 + 1 - 100) + 100);
   numCubic.value = (+props.duration * randomNum).toString() + "deg";
 };
 
+const removeFilmFromWheel = (title: string): void => {
+  const indexOfTitle: number = wheelFilms.findIndex(
+    (e) => (e as FilmForWheel).title === title
+  );
+
+  wheelFilms.splice(indexOfTitle, 1);
+  numberOfDeg.length = 0;
+
+  for (let index = 0; index < wheelFilms.length; index++) {
+    numberOfDeg.push((360 / wheelFilms.length) * index);
+  }
+
+  console.dir(pie.value?.children[indexOfTitle], "width");
+  dynamicWidth.value = getSegmentWidth(
+    circle.value,
+    +(pie.value?.children[indexOfTitle] as HTMLLIElement)?.offsetWidth,
+    wheelFilms.length
+  );
+  //for css calc(100% * 5 / 6);
+};
+
 const startRotateWheel = () => {
-  // const randomNum = Math.floor(Math.random() * (+props.duration + 1 - 1) + 1);
-  document.documentElement.style.setProperty("--wheel-duration", `${+props.duration}s`);
-  rotateClass.value = true;
+  document.documentElement.style.setProperty("--wheel-duration", `${+props.duration}s`); // час роботи анімації
+  rotateClass.value = true; // добавлення класу при першому старті
   getRandomNum();
+
   pie.value && (pie.value.style.animationPlayState = "running");
+
   let stopAnimation = setTimeout(() => {
     pie.value && (pie.value.style.animationPlayState = "paused");
 
@@ -148,13 +192,31 @@ const startRotateWheel = () => {
         ? (intNumCub + intNumCubPrev).toString() + "deg"
         : intNumCub.toString() + "deg";
 
+    const liTitleFromPoint: string = String(
+      document
+        .elementsFromPoint(xCoordinate.value, yCoordinate.value)
+        .find((e) => e.classList.contains("pie-slice"))?.textContent
+    );
+
+    removeFilmFromWheel(liTitleFromPoint);
+
     clearTimeout(stopAnimation);
-    console.log(numCubicPrev.value, numCubic.value);
   }, +(props.duration + "000"));
 };
 </script>
 
 <style lang="scss" scoped>
+.dot {
+  color: red;
+  position: absolute;
+  rotate: 180deg;
+  top: 10px;
+  height: 1px;
+  width: 1.1px;
+  left: 49.99%;
+  transform: translateX(50%);
+}
+
 .arrow-fortun {
   display: inline-block;
   stroke-width: 0;
@@ -224,8 +286,8 @@ const startRotateWheel = () => {
   position: absolute;
   transform: translateX(-50%);
   transform-origin: bottom;
-  clip-path: polygon(100% 0, 50% 100%, 0 0);
-  width: 58%;
+
+  width: v-bind(dynamicWidth);
   height: 50%;
   background-position: center;
   background-size: cover;
@@ -234,9 +296,13 @@ const startRotateWheel = () => {
   align-items: center;
 }
 
+.clipPath-wheel {
+  clip-path: polygon(100% 0, 50% 100%, 0 0);
+}
+
 .pie-slice:nth-of-type(1) {
   /* transform: rotate(0deg); */
-  left: 50%;
+  left: auto;
   background-color: aquamarine;
 }
 

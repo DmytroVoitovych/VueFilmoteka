@@ -4,5 +4,7 @@
     "composite": true,
     "lib": ["ES2021.String"],
     "types": ["node", "jsdom"]
-  }
+    
+  },
+  "include": ["src/**/*.ts"]
 }

@@ -13,7 +13,7 @@ export default class MovieAPiServer {
   maxPages: null | number | string;
   isLoadGenres: boolean;
 
-  numberOfRandomFilms: number = 6;
+  readonly numberOfRandomFilms: number = 6;
   keysOfRandomFilms: string[] = [
     'title',
     'backdrop_path',
@@ -57,28 +57,6 @@ export default class MovieAPiServer {
         )
       );
     }
-    //  let missingVideos: any[] = [];
-
-    //  if (!this.getlang().includes('en') && videoContentCheck) {
-    //    const arrId: number[] = video
-    //      .filter(e => !e.data.results.length)
-    //      .map(e => e.data.id);
-    //    missingVideos = await this.getVideoById('en', undefined, arrId);
-    //  }
-
-    // console.log(missingVideos, 'missingVideos');
-
-    //  Promise.all(
-    //     arrId!.map(e =>
-    //       http.get(
-    //         `/3/movie/${e.toString()}/videos?api_key=${
-    //           this.API_KEY
-    //         }&language=en`
-    //       )
-    //     )
-    //   );
-
-    // return data;
   }
 
   getlang() {
