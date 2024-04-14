@@ -149,8 +149,8 @@ const getPoster = (poster: string) =>
   `https://image.tmdb.org/t/p/original/${poster}`;
 
 const getRandomNum = (): void => {
-  const randomNum: number = Math.floor(Math.random() * (3600 + 1 - 100) + 100);
-  numCubic.value = (+props.duration * randomNum).toString() + "deg";
+  const randomNum: number = Math.floor(Math.random() * (3600 + 1 - 360) + 360);
+  numCubic.value = (+(props.duration[0] + ".5") * randomNum).toString() + "deg";
 };
 
 const removeFilmFromWheel = (title: string): void => {
@@ -165,12 +165,12 @@ const removeFilmFromWheel = (title: string): void => {
     numberOfDeg.push((360 / wheelFilms.length) * index);
   }
 
-  console.dir(pie.value?.children[indexOfTitle], "width");
   dynamicWidth.value = getSegmentWidth(
     circle.value,
     +(pie.value?.children[indexOfTitle] as HTMLLIElement)?.offsetWidth,
     wheelFilms.length
   );
+
   //for css calc(100% * 5 / 6);
 };
 
@@ -183,14 +183,9 @@ const startRotateWheel = () => {
 
   let stopAnimation = setTimeout(() => {
     pie.value && (pie.value.style.animationPlayState = "paused");
+    rotateClass.value = false;
 
-    const intNumCub: number = +numCubic.value.replace("deg", "");
-    const intNumCubPrev: number = +numCubicPrev.value.replace("deg", "");
-
-    numCubicPrev.value =
-      intNumCub < intNumCubPrev
-        ? (intNumCub + intNumCubPrev).toString() + "deg"
-        : intNumCub.toString() + "deg";
+    numCubicPrev.value = "0deg";
 
     const liTitleFromPoint: string = String(
       document
@@ -271,7 +266,7 @@ const startRotateWheel = () => {
 }
 
 .wheel-animation {
-  animation: rotate var(--wheel-duration) cubic-bezier(0.42, 0, 0.58, 1) infinite;
+  animation: rotate var(--wheel-duration) cubic-bezier(0.42, 0, 0.58, 1);
 }
 
 .pie-chartTitle {

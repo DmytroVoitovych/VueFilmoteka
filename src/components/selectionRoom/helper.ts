@@ -6,6 +6,8 @@ export const getSegmentWidth = (
   switch (numSegments) {
     case 6:
       return '58%';
+    case 5:
+      return '74%';
     case 4:
       return '100%';
     case 3:
