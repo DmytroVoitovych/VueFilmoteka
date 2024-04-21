@@ -12,7 +12,10 @@
           v-for="(obj,index) of (wheelFilms as FilmForWheel[])"
           :key="obj.id"
           class="pie-slice"
-          :class="wheelFilms.length > 2 ? 'clipPath-wheel' : ''"
+          :class="[
+            wheelFilms.length > 2 ? 'clipPath-wheel' : '',
+            removeAnimation && selectedIndex === index ? 'pie-sliceRemove' : '',
+          ]"
           :style="{
             backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`,
             transform: `rotate(${numberOfDeg[index]}deg)`,
@@ -39,12 +42,24 @@
       />
 
       <div v-else-if="showYt" class="wheelPosterFilm" :style="showPoster"></div>
+      <DialogRadix
+        v-else-if="!rotateClass && numCubic !== '360deg' && dialogOpen"
+        :backgroundImg="popupPoster"
+        @getModalState="getModalState"
+      />
     </div>
-    <button class="btnRun-wheel" @click="startRotateWheel">Запустити</button>
+    <button
+      class="btnRun-wheel"
+      :disabled="rotateClass || wheelFilms.length < 2"
+      @click="startRotateWheel"
+    >
+      Запустити
+    </button>
   </div>
 </template>
 
 <script lang="ts" setup>
+import DialogRadix from "../shared/radix/DialogRadix.vue";
 import MovieAPiServer from "@/helpers/req";
 import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
 import YouIframe from "../iframe/YouIframe.vue";
@@ -78,6 +93,9 @@ const arrowFortun = ref<HTMLDivElement>();
 const numCubic = ref<string>("360deg");
 const numCubicPrev = ref<string>("0deg");
 const dynamicWidth = ref<string>("58%");
+const removeAnimation = ref<boolean>(false);
+const popupPoster = ref<string>('');
+const dialogOpen = ref<boolean>(true);
 
 const xCoordinate = computed<number>(
   () => arrowFortun.value?.getBoundingClientRect().x as number
@@ -92,12 +110,25 @@ const videoExist = computed<boolean>(
 const showPoster = computed(() => ({
   display: showYt.value ? "block" : "none",
   backgroundImage: `url(${getPoster(
-    (wheelFilms[selectedIndex.value] as FilmForWheel).poster_path
+    (wheelFilms[selectedIndex.value] as FilmForWheel)?.poster_path
   )})`,
 }));
+
 const circle = computed<number>(() => 2 * Math.PI * (pie.value!.offsetWidth / 2));
 
 const numberOfDeg = reactive<number[]>([0, 60, 120, 180, 240, 300]);
+
+const getModalState = (modalState: boolean): void => {
+  console.log(modalState,'modalState');
+  dialogOpen.value = modalState;
+};
+
+const calculateAngle = (): void => {
+  numberOfDeg.length = 0;
+  for (let index = 0; index < wheelFilms.length; index++) {
+    numberOfDeg.push((360 / wheelFilms.length) * index);
+  }
+};
 
 const created = () => {
   // запит першого входу
@@ -115,10 +146,7 @@ const created = () => {
         });
 
         wheelFilms.push(...typedData);
-        numberOfDeg.length = 0;
-        for (let index = 0; index < wheelFilms.length; index++) {
-          numberOfDeg.push((360 / wheelFilms.length) * index);
-        }
+        calculateAngle();
         //  width: calc((100% + var(--deleted-width)) / (var(--num-slices) - 1));
         dynamicWidth.value = getSegmentWidth(circle.value, 0, wheelFilms.length);
         console.log(circle.value, "circle");
@@ -132,16 +160,19 @@ const created = () => {
 created();
 
 const funcHover = (index: number) => {
-  console.log("testEnter", index);
-  showYt.value = true;
-  console.log(index, "index");
-  selectedIndex.value = index;
+  if (!rotateClass.value) {
+    showYt.value = true;
+    console.log(index, "index");
+    selectedIndex.value = index;
+  }
 };
 
 const funcHoverOut = () => {
-  console.log("testOut");
-  showYt.value = false;
-  selectedIndex.value = 0;
+  if (!rotateClass.value) {
+    console.log("testOut");
+    showYt.value = false;
+    selectedIndex.value = 0;
+  }
 };
 
 const getPoster = (poster: string) =>
@@ -158,21 +189,30 @@ const removeFilmFromWheel = (title: string): void => {
     (e) => (e as FilmForWheel).title === title
   );
 
-  wheelFilms.splice(indexOfTitle, 1);
-  numberOfDeg.length = 0;
-
-  for (let index = 0; index < wheelFilms.length; index++) {
-    numberOfDeg.push((360 / wheelFilms.length) * index);
-  }
-
-  dynamicWidth.value = getSegmentWidth(
-    circle.value,
-    +(pie.value?.children[indexOfTitle] as HTMLLIElement)?.offsetWidth,
-    wheelFilms.length
-  );
-
+  dialogOpen.value = true;
+  selectedIndex.value = indexOfTitle;
+  popupPoster.value = `url(${getPoster((wheelFilms[selectedIndex.value] as FilmForWheel)?.poster_path)})`;
+  removeAnimation.value = true;
+  setTimeout(() => (removeAnimation.value = false), 350);
   //for css calc(100% * 5 / 6);
 };
+
+watch(removeAnimation, (n) => {
+  //анімація видалення
+  if (!n) {
+    wheelFilms.splice(selectedIndex.value, 1);
+    calculateAngle();
+
+    dynamicWidth.value = getSegmentWidth(
+      circle.value,
+      +(pie.value?.children[selectedIndex.value] as HTMLLIElement)?.offsetWidth,
+      wheelFilms.length
+    );
+
+    numCubicPrev.value = "0deg";
+    rotateClass.value = false;
+  }
+});
 
 const startRotateWheel = () => {
   document.documentElement.style.setProperty("--wheel-duration", `${+props.duration}s`); // час роботи анімації
@@ -183,9 +223,6 @@ const startRotateWheel = () => {
 
   let stopAnimation = setTimeout(() => {
     pie.value && (pie.value.style.animationPlayState = "paused");
-    rotateClass.value = false;
-
-    numCubicPrev.value = "0deg";
 
     const liTitleFromPoint: string = String(
       document
@@ -201,6 +238,13 @@ const startRotateWheel = () => {
 </script>
 
 <style lang="scss" scoped>
+button[disabled] {
+  background: var(--disabled);
+  pointer-events: none;
+  outline-color: var(--disabled);
+  color: var(--text-color-light);
+}
+
 .dot {
   color: red;
   position: absolute;
@@ -267,6 +311,7 @@ const startRotateWheel = () => {
 
 .wheel-animation {
   animation: rotate var(--wheel-duration) cubic-bezier(0.42, 0, 0.58, 1);
+  /* pointer-events: none; */
 }
 
 .pie-chartTitle {
@@ -289,6 +334,13 @@ const startRotateWheel = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.pie-sliceRemove {
+  z-index: 1;
+  translate: 0 -100vh;
+  border: 3px solid var(--text-color-light-orange);
+  transition: all 350ms;
 }
 
 .clipPath-wheel {
