@@ -42,11 +42,13 @@
       />
 
       <div v-else-if="showYt" class="wheelPosterFilm" :style="showPoster"></div>
+      
       <DialogRadix
-        v-else-if="!rotateClass && numCubic !== '360deg' && dialogOpen"
+        v-if="!rotateClass && numCubic !== '360deg' && dialogOpen"
         :backgroundImg="popupPoster"
         @getModalState="getModalState"
       />
+    
     </div>
     <button
       class="btnRun-wheel"
@@ -188,10 +190,11 @@ const removeFilmFromWheel = (title: string): void => {
   const indexOfTitle: number = wheelFilms.findIndex(
     (e) => (e as FilmForWheel).title === title
   );
-
+  const particularSlice = (wheelFilms[indexOfTitle] as FilmForWheel);
+console.log(particularSlice?.poster_path,'particularSlice?.poster_path');
   dialogOpen.value = true;
   selectedIndex.value = indexOfTitle;
-  popupPoster.value = `url(${getPoster((wheelFilms[selectedIndex.value] as FilmForWheel)?.poster_path)})`;
+  popupPoster.value = `url(${getPoster(particularSlice?.poster_path ?? particularSlice?.backdrop_path)})`;
   removeAnimation.value = true;
   setTimeout(() => (removeAnimation.value = false), 350);
   //for css calc(100% * 5 / 6);
@@ -238,6 +241,7 @@ const startRotateWheel = () => {
 </script>
 
 <style lang="scss" scoped>
+
 button[disabled] {
   background: var(--disabled);
   pointer-events: none;

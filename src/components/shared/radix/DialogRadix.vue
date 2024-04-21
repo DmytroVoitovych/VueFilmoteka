@@ -1,15 +1,19 @@
 <template>
   <DialogRoot :defaultOpen="true"  v-model:open="open">
     <DialogPortal>
+    
       <DialogOverlay
         class="DialogOverlay"
         :style="{ backgroundImage: props.backgroundImg }"
+        
       />
+      
       <DialogContent>
         <DialogTitle />
         <DialogDescription />
         <DialogClose />
       </DialogContent>
+     
     </DialogPortal>
   </DialogRoot>
 </template>
@@ -29,52 +33,55 @@ import { computed, onMounted, ref, watch } from "vue";
 const open = ref<boolean>(true);
 const props = defineProps<{ backgroundImg: string }>();
 
-const getModalState = () => { emit('getModalState', open.value);};
+const getModalState = () => { open.value = false;setTimeout(()=> emit('getModalState', open.value),450);};
 const emit = defineEmits<{getModalState:[open: boolean] }>();
 
-const backgroundImg = ref<string>(props.backgroundImg);
-
-
-
 watch(open, () => getModalState());
-onMounted(() => {
-  backgroundImg.value = props.backgroundImg;
-  console.log(backgroundImg.value);
-});
+
 </script>
 
 <style lang="scss" scoped>
+
+@keyframes fadeIn {
+  from {
+    inset: 1000px;
+    opacity: 1;
+  }
+  to {
+    inset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    inset: 0;
+    opacity: 0;
+  }
+  to {
+    inset: 1000px;
+    opacity: 1;
+  }
+}
+
+.DialogOverlay[data-state="open"],
+.DialogContent[data-state="open"] {
+  animation: fadeIn 450ms ease-out;
+}
+
+.DialogOverlay[data-state="closed"],
+.DialogContent[data-state="closed"] {
+  animation: fadeOut 450ms ease-in;
+}
+
 .DialogOverlay {
   background-position: center;
   background-size: cover;
   z-index: 1;
   position: fixed;
   inset: 0;
-  animation: overlayShow 3s cubic-bezier(0.16, 1, 0.3, 1),
-    overlayScale 3s cubic-bezier(0.16, 1, 0.3, 1) 349ms;
-}
 
-@keyframes overlayShow {
-  from {
-    opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
-}
 
-@keyframes overlayScale {
-  0% {
-    scale: 1.5;
-  }
-  50% {
-    scale: 2;
-  }
-  75% {
-    scale: 2.5;
-  }
-  100% {
-    scale: 1;
-  }
-}
+
 </style>
