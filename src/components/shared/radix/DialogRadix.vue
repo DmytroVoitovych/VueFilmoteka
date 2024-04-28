@@ -1,37 +1,35 @@
 <template>
   <DialogRoot :defaultOpen="true"  v-model:open="open">
     <DialogPortal>
-    
-      <DialogOverlay
+     <DialogOverlay
         class="DialogOverlay"
         :style="{ backgroundImage: props.backgroundImg }"
         
       />
-      
-      <DialogContent>
-        <DialogTitle />
-        <DialogDescription />
-        <DialogClose />
-      </DialogContent>
-     
-    </DialogPortal>
+     <DialogContent class="DialogContent">
+      <DialogDescription>
+      <DialogTitle><u><slot name="dialogDescription"></slot></u></DialogTitle> выбивает из колеса! Для продолжения нажмите в любом месте.
+      </DialogDescription>
+     </DialogContent>
+     </DialogPortal>
   </DialogRoot>
 </template>
 
 <script setup lang="ts">
 import {
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogOverlay,
   DialogPortal,
   DialogRoot,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
+  
 } from "radix-vue";
-import { computed, onMounted, ref, watch } from "vue";
+import {ref, watch } from "vue";
 const open = ref<boolean>(true);
-const props = defineProps<{ backgroundImg: string }>();
+const props = defineProps<{
+  backgroundImg: string,
+  }>();
 
 const getModalState = () => { open.value = false;setTimeout(()=> emit('getModalState', open.value),450);};
 const emit = defineEmits<{getModalState:[open: boolean] }>();
@@ -81,6 +79,29 @@ watch(open, () => getModalState());
   position: fixed;
   inset: 0;
 
+  }
+
+  .DialogContent{
+    background-color: transparent;
+    border-radius: 6px;
+    box-shadow: hsla(206, 22%, 7%, 0.35) 0px 10px 38px -10px, hsla(206, 22%, 7%, 0.2) 0px 10px 20px -15px;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100vw;
+    z-index: 1;
+    text-align: center;
+    font-size: 24px;
+    backdrop-filter: brightness(0.5);
+    padding: 0 15;
+
+
+    u{
+     text-decoration-skip-ink: none;
+     color: var(--text-color-light-orange);
+     filter: drop-shadow(2px 4px 6px black);
+    }
   }
 
 

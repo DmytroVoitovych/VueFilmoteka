@@ -47,7 +47,11 @@
         v-if="!rotateClass && numCubic !== '360deg' && dialogOpen"
         :backgroundImg="popupPoster"
         @getModalState="getModalState"
-      />
+      >
+      <template v-slot:dialogDescription>
+        {{popupTitle}}
+      </template>
+      </DialogRadix>
     
     </div>
     <button
@@ -86,6 +90,7 @@ console.log(props.moode);
 
 //стейт
 const wheelFilms = reactive<FilmForWheel[] | object[]>([]); // дефолтні або ж додані з різних точок
+const battleFilms = reactive<[string?,string?]>([]);
 const showYt = ref(false);
 const selectedIndex = ref(0);
 const yt = ref<typeof YouIframe | null>(null);
@@ -97,6 +102,7 @@ const numCubicPrev = ref<string>("0deg");
 const dynamicWidth = ref<string>("58%");
 const removeAnimation = ref<boolean>(false);
 const popupPoster = ref<string>('');
+const popupTitle = ref<string>('');
 const dialogOpen = ref<boolean>(true);
 
 const xCoordinate = computed<number>(
@@ -191,14 +197,43 @@ const removeFilmFromWheel = (title: string): void => {
     (e) => (e as FilmForWheel).title === title
   );
   const particularSlice = (wheelFilms[indexOfTitle] as FilmForWheel);
-console.log(particularSlice?.poster_path,'particularSlice?.poster_path');
+ 
   dialogOpen.value = true;
   selectedIndex.value = indexOfTitle;
+
   popupPoster.value = `url(${getPoster(particularSlice?.poster_path ?? particularSlice?.backdrop_path)})`;
+  popupTitle.value = particularSlice?.title;
   removeAnimation.value = true;
+
   setTimeout(() => (removeAnimation.value = false), 350);
   //for css calc(100% * 5 / 6);
 };
+
+const chooseMovieAorB = (title: string) => {
+  
+  removeFilmFromWheel(title)
+  battleFilms.push(title);
+  console.log('battleFilms', battleFilms);
+  battleFilms.length === 2 && (battleFilms.length = 0);
+  const wheelWinningMovies: string[] = [];
+
+  
+};
+
+const runAnimationsAndLogicDpOnMood = (title: string): void => {
+  
+switch (props.moode) {
+  case 'takeoff':
+    removeFilmFromWheel(title);
+    break;
+case 'battle':
+   chooseMovieAorB(title);
+    break;
+  default:
+    break;
+}
+};
+
 
 watch(removeAnimation, (n) => {
   //анімація видалення
@@ -233,7 +268,7 @@ const startRotateWheel = () => {
         .find((e) => e.classList.contains("pie-slice"))?.textContent
     );
 
-    removeFilmFromWheel(liTitleFromPoint);
+    runAnimationsAndLogicDpOnMood(liTitleFromPoint);
 
     clearTimeout(stopAnimation);
   }, +(props.duration + "000"));
