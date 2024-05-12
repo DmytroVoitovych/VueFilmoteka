@@ -1,5 +1,5 @@
 <template>
-  <DialogRoot :defaultOpen="true"  v-model:open="open">
+  <DialogRoot :defaultOpen="true"  v-model:open="open" >
     <DialogPortal>
      <DialogOverlay
         class="DialogOverlay"
@@ -8,7 +8,7 @@
       />
      <DialogContent class="DialogContent">
       <DialogDescription>
-      <DialogTitle><u><slot name="dialogDescription"></slot></u></DialogTitle> выбивает из колеса! Для продолжения нажмите в любом месте.
+      <DialogTitle><u><slot name="dialogTitle"></slot></u></DialogTitle> <slot name="dialogDescription"></slot> 
       </DialogDescription>
      </DialogContent>
      </DialogPortal>
@@ -29,6 +29,7 @@ import {ref, watch } from "vue";
 const open = ref<boolean>(true);
 const props = defineProps<{
   backgroundImg: string,
+  battleFilm: [string?,string?]
   }>();
 
 const getModalState = () => { open.value = false;setTimeout(()=> emit('getModalState', open.value),450);};

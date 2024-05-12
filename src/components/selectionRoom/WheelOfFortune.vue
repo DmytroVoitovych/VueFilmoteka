@@ -46,13 +46,17 @@
       <DialogRadix
         v-if="!rotateClass && numCubic !== '360deg' && dialogOpen"
         :backgroundImg="popupPoster"
+        :battleFilm="battleFilmsTitle"
         @getModalState="getModalState"
       >
-      <template v-slot:dialogDescription>
+      <template v-slot:dialogTitle>
         {{popupTitle}}
       </template>
+      <template v-slot:dialogDescription>{{ contentInDialog }}</template>
       </DialogRadix>
-    
+    <DialogOverlayBattleMode v-if="!dialogOpen && battleFilmsDescript.length === 2" :battleFilm="battleFilmsDescript"
+     :getPoster="getPoster"  @getModalFilm="getModalFilm" />
+     
     </div>
     <button
       class="btnRun-wheel"
@@ -66,18 +70,13 @@
 
 <script lang="ts" setup>
 import DialogRadix from "../shared/radix/DialogRadix.vue";
+import DialogOverlayBattleMode from '../shared/radix/DialogOverlayForBattleMode.vue';
 import MovieAPiServer from "@/helpers/req";
-import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
+import { computed, onMounted, pushScopeId, reactive, ref, watch, watchEffect } from "vue";
 import YouIframe from "../iframe/YouIframe.vue";
 import { getSegmentWidth } from "./helper";
-
-type FilmForWheel = {
-  title: string;
-  backdrop_path: string;
-  id: number;
-  poster_path: string;
-  video: { id: number; results: { [key: string]: string }[] };
-};
+import type { FilmForWheel } from "@/types/types";
+import { intersectionBy } from "lodash";
 
 const http = new MovieAPiServer();
 
@@ -90,7 +89,8 @@ console.log(props.moode);
 
 //стейт
 const wheelFilms = reactive<FilmForWheel[] | object[]>([]); // дефолтні або ж додані з різних точок
-const battleFilms = reactive<[string?,string?]>([]);
+const battleFilmsTitle = reactive<[string?, string?]>([]);
+const battleFilmsDescript = reactive<FilmForWheel[] | object[]>([]);
 const showYt = ref(false);
 const selectedIndex = ref(0);
 const yt = ref<typeof YouIframe | null>(null);
@@ -104,6 +104,8 @@ const removeAnimation = ref<boolean>(false);
 const popupPoster = ref<string>('');
 const popupTitle = ref<string>('');
 const dialogOpen = ref<boolean>(true);
+
+const COPY_WHEELFILMS:FilmForWheel[] | object[] = [];
 
 const xCoordinate = computed<number>(
   () => arrowFortun.value?.getBoundingClientRect().x as number
@@ -123,6 +125,20 @@ const showPoster = computed(() => ({
 }));
 
 const circle = computed<number>(() => 2 * Math.PI * (pie.value!.offsetWidth / 2));
+
+const contentInDialog = computed<string>(() => {
+  switch (props.moode) {
+    case 'takeoff':
+      return 'выбивает из колеса! Для продолжения нажмите в любом месте.';
+
+    case 'battle':
+      return battleFilmsTitle.length === 1 ? 'попадает как участник для вашего вибора! Для продолжения нажмите в любом месте.' :
+        'являеться вторим участникам батла! Для продолжения нажмите в любом месте, да начнется батл. ';
+    default:
+      return '';
+        }
+}
+);
 
 const numberOfDeg = reactive<number[]>([0, 60, 120, 180, 240, 300]);
 
@@ -153,7 +169,9 @@ const created = () => {
           );
         });
 
+        const copy: readonly FilmForWheel[] = Object.freeze(typedData);
         wheelFilms.push(...typedData);
+        COPY_WHEELFILMS.push(...copy);
         calculateAngle();
         //  width: calc((100% + var(--deleted-width)) / (var(--num-slices) - 1));
         dynamicWidth.value = getSegmentWidth(circle.value, 0, wheelFilms.length);
@@ -212,13 +230,28 @@ const removeFilmFromWheel = (title: string): void => {
 const chooseMovieAorB = (title: string) => {
   
   removeFilmFromWheel(title)
-  battleFilms.push(title);
-  console.log('battleFilms', battleFilms);
-  battleFilms.length === 2 && (battleFilms.length = 0);
-  const wheelWinningMovies: string[] = [];
-
-  
+  battleFilmsTitle.push(title);
+  battleFilmsTitle.length === 2 &&  battleFilmsDescript.push(...intersectionBy(COPY_WHEELFILMS, battleFilmsTitle.map((title) => ({ title })), 'title') as FilmForWheel[]);
+  console.log(battleFilmsDescript,'battleFilmsDescript');
+  battleFilmsDescript.length === 2 && (battleFilmsTitle.length = 0);
+   
 };
+
+const getModalFilm = (selectedFilm: FilmForWheel): void => {
+  wheelFilms.some((e)=> (e as FilmForWheel).id === selectedFilm.id) && (wheelFilms.length = 0);
+  wheelFilms.push(selectedFilm);
+
+   calculateAngle();
+
+    dynamicWidth.value = getSegmentWidth(
+      circle.value,
+      +(pie.value?.children[selectedIndex.value] as HTMLLIElement)?.offsetWidth,
+      wheelFilms.length
+    );
+
+  battleFilmsDescript.length = 0;   
+  
+ };
 
 const runAnimationsAndLogicDpOnMood = (title: string): void => {
   
@@ -235,9 +268,11 @@ case 'battle':
 };
 
 
-watch(removeAnimation, (n) => {
+watch(removeAnimation, (n,old) => {
   //анімація видалення
   if (!n) {
+    
+    console.log("удаление",wheelFilms);  
     wheelFilms.splice(selectedIndex.value, 1);
     calculateAngle();
 
@@ -251,6 +286,19 @@ watch(removeAnimation, (n) => {
     rotateClass.value = false;
   }
 });
+
+watch(() => wheelFilms, (n) => {
+  console.log('battleFilmsDescript', battleFilmsDescript);
+
+  const battleFilmsCheck: boolean = n.length === 2 && !battleFilmsTitle.length && !battleFilmsDescript.length;
+  if (battleFilmsCheck) {
+      console.log('battleFilmsDescriptinside', battleFilmsDescript);
+    
+    battleFilmsDescript.push(...(wheelFilms as FilmForWheel[]));
+    dialogOpen.value = false; 
+     }
+},{deep:true,immediate:true})
+
 
 const startRotateWheel = () => {
   document.documentElement.style.setProperty("--wheel-duration", `${+props.duration}s`); // час роботи анімації
@@ -268,11 +316,16 @@ const startRotateWheel = () => {
         .find((e) => e.classList.contains("pie-slice"))?.textContent
     );
 
+    
     runAnimationsAndLogicDpOnMood(liTitleFromPoint);
 
     clearTimeout(stopAnimation);
   }, +(props.duration + "000"));
 };
+
+
+
+
 </script>
 
 <style lang="scss" scoped>
