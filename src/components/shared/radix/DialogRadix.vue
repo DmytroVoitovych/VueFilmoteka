@@ -1,6 +1,6 @@
 <template>
-  <DialogRoot :defaultOpen="true"  v-model:open="open" >
-    <DialogPortal>
+  <DialogRoot :defaultOpen="true"  v-model:open="open"  >
+    <DialogPortal >
      <DialogOverlay
         class="DialogOverlay"
         :style="{ backgroundImage: props.backgroundImg }"
@@ -22,20 +22,25 @@ import {
   DialogOverlay,
   DialogPortal,
   DialogRoot,
-  DialogTitle
-  
+  DialogTitle,
+   
 } from "radix-vue";
-import {ref, watch } from "vue";
-const open = ref<boolean>(true);
+import { ref, watch } from "vue";
+
 const props = defineProps<{
   backgroundImg: string,
-  battleFilm: [string?,string?]
-  }>();
+  battleFilm: [string?, string?],
+  flagForDialogWin: number
+}>();
+
+const open = ref<boolean>(true);
 
 const getModalState = () => { open.value = false;setTimeout(()=> emit('getModalState', open.value),450);};
 const emit = defineEmits<{getModalState:[open: boolean] }>();
 
-watch(open, () => getModalState());
+watch(open, () => props.flagForDialogWin === 0 && getModalState());
+
+watch(() => props.flagForDialogWin, (n) => n === 1 && (open.value = true)); // примусове відкриття за флагом
 
 </script>
 

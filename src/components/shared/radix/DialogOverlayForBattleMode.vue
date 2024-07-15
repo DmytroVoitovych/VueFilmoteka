@@ -1,6 +1,7 @@
 <template>
   <DialogRoot :defaultOpen="true" v-model:open="open">
     <DialogPortal>
+    <DialogOverlay class="DialogOverlayBattleWrapper">
      <DialogOverlay 
          v-for="film of props.battleFilm"
         class="DialogOverlayBattle"
@@ -11,9 +12,10 @@
               class="dialogWheelBattleBtn"
               @click="()=>getModalFilm((film as FilmForWheel))"
             >
-            select and continue with: {{ (film as FilmForWheel).title }}
+            select and continue with: <br/> {{ (film as FilmForWheel).title }}
             </button>
           </DialogClose>
+      </DialogOverlay>
       </DialogOverlay>
      </DialogPortal>
   </DialogRoot>
@@ -66,6 +68,26 @@ onMounted(() => {
      filter: drop-shadow(2px 4px 6px black);
   }
 
+  
+
+  }
+
+.DialogOverlayBattleWrapper{
+   position: relative;
+   &::after{ 
+    content: '';
+    position: fixed;
+    width: 50%;
+    height: 50%;
+    background-image: url(../../../assets/images/wheel/ver.png);
+    background-position: center;
+    background-size: cover;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+  }
   }
 
   .DialogOverlayBattle:last-child{
@@ -82,7 +104,9 @@ onMounted(() => {
   background: linear-gradient(0deg, rgb(255, 151, 0) 0%, rgb(251, 75, 2) 100%);
   color: var(--text-color-light);
   border: none;
-  margin-top: 100%;
+    position: sticky;
+    top: 70vh;
+    cursor: pointer;
   }
   
 </style>
