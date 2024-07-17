@@ -135,7 +135,7 @@ const whenModeNoDefault = computed<boolean>(() => flagForDialogWin.value === 1 &
 const contentInDialog = computed<string>(() => {
 
   const defaultContent: string = 'победитель турнира приятного просмотра)';
-  // console.log(whenModeNoDefault);
+  
   if (whenModeNoDefault.value) {
     console.log('wheelFilms.length',wheelFilms.length, whenModeNoDefault.value);
     return defaultContent;
@@ -163,16 +163,37 @@ const canIshowDialogComponent = computed<boolean>(() => {
 
 const numberOfDeg = reactive<number[]>([0, 60, 120, 180, 240, 300]);
 
-var counterTakeOff:number = 0; // кількість закритів
+const funcCountsIfIsNoDefaultMode: {
+  counterTakeOff: number, counterBattles: number, takePlus: Function, battlePlus: Function
+} = {
+
+  counterTakeOff: 0, // кількість закритів  
+  counterBattles: 0,
+
+  takePlus(): void {
+    if (props.moode === 'takeoff') {
+      this.counterTakeOff === COPY_WHEELFILMS.length - 1 && (this.counterTakeOff = 0);
+      this.counterTakeOff++;
+      this.counterTakeOff === COPY_WHEELFILMS.length - 1 && (flagForDialogWin.value = 1);
+    }
+  },
+
+  battlePlus(): void {
+    if (props.moode === 'battle') {
+      this.counterBattles === COPY_WHEELFILMS.length - 1 && (this.counterBattles = 0);
+      this.counterBattles++;
+      this.counterBattles === COPY_WHEELFILMS.length - 1 && (flagForDialogWin.value = 1);
+    }
+  }
+};
 
 const getModalState = (modalState: boolean): void => {
   console.log(modalState, 'modalState');
   
   dialogOpen.value = modalState;
-  props.moode === 'takeoff' && counterTakeOff++;
-  counterTakeOff === COPY_WHEELFILMS.length - 1 && (flagForDialogWin.value = 1);
 
-  console.log('counter',counterTakeOff);
+  funcCountsIfIsNoDefaultMode.takePlus();
+  
   if (props.moode !== 'battle') {
     popupPoster.value = '';
     popupTitle.value = '';
@@ -282,6 +303,8 @@ const getModalFilm = (selectedFilm: FilmForWheel): void => {
   wheelFilms.some((e)=> (e as FilmForWheel).id === selectedFilm.id) && (wheelFilms.length = 0);
   wheelFilms.push(selectedFilm);
 
+  funcCountsIfIsNoDefaultMode.battlePlus();
+  
    calculateAngle();
 
     dynamicWidth.value = getSegmentWidth(
