@@ -20,3 +20,10 @@ export const getSegmentWidth = (
       return `calc((${circle}px + ${segmentWidth}px) / (${numSegments} - 1) )`;
   }
 };
+
+import { pick } from 'lodash';
+
+export const tranformObjectForLists = (arr: {}[], keys: string[]) =>
+  arr
+    .map(obj => pick(obj, keys))
+    .filter(e => 'release_date' in e && e.release_date);

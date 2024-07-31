@@ -124,6 +124,7 @@ export default class MovieAPiServer {
 
     try {
       const response = await http.get(URL);
+
       if (!response.data.results.length) {
         throw new Error("We didn't find anything");
       }
@@ -135,6 +136,35 @@ export default class MovieAPiServer {
       toBack && toBack();
       console.log(error);
     }
+  }
+
+  async transformTheObjectOfMovies(transformData: any[]) {
+    const video = await this.getVideoById(this.getlang(), transformData); //base data
+    const idVideo = video
+      .filter(e => !e.data.results.length)
+      .map(e => e.data.id);
+    const videoEN = await this.getVideoById('en', undefined, idVideo); //base data
+
+    const combineVideo = [
+      ...video.filter(e => e.data.results.length),
+      ...videoEN,
+    ];
+
+    if (!video) {
+      throw new Error('We coud not get videos by this request');
+    }
+    console.log('combineVideo', combineVideo);
+    transformData.map(
+      e => (e.video = combineVideo.map(e => e.data).find(v => v.id === e.id))
+    );
+    // не забути проконтролювати поведінку якщо відео не буде
+    const particularKeys = transformData.map(obj =>
+      pick(obj, this.keysOfRandomFilms)
+    );
+
+    console.log(particularKeys, 'response');
+
+    return particularKeys;
   }
 
   async fetchMovieWatchedNow(toBack?: Function) {
@@ -152,32 +182,9 @@ export default class MovieAPiServer {
         this.numberOfRandomFilms
       );
 
-      const video = await this.getVideoById(this.getlang(), transformData); //base data
-      const idVideo = video
-        .filter(e => !e.data.results.length)
-        .map(e => e.data.id);
-      const videoEN = await this.getVideoById('en', undefined, idVideo); //base data
+      const res = await this.transformTheObjectOfMovies(transformData);
 
-      const combineVideo = [
-        ...video.filter(e => e.data.results.length),
-        ...videoEN,
-      ];
-
-      if (!video) {
-        throw new Error('We coud not get videos by this request');
-      }
-      console.log('combineVideo', combineVideo);
-      transformData.map(
-        e => (e.video = combineVideo.map(e => e.data).find(v => v.id === e.id))
-      );
-      // не забути проконтролювати поведінку якщо відео не буде
-      const particularKeys = transformData.map(obj =>
-        pick(obj, this.keysOfRandomFilms)
-      );
-
-      console.log(particularKeys, 'response');
-
-      return particularKeys;
+      return res;
     } catch (error) {
       toBack && toBack();
       console.log(error);

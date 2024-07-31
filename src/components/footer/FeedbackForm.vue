@@ -1,7 +1,11 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <div ref="el" class="modal-feedback" @keydown.esc="props.toggle">
-    <button class="close closeV'" type="button" @click="props.toggle">
+  <div 
+  ref="el"
+  class="modal-feedback"
+  @keydown.esc="()=>props.toggle()"
+  >
+    <button class="close closeV'" type="button" @click="()=>props.toggle()">
       <svg width="20" height="20" aria-hidden="true">
         <use href="../../assets/sprite.svg#icon-close"></use>
       </svg>

@@ -1,5 +1,5 @@
 <template>
-  <!-- <div> -->
+ 
   <div v-if="path.includes('Auth')" id="auth">
     <router-view></router-view>
   </div>
@@ -38,7 +38,7 @@
       <ModalMain :filmsid="filmsid" ref="open" @modalstate="modalstate" />
     </teleport>
   </div>
-  <!-- </div> -->
+  
 </template>
 
 <script lang="ts" setup>
