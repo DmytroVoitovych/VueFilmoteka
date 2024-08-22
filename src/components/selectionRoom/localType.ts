@@ -8,6 +8,7 @@ type DatalistProp = {
 type UllistProp = {
   title: string;
   id: number;
+  release_date: string;
   vote_average?: number;
   backdrop_path?: string | null;
   poster_path?: string | null;

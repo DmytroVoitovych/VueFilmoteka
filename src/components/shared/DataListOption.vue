@@ -4,7 +4,7 @@
 :value="transfomDublicateValue(title,release_date)" :key="id" 
 :data-id="id" ref="datalistChildren"
  >
-rate:&#160;&#10145;{{vote_average.toFixed(1) ?? 0}}&#160;  data:&#160;&#127916;{{ release_date.split('-')[0] ?? '' }}
+rate:&#160;&#10145;{{vote_average?.toFixed(1) ?? 0}}&#160;  data:&#160;&#127916;{{ release_date?.split('-')[0] ?? '' }}
 
 </option>    
 </datalist>

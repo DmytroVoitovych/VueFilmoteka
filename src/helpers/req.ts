@@ -1,7 +1,8 @@
 import { Block } from 'notiflix';
 import http from './axios';
 import 'ts-replace-all';
-import { sampleSize, pick } from 'lodash';
+import sampleSize from 'lodash.samplesize';
+import pick from 'lodash.pick';
 
 export default class MovieAPiServer {
   searchQuery: string;

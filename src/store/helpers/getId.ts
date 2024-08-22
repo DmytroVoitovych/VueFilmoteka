@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash'; // швидке звірення масивів // швидше джейсон
+import isEqual from 'lodash.isequal'; // швидке звірення масивів // швидше джейсон
 
 export const getAndCompare = (storeArr: any[], nodeArr: any[]) =>
   isEqual(

@@ -45,6 +45,8 @@
                   >{{
                     getGenre(genre_ids ?? genres?.map((e: obj) => e.id))
 
+
+
                   }}&ensp;|&ensp;</span
                 >
                 {{ year(release_date)
@@ -87,7 +89,7 @@ import SkeletonTrend from "./SkeletonTrend.vue";
 import { axio, cacheOptions, nodeHttp } from "../../helpers/axios";
 import { Report, Block } from "notiflix";
 import { store } from "@/store/filmsStore";
-import { intersectionWith } from "lodash";
+import intersectionWith from "lodash.intersectionwith";
 import { featuresStore } from "@/store/storeForFeatures";
 import { myDatabase } from "@/store/filmsStore";
 import img from "@/assets/images/ded.jpg";
