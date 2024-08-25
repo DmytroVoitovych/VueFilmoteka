@@ -17,7 +17,12 @@
             removeAnimation && selectedIndex === index ? 'pie-sliceRemove' : '',
           ]"
           :style="{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original/${obj.backdrop_path})`,
+            backgroundImage:
+              obj?.backdrop_path || obj?.poster_path
+                ? `url(https://image.tmdb.org/t/p/original/${
+                    obj?.backdrop_path ?? obj?.poster_path
+                  })`
+                : `url(${img})`,
             transform: `rotate(${numberOfDeg[index]}deg)`,
             height: wheelFilms.length === 1 ? '100%' : '50%',
           }"
@@ -88,12 +93,17 @@ import {
   nextTick,
 } from "vue";
 import YouIframe from "../iframe/YouIframe.vue";
-import { getSegmentWidth } from "./helper";
+import { getSegmentWidth, getSessionFilmsList } from "./helper";
 import type { FilmForWheel } from "@/types/types";
 import { intersectionBy } from "lodash";
 import type { UllistProp } from "./localType";
+import { useRoute } from "vue-router";
+import img from "@/assets/images/ded.jpg";
+import { onBeforeUpdate } from "vue";
+import { onBeforeMount } from "vue";
 
 const http = new MovieAPiServer();
+const route = useRoute();
 
 //props
 const props = defineProps<{
@@ -130,10 +140,20 @@ const yCoordinate = (): number => arrowFortun.value?.getBoundingClientRect().y a
 const videoExist = computed<boolean>(
   () => !!(wheelFilms[selectedIndex.value] as FilmForWheel).video.results.length
 );
+
+const getPoster = (poster: string | null) => {
+  //постери
+  console.log(poster, "poster");
+  return typeof poster === "string"
+    ? `https://image.tmdb.org/t/p/original/${poster}`
+    : img;
+};
+
 const showPoster = computed(() => ({
   display: showYt.value ? "block" : "none",
   backgroundImage: `url(${getPoster(
-    (wheelFilms[selectedIndex.value] as FilmForWheel)?.poster_path
+    (wheelFilms[selectedIndex.value] as FilmForWheel)?.poster_path ??
+      (wheelFilms[selectedIndex.value] as FilmForWheel)?.backdrop_path
   )})`,
 }));
 
@@ -221,45 +241,77 @@ const calculateAngle = (): void => {
   }
 };
 
-// watch(
-//   () => props.userFilms,
-//   () => {
-//     http.transformTheObjectOfMovies(props.userFilms);
-//   },
-//   { deep: true }
-// );
+const setInitialValues = (typedData: FilmForWheel[]): void => {
+  const copy: readonly FilmForWheel[] = Object.freeze(typedData);
+  wheelFilms.push(...typedData);
+  COPY_WHEELFILMS.push(...copy);
+  calculateAngle();
+  //  width: calc((100% + var(--deleted-width)) / (var(--num-slices) - 1));
+  dynamicWidth.value = getSegmentWidth(circle.value, 0, wheelFilms.length);
+  console.log(circle.value, "circle");
+};
+
+watch(
+  () => props.userFilms,
+  (n) => {
+    console.log(wheelFilms?.length, n.length);
+    if (n.length !== wheelFilms?.length && wheelFilms?.length) {
+      const newItem = n.filter((e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id);
+      console.log("test first");
+      http
+        .transformTheObjectOfMovies(newItem)
+        .then((e) => {
+          n.length === 1 && (wheelFilms.length = 0); // !!!!
+          return e;
+        })
+        .then((e) => setInitialValues(e as FilmForWheel[]));
+    }
+  }
+);
 
 const created = () => {
   // запит першого входу
+  if (!getSessionFilmsList() && !("id" in route.query)) {
+    http
+      .fetchMovieWatchedNow()
+      .then((data) => {
+        if (data) {
+          const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
+            return (
+              typeof item.title === "string" &&
+              typeof item.backdrop_path === "string" &&
+              typeof item.id === "number" &&
+              typeof item.poster_path === "string"
+            );
+          });
 
+          setInitialValues(typedData);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching movies:", error);
+      });
+  }
+};
+
+created();
+
+onBeforeMount(() => {
   http
-    .fetchMovieWatchedNow()
+    .transformTheObjectOfMovies(JSON.parse(getSessionFilmsList() as string))
     .then((data) => {
       if (data) {
+        console.log("daata", data);
         const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
-          return (
-            typeof item.title === "string" &&
-            typeof item.backdrop_path === "string" &&
-            typeof item.id === "number" &&
-            typeof item.poster_path === "string"
-          );
+          return typeof item.title === "string" && typeof item.id === "number";
         });
-
-        const copy: readonly FilmForWheel[] = Object.freeze(typedData);
-        wheelFilms.push(...typedData);
-        COPY_WHEELFILMS.push(...copy);
-        calculateAngle();
-        //  width: calc((100% + var(--deleted-width)) / (var(--num-slices) - 1));
-        dynamicWidth.value = getSegmentWidth(circle.value, 0, wheelFilms.length);
-        console.log(circle.value, "circle");
+        setInitialValues(typedData);
       }
     })
     .catch((error) => {
       console.error("Error fetching movies:", error);
     });
-};
-
-created();
+});
 
 const funcHover = (index: number) => {
   if (!rotateClass.value) {
@@ -276,10 +328,6 @@ const funcHoverOut = () => {
     selectedIndex.value = 0;
   }
 };
-
-const getPoster = (poster: string) =>
-  //постери
-  `https://image.tmdb.org/t/p/original/${poster}`;
 
 const getRandomNum = (): void => {
   const randomNum: number = Math.floor(Math.random() * (3600 + 1 - 360) + 360);

@@ -13,8 +13,8 @@
   ],
  
   "compilerOptions": {
-  "target": "esNext",   
- "lib": ["es2021","es2022","es2023"],   
+  "target": "ES5",   
+ "lib": ["ESNext","DOM"],   
  "allowJs": true,
  "isolatedModules": false,
  "skipLibCheck": true,

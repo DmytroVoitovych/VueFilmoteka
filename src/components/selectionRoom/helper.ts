@@ -27,3 +27,6 @@ export const tranformObjectForLists = (arr: {}[], keys: string[]) =>
   arr
     .map(obj => pick(obj, keys))
     .filter(e => 'release_date' in e && e.release_date);
+
+export const getSessionFilmsList = (): string | null =>
+  window.sessionStorage.getItem('addedForWheel');

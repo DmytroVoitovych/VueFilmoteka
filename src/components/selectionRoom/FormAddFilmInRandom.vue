@@ -58,7 +58,7 @@ import { watch } from "vue";
 import { onMounted } from "vue";
 import { generatorId } from "../../helpers/generatorId";
 import { Confirm } from "notiflix";
-import { tranformObjectForLists } from "./helper";
+import { tranformObjectForLists, getSessionFilmsList } from "./helper";
 import ListOfAddedFilms from "./ListOfAddedFilms.vue";
 import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
@@ -107,11 +107,36 @@ defineExpose({ transformDataForUlList }); // експоз для компоне�
 
 const setLangContent = () => getFormAddingFilmContent(lang.value);
 
-const getDataFromStorage = (): void => {
-  const sessionData: string | null = window.sessionStorage.getItem("addedForWheel");
+const pushWithQueryOfFilms = (id: string): void => {
+  console.log("route", router);
+  router.push({
+    name: "SelectionRoom",
+    query: {
+      id,
+    },
+  });
+};
 
-  if (sessionData) {
-    noTransformDataForChoosenList.push(...JSON.parse(sessionData as string));
+const getDataFromStorage = (): void => {
+  console.log("routparamsId", "id" in route.query);
+  if (getSessionFilmsList()) {
+    noTransformDataForChoosenList.push(...JSON.parse(getSessionFilmsList() as string));
+    pushWithQueryOfFilms(listOfId.value);
+    return;
+  } else if ("id" in route.query) {
+    const listOfQueryId: string[] = (route.query.id as string).split(",");
+
+    Promise.all(listOfQueryId.map((id) => http.fetchMovieById(id)))
+      .then((data) => {
+        noTransformDataForChoosenList.push(...data);
+        window.sessionStorage.setItem(
+          "addedForWheel",
+          JSON.stringify(transformDataForUlList.value)
+        );
+      })
+      .catch((err) => console.log(err));
+  } else {
+    return;
   }
 };
 
@@ -136,16 +161,6 @@ const findFilm = throttle(() => {
     // зробити так щоб похід за відео був тіки по обраному з дата листа
   }
 }, 50);
-
-const pushWithQueryOfFilms = (id: string): void => {
-  console.log("route", router);
-  router.push({
-    name: "SelectionRoom",
-    query: {
-      id,
-    },
-  });
-};
 
 const blurOnInput = (e: Event) => {
   focus.value = false;
