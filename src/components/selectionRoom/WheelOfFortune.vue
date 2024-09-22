@@ -82,28 +82,20 @@
 import DialogRadix from "../shared/radix/DialogRadix.vue";
 import DialogOverlayBattleMode from "../shared/radix/DialogOverlayForBattleMode.vue";
 import MovieAPiServer from "@/helpers/req";
-import {
-  computed,
-  onMounted,
-  pushScopeId,
-  reactive,
-  ref,
-  watch,
-  watchEffect,
-  nextTick,
-} from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import YouIframe from "../iframe/YouIframe.vue";
-import { getSegmentWidth, getSessionFilmsList } from "./helper";
+import { getSegmentWidth, getSessionFilmsList, changeUrlAndStore } from "./helper";
 import type { FilmForWheel } from "@/types/types";
 import { intersectionBy } from "lodash";
 import type { UllistProp } from "./localType";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import img from "@/assets/images/ded.jpg";
-import { onBeforeUpdate } from "vue";
 import { onBeforeMount } from "vue";
+import { nextTick } from "vue";
 
 const http = new MovieAPiServer();
 const route = useRoute();
+const router = useRouter();
 
 //props
 const props = defineProps<{
@@ -251,28 +243,27 @@ const setInitialValues = (typedData: FilmForWheel[]): void => {
   console.log(circle.value, "circle");
 };
 
-watch(
-  () => props.userFilms,
-  (n) => {
-    console.log(wheelFilms?.length, n.length);
-    if (n.length !== wheelFilms?.length && wheelFilms?.length) {
-      const newItem = n.filter((e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id);
-      console.log("test first");
-      http
-        .transformTheObjectOfMovies(newItem)
-        .then((e) => {
-          n.length === 1 && (wheelFilms.length = 0); // !!!!
-          return e;
-        })
-        .then((e) => setInitialValues(e as FilmForWheel[]));
+const transformMixedListOfUserFilms = (
+  mixedArr: UllistProp[],
+  apiArr: FilmForWheel[]
+) => {
+  const addVideoProperty = mixedArr.map((e) => {
+    if (e?.video) {
+      return e;
+    } else {
+      e.video = { id: e.id, results: [] };
+      return e;
     }
-  }
-);
+  });
+  // console.log(addVideoProperty, "add");
+  return addVideoProperty.length !== apiArr.length
+    ? addVideoProperty.map((e) =>
+        e.id.toString().includes("user") ? e : apiArr?.find((item) => item.id === e.id)
+      )
+    : apiArr;
+};
 
-const created = () => {
-  // запит першого входу
-  if (!getSessionFilmsList() && !("id" in route.query)) {
-    http
+const initialStart = ()=>http
       .fetchMovieWatchedNow()
       .then((data) => {
         if (data) {
@@ -291,26 +282,50 @@ const created = () => {
       .catch((error) => {
         console.error("Error fetching movies:", error);
       });
+
+const created = () => {
+  // запит першого входу
+  console.log('запуск');
+  if (!getSessionFilmsList()?.length && !("id" in route.query)) {
+    console.log("test last");
+    initialStart();
   }
 };
 
 created();
 
 onBeforeMount(() => {
-  http
-    .transformTheObjectOfMovies(JSON.parse(getSessionFilmsList() as string))
-    .then((data) => {
-      if (data) {
-        console.log("daata", data);
-        const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
-          return typeof item.title === "string" && typeof item.id === "number";
-        });
-        setInitialValues(typedData);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching movies:", error);
-    });
+  // виконати фільтр на кастомні і можливо врахувати їх порядок
+  const filmsFromStorage: UllistProp[] = JSON.parse(getSessionFilmsList() as string);
+
+  if (filmsFromStorage) {
+    const separatedStorageData = filmsFromStorage.filter(
+      (e) => !e.id.toString().includes("user")
+    );
+
+    http
+      .transformTheObjectOfMovies(separatedStorageData)
+      .then((data) => {
+        if (data) {
+          console.log("daata", data);
+          const typedData: FilmForWheel[] = data.filter((item): item is FilmForWheel => {
+            return typeof item.title === "string" && typeof item.id === "number";
+          });
+          return typedData;
+        }
+      })
+      .then((data) => {
+        setInitialValues(
+          transformMixedListOfUserFilms(
+            filmsFromStorage,
+            data as FilmForWheel[]
+          ) as FilmForWheel[]
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching movies:", error);
+      });
+  }
 });
 
 const funcHover = (index: number) => {
@@ -350,6 +365,17 @@ const extractMovieInfoByTitle = (title: string): void => {
   popupTitle.value = particularSlice?.title;
 };
 
+const setUserDataInWheel = (): void => {
+  const isUserDataExist: boolean = getSessionFilmsList() !== null && "id" in route.query;
+
+  if (isUserDataExist) {
+    console.log("сработало");
+    changeUrlAndStore(selectedIndex.value, router);
+    props.moode !== "battle" && calculateAngle();
+    return;
+  }
+};
+
 const removeFilmFromWheel = (title: string): void => {
   extractMovieInfoByTitle(title);
   removeAnimation.value = true;
@@ -371,6 +397,7 @@ const chooseMovieAorB = (title: string) => {
     );
   console.log(battleFilmsDescript, "battleFilmsDescript");
   battleFilmsDescript.length === 2 && (battleFilmsTitle.length = 0);
+  // setUserDataInWheel();
 };
 
 const getModalFilm = (selectedFilm: FilmForWheel): void => {
@@ -379,7 +406,7 @@ const getModalFilm = (selectedFilm: FilmForWheel): void => {
   wheelFilms.push(selectedFilm);
 
   funcCountsIfIsNoDefaultMode.battlePlus();
-
+  setUserDataInWheel();
   calculateAngle();
 
   dynamicWidth.value = getSegmentWidth(
@@ -389,6 +416,10 @@ const getModalFilm = (selectedFilm: FilmForWheel): void => {
   );
 
   battleFilmsDescript.length = 0;
+
+  wheelFilms.length === 2 && // можливо винести в окрему функцію
+    !battleFilmsDescript.length &&
+    battleFilmsDescript.push(...(wheelFilms as FilmForWheel[]));
 };
 
 const runAnimationsAndLogicDpOnMood = (title: string): void => {
@@ -406,12 +437,57 @@ const runAnimationsAndLogicDpOnMood = (title: string): void => {
   }
 };
 
+watch(
+  () => props.userFilms,
+  (n, o) => {
+ 
+   if (n.length > o?.length) {
+      const cleanIfIsFirst = (): void => {
+        n.length === 1 && (wheelFilms.length = 0);
+      };
+
+      console.log(wheelFilms?.length, n.length);
+      if (n.length !== wheelFilms?.length && wheelFilms?.length) {
+        const newItem = n.filter((e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id);
+        console.log("test first");
+        const customUserFilm: FilmForWheel = {
+          id: newItem[0]?.id,
+          title: newItem[0]?.title,
+          backdrop_path: newItem[0]?.backdrop_path ?? null,
+          poster_path: newItem[0]?.poster_path ?? null,
+          video: { id: 8687, results: [] },
+        };
+
+        cleanIfIsFirst();
+        // !!! проробити оброку доданих фільмів з апі і кастомних
+        newItem[0]?.id?.toString().includes("user")
+          ? setInitialValues([customUserFilm])
+          : http
+              .transformTheObjectOfMovies(newItem)
+              .then((e) => e)
+              .then((e) => setInitialValues(e as FilmForWheel[]));
+      }
+    }
+   else {
+          
+     const deletedItemIndex = n.findIndex(
+        (e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id
+      );
+     wheelFilms.splice(deletedItemIndex, 1);
+     !n.length && window.sessionStorage.removeItem('addedForWheel')
+    calculateAngle();
+     !n.length && COPY_WHEELFILMS.length && initialStart(); 
+    }
+  }
+);
+
 watch(removeAnimation, (n, old) => {
   //анімація видалення
   if (!n) {
     console.log("удаление", wheelFilms);
     wheelFilms.splice(selectedIndex.value, 1);
     calculateAngle();
+    props.moode !== "battle" && setUserDataInWheel();
 
     dynamicWidth.value = getSegmentWidth(
       circle.value,
@@ -424,19 +500,24 @@ watch(removeAnimation, (n, old) => {
   }
 });
 
+
 watch(
   () => wheelFilms,
-  (n) => {
-    console.log("battleFilmsDescript", battleFilmsDescript);
-
+  (n, o) => {
+   
     const battleFilmsCheck: boolean =
-      n.length === 2 && !battleFilmsTitle.length && !battleFilmsDescript.length;
+      n.length === 2 &&
+      Number(o?.length) > n.length &&
+      !battleFilmsTitle.length &&
+      !battleFilmsDescript.length;
+      
     if (battleFilmsCheck && props.moode === "battle") {
       console.log("battleFilmsDescriptinside", battleFilmsDescript);
 
       battleFilmsDescript.push(...(wheelFilms as FilmForWheel[]));
       dialogOpen.value = false;
     }
+    
   },
   { deep: true, immediate: true }
 );

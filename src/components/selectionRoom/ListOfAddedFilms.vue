@@ -22,6 +22,13 @@
           :src=" getPoster((visibleLi as UllistProp)?.backdrop_path! ?? (visibleLi as UllistProp)?.poster_path! ) "
           :alt="(visibleLi as UllistProp)?.title ?? 'no image'"
         />
+        <button
+          type="button"
+          class="searchList__deleteBtn"
+          @click="() => deleteItemFromAddedList((visibleLi as UllistProp)?.id)"
+        >
+          <Icon icon="fxemoji:crossmark" />
+        </button>
       </li>
       <CollapsibleContent as="li" class="CollapsibleContent searchList__item">
         <TransitionGroup tag="ul" name="list">
@@ -40,6 +47,13 @@
               :src=" getPoster(backdrop_path! ?? poster_path!) "
               :alt="title ?? 'no image'"
             />
+            <button
+              type="button"
+              class="searchList__deleteBtn"
+              @click="() => deleteItemFromAddedList(id)"
+            >
+              <Icon icon="fxemoji:crossmark" />
+            </button>
           </li>
         </TransitionGroup>
       </CollapsibleContent>
@@ -67,6 +81,10 @@ const props = defineProps<{
   films: UllistProp[] | {}[];
 }>();
 
+const emit = defineEmits<{
+  deleteItem: [id: number | string];
+}>();
+
 const open = ref<boolean>(false);
 const visibleLi = computed<UllistProp | {}>(() => props.films[0]);
 const hiddedLi = computed<UllistProp[] | {}[]>(() => props.films.filter((_, i) => i));
@@ -76,6 +94,8 @@ const getPoster = (poster: string | null) =>
     ? //постери
       `https://image.tmdb.org/t/p/w300/${poster}`
     : img;
+
+const deleteItemFromAddedList = (e: string | number) => emit("deleteItem", e);
 </script>
 
 <style lang="scss" scoped>
@@ -123,6 +143,14 @@ $listColumnGap: 8px;
 
   &:not(:first-child) > li .searchList__commonStyle {
     margin-top: 8px;
+  }
+
+  &__deleteBtn {
+    display: grid;
+    grid-column: 2;
+    cursor: pointer;
+    justify-self: end;
+    margin-top: 4px;
   }
 }
 

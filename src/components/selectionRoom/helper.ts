@@ -1,3 +1,7 @@
+import { pick } from 'lodash';
+import type { UllistProp } from './localType';
+import type { Router } from 'vue-router';
+
 export const getSegmentWidth = (
   circle: number,
   segmentWidth: number,
@@ -21,8 +25,6 @@ export const getSegmentWidth = (
   }
 };
 
-import { pick } from 'lodash';
-
 export const tranformObjectForLists = (arr: {}[], keys: string[]) =>
   arr
     .map(obj => pick(obj, keys))
@@ -30,3 +32,25 @@ export const tranformObjectForLists = (arr: {}[], keys: string[]) =>
 
 export const getSessionFilmsList = (): string | null =>
   window.sessionStorage.getItem('addedForWheel');
+
+export const changeUrlAndStore = (index: number, router: Router): void => {
+  const filmSessionData: UllistProp[] = JSON.parse(
+    window.sessionStorage.getItem('addedForWheel') as string
+  );
+
+  filmSessionData.splice(index, 1);
+  const listId = filmSessionData
+    .map(e => (e.id.toString().includes('user') ? e : e.id))
+    .join('_');
+  window.sessionStorage.setItem(
+    'addedForWheel',
+    JSON.stringify(filmSessionData)
+  );
+
+  router.push({
+    name: 'SelectionRoom',
+    query: {
+      id: `${listId}_`,
+    },
+  });
+};

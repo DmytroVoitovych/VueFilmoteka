@@ -39,6 +39,7 @@
     <ListOfAddedFilms
       :films="transformDataForUlList"
       v-show="transformDataForUlList.length"
+      @deleteItem="deleteItem"
     />
   </form>
 </template>
@@ -100,7 +101,9 @@ const toggleListAttrForDatalist = computed<{ list: string } | {}>(() =>
   !checkboxOne.value ? { list: "filmSearchForWheel" } : {}
 );
 const listOfId = computed<string>(() =>
-  (transformDataForUlList.value as UllistProp[]).map((e) => e.id).join(",")
+  (transformDataForUlList.value as UllistProp[])
+    .map((e) => (e.id.toString().includes("user") ? JSON.stringify(e) : e.id))
+    .join("_")
 );
 
 defineExpose({ transformDataForUlList }); // експоз для компонента списку
@@ -108,25 +111,32 @@ defineExpose({ transformDataForUlList }); // експоз для компоне�
 const setLangContent = () => getFormAddingFilmContent(lang.value);
 
 const pushWithQueryOfFilms = (id: string): void => {
-  console.log("route", router);
+  console.dir("id", id);
   router.push({
     name: "SelectionRoom",
-    query: {
-      id,
-    },
+    query: id.length
+      ? {
+          id: `${id}_`,
+        }
+      : {},
   });
 };
 
 const getDataFromStorage = (): void => {
   console.log("routparamsId", "id" in route.query);
+
   if (getSessionFilmsList()) {
     noTransformDataForChoosenList.push(...JSON.parse(getSessionFilmsList() as string));
-    pushWithQueryOfFilms(listOfId.value);
+    listOfId.value.length
+      ? pushWithQueryOfFilms(listOfId.value)
+      : window.sessionStorage.removeItem("addedForWheel");
     return;
   } else if ("id" in route.query) {
-    const listOfQueryId: string[] = (route.query.id as string).split(",");
-
-    Promise.all(listOfQueryId.map((id) => http.fetchMovieById(id)))
+    const listOfQueryId: string[] = (route.query.id as string).split("_");
+    console.log("listOfQueryId", listOfQueryId);
+    Promise.all(
+      listOfQueryId.map((id) => (id.includes("user") ? id : http.fetchMovieById(id)))
+    )
       .then((data) => {
         noTransformDataForChoosenList.push(...data);
         window.sessionStorage.setItem(
@@ -222,6 +232,31 @@ const addFilmDataInUlList = (): void => {
 
   //IMPORTANT не забути додавати в юрл в якості зберігання доданого
 };
+
+const deleteItem = (id: string | number): void => {
+  const idOfDeletingItem = transformDataForUlList.value.findIndex(
+    (e) => ("id" in e && e.id) === id
+  );
+  console.log(idOfDeletingItem, "idof");
+  noTransformDataForChoosenList.splice(idOfDeletingItem, 1);
+  window.sessionStorage.setItem(
+    "addedForWheel",
+    JSON.stringify(transformDataForUlList.value)
+  );
+  pushWithQueryOfFilms(listOfId.value);
+};
+
+watch(
+  () => route.query.id,
+  (n, o) => {
+    if (n && o && n?.length < o?.length) {
+      const listIndex = listOfId.value.split("_").findIndex((e) => !n.includes(e));
+      noTransformDataForChoosenList.some(
+        (k) => "id" in k && k.id === listOfId.value[listIndex]
+      ) && noTransformDataForChoosenList.splice(listIndex, 1);
+    }
+  }
+);
 
 watch(focus, (n) => {
   // розбить на функції

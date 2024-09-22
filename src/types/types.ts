@@ -7,5 +7,5 @@ export type FilmForWheel = {
   backdrop_path: string | null;
   id: number;
   poster_path: string | null;
-  video: { id: number; results: { [key: string]: string }[] };
+  video: { id: number; results: { [key: string]: string }[] | [] };
 };
