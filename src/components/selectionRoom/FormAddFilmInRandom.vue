@@ -132,7 +132,7 @@ const getDataFromStorage = (): void => {
       : window.sessionStorage.removeItem("addedForWheel");
     return;
   } else if ("id" in route.query) {
-    const listOfQueryId: string[] = (route.query.id as string).split("_");
+    const listOfQueryId: string[] = (route.query.id as string).split("_").filter(e=> e !== '');
     console.log("listOfQueryId", listOfQueryId);
     Promise.all(
       listOfQueryId.map((id) => (id.includes("user") ? id : http.fetchMovieById(id)))
@@ -235,7 +235,7 @@ const addFilmDataInUlList = (): void => {
 
 const deleteItem = (id: string | number): void => {
   const idOfDeletingItem = transformDataForUlList.value.findIndex(
-    (e) => ("id" in e && e.id) === id
+    (e) => ("id" in e && String(e.id)) === String(id)
   );
   console.log(idOfDeletingItem, "idof");
   noTransformDataForChoosenList.splice(idOfDeletingItem, 1);
@@ -250,10 +250,12 @@ watch(
   () => route.query.id,
   (n, o) => {
     if (n && o && n?.length < o?.length) {
+      console.log('test watcherid',n);
       const listIndex = listOfId.value.split("_").findIndex((e) => !n.includes(e));
-      noTransformDataForChoosenList.some(
-        (k) => "id" in k && k.id === listOfId.value[listIndex]
-      ) && noTransformDataForChoosenList.splice(listIndex, 1);
+      //??  проверить индекс  
+      console.log('index',listIndex);   
+      listIndex !== -1 && transformDataForUlList.value.length > 1 && noTransformDataForChoosenList.splice(listIndex, 1);
+      console.log(transformDataForUlList.value,listIndex,' test deleting');
     }
   }
 );

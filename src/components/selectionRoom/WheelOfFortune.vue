@@ -126,6 +126,7 @@ const dialogOpen = ref<boolean>(true);
 const flagForDialogWin = ref<number>(0);
 
 const COPY_WHEELFILMS: FilmForWheel[] | object[] = [];
+const USER_CUSTOM_FLAG: string = 'user'; 
 
 const xCoordinate = (): number => arrowFortun.value?.getBoundingClientRect().x as number;
 const yCoordinate = (): number => arrowFortun.value?.getBoundingClientRect().y as number;
@@ -136,7 +137,7 @@ const videoExist = computed<boolean>(
 const getPoster = (poster: string | null) => {
   //постери
   console.log(poster, "poster");
-  return typeof poster === "string"
+  return typeof poster === "string" && !poster.includes(USER_CUSTOM_FLAG)
     ? `https://image.tmdb.org/t/p/original/${poster}`
     : img;
 };
@@ -184,6 +185,8 @@ const canIshowDialogComponent = computed<boolean>(() => {
   );
 });
 
+const pieContainerPadding = computed<string>(()=> props.userFilms.length?'120px':'60px');
+
 const numberOfDeg = reactive<number[]>([0, 60, 120, 180, 240, 300]);
 
 const funcCountsIfIsNoDefaultMode: {
@@ -218,7 +221,7 @@ const getModalState = (modalState: boolean): void => {
   dialogOpen.value = modalState;
 
   funcCountsIfIsNoDefaultMode.takePlus();
-
+  
   if (props.moode !== "battle") {
     popupPoster.value = "";
     popupTitle.value = "";
@@ -288,6 +291,7 @@ const created = () => {
   console.log('запуск');
   if (!getSessionFilmsList()?.length && !("id" in route.query)) {
     console.log("test last");
+    flagForDialogWin.value && (flagForDialogWin.value = 0);
     initialStart();
   }
 };
@@ -355,14 +359,18 @@ const extractMovieInfoByTitle = (title: string): void => {
     (e) => (e as FilmForWheel).title === title
   );
   const particularSlice = wheelFilms[indexOfTitle] as FilmForWheel;
-
+console.log(indexOfTitle,'indexoftitle',particularSlice);
   dialogOpen.value = true;
   selectedIndex.value = indexOfTitle;
 
   popupPoster.value = `url(${getPoster(
-    particularSlice?.poster_path ?? particularSlice?.backdrop_path
+    particularSlice?.poster_path ??
+    particularSlice?.backdrop_path ??
+    (JSON.parse(window.sessionStorage.getItem('addedForWheel') as string))[selectedIndex.value]?.id
   )})`;
   popupTitle.value = particularSlice?.title;
+  //??
+  // flagForDialogWin.value = 0;
 };
 
 const setUserDataInWheel = (): void => {
@@ -400,11 +408,21 @@ const chooseMovieAorB = (title: string) => {
   // setUserDataInWheel();
 };
 
+const setIndex = (selectedFilm:FilmForWheel): void => {
+  if (props.userFilms.length) {
+   const removeObj:FilmForWheel =  battleFilmsDescript.find(e=> (e as FilmForWheel).id.toString() !== selectedFilm.id.toString()) as FilmForWheel;
+     console.log('removeobj',removeObj.id,props.userFilms.findIndex(e => (e as FilmForWheel).id.toString() === removeObj.id.toString()));
+  selectedIndex.value = props.userFilms.findIndex(e => (e as FilmForWheel).id.toString() === removeObj.id.toString());
+}
+};
+
 const getModalFilm = (selectedFilm: FilmForWheel): void => {
   wheelFilms.some((e) => (e as FilmForWheel).id === selectedFilm.id) &&
     (wheelFilms.length = 0);
   wheelFilms.push(selectedFilm);
 
+  setIndex(selectedFilm);
+  
   funcCountsIfIsNoDefaultMode.battlePlus();
   setUserDataInWheel();
   calculateAngle();
@@ -441,7 +459,7 @@ watch(
   () => props.userFilms,
   (n, o) => {
  
-   if (n.length > o?.length) {
+    if (n.length > o?.length) {
       const cleanIfIsFirst = (): void => {
         n.length === 1 && (wheelFilms.length = 0);
       };
@@ -463,20 +481,26 @@ watch(
         newItem[0]?.id?.toString().includes("user")
           ? setInitialValues([customUserFilm])
           : http
-              .transformTheObjectOfMovies(newItem)
-              .then((e) => e)
-              .then((e) => setInitialValues(e as FilmForWheel[]));
+            .transformTheObjectOfMovies(newItem)
+            .then((e) => e)
+            .then((e) => setInitialValues(e as FilmForWheel[]));
       }
     }
-   else {
-          
-     const deletedItemIndex = n.findIndex(
-        (e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id
-      );
-     wheelFilms.splice(deletedItemIndex, 1);
-     !n.length && window.sessionStorage.removeItem('addedForWheel')
-    calculateAngle();
-     !n.length && COPY_WHEELFILMS.length && initialStart(); 
+    else {
+      //видалення в залежності від списку
+      const isEffectFromAdd: boolean = wheelFilms.every((e, i) => (e as FilmForWheel)?.id?.toString() === n[i]?.id?.toString());
+      if (isEffectFromAdd) {
+        return;
+      }
+      else {
+        const deletedItemIndex = n.findIndex(
+          (e, i) => e.id !== (wheelFilms[i] as FilmForWheel)?.id
+        );
+        wheelFilms.splice(deletedItemIndex, 1);
+        !n.length && window.sessionStorage.removeItem('addedForWheel')
+        calculateAngle();
+        !n.length && COPY_WHEELFILMS.length && initialStart();
+      }
     }
   }
 );
@@ -517,7 +541,12 @@ watch(
       battleFilmsDescript.push(...(wheelFilms as FilmForWheel[]));
       dialogOpen.value = false;
     }
-    
+
+    if (n.length > 1 && flagForDialogWin.value === 1 && props.moode !== 'battle') {
+      console.log('проверям батл победа',n.length );
+      flagForDialogWin.value = 0;
+    }
+        
   },
   { deep: true, immediate: true }
 );
@@ -529,6 +558,7 @@ watch(
     if (n === "standard" && o !== "standard") {
       popupPoster.value = "";
       popupTitle.value = "";
+      flagForDialogWin.value = 0;
       return;
     }
   }
@@ -539,6 +569,7 @@ watch(flagForDialogWin, (n, o) => {
   n === 1 &&
     wheelFilms.length &&
     extractMovieInfoByTitle((wheelFilms[0] as FilmForWheel).title);
+    console.log(n,'flag');
 });
 
 const startRotateWheel = () => {
@@ -598,7 +629,7 @@ button[disabled] {
 }
 
 .pie-container {
-  padding: 60px 0;
+  padding: v-bind(pieContainerPadding) 0;
   text-align: center;
 }
 .pie-wrap {

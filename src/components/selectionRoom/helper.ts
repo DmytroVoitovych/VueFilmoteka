@@ -34,6 +34,7 @@ export const getSessionFilmsList = (): string | null =>
   window.sessionStorage.getItem('addedForWheel');
 
 export const changeUrlAndStore = (index: number, router: Router): void => {
+  console.log('helper undex', index);
   const filmSessionData: UllistProp[] = JSON.parse(
     window.sessionStorage.getItem('addedForWheel') as string
   );
