@@ -69,11 +69,11 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^2.8.8",
     "sass": "^1.67.0",
-    "typescript": "^5.6.0-dev.20240726",
+    "typescript": "~5.0.4",
     "unplugin-auto-import": "^0.16.6",
     "vite": "^4.4.9",
     "vite-plugin-checker": "^0.6.2",
-    "vue-tsc": "^1.8.13"
+    "vue-tsc": "^1.8.27"
   },
   "eslintConfig": {
     "root": true,
